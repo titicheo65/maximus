@@ -23,7 +23,24 @@ Ricardo decide priorizar el "gerente virtual" (antes punto B, parqueado por Maxi
 - `agent/maximus.py` (nuevo): detecta el número de Ricardo, carga los seis archivos desde `MAXIMUS_MEMORY_DIR`, responde con prompt cacheado y formato WhatsApp. Cache invalidado por mtime: al editar la memoria, Maximus la relee solo.
 - `agent/main.py`: 11 líneas insertadas **antes** de colación y de atención al cliente. **Falla cerrado**: si `MAXIMUS_OWNER_PHONES` está vacío, el bloque no existe para nadie y el agente se comporta igual que siempre.
 - Prueba ejecutada (D-007): número reconocido con y sin `+`, otro número rechazado, 50.071 caracteres de memoria cargados, y respuesta correcta a "costo laboral de julio y prime cost" — incluyendo el caveat de que el 29% es estimado. **Aprobada.**
-- **Pendiente para cerrar la fase 1:** desplegar en ServidorPlaya. Bloqueante: la memoria vive en el Mac y el servidor no la ve. Ver P-007.
+- **FASE 1 APROBADA el 20-ago-2026.** Desplegada en ServidorPlaya y verificada con el criterio fijado de antemano (D-007): Ricardo preguntó por WhatsApp desde su celular "¿cuánto fue el costo laboral de julio?" y Maximus respondió $30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como estimado**. No inventó.
+
+**Estado de la instalación (20-ago-2026):**
+- Código de producción: `C:\dimango-agent` (clon de `titicheo65/dimango-agent`, deploy key de solo lectura).
+- Memoria: `C:\maximus` (clon de `titicheo65/maximus`).
+- Se abandonó `C:\Users\usuario\Desktop\dimango-app`, que era la copia viva y **no era un repositorio git**. Quedan 5 copias muertas del proyecto en el servidor, pendientes de archivar.
+- Arranque: `python -m uvicorn agent.main:app --host 0.0.0.0 --port 8000` desde `C:\dimango-agent`.
+
+**P-008 · Tres pendientes de infraestructura, todos con costo si no se hacen:**
+1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok vuelven. Se resuelve con tarea programada al inicio (ya hay precedente: `subir_venta_mall`).
+2. **La memoria del servidor no se actualiza sola.** `C:\maximus` es un clon: cuando Maximus aprende algo en la sesión de Claude Code, el servidor sigue con la versión vieja hasta que alguien haga `git pull`. Necesita tarea programada cada 15 min.
+3. **Telegram sin token válido.** El webhook devolvió 404 — el `.env` tiene el token revocado, no el nuevo.
+
+**Decisión de canal (20-ago):** Maximus habla con Ricardo por **Telegram**, no por WhatsApp. Razón técnica, no de gusto: Meta no permite iniciar conversación fuera de la ventana de 24h sin plantilla aprobada, lo que hace **imposible el saludo matutino y las alertas proactivas** de la fase 2. Telegram permite escribir primero, gratis y sin aprobación. Los mensajes a **trabajadores y clientes siguen en WhatsApp** — ahí es donde ellos están. Implementado en `agent/telegram_maximus.py` + endpoint `/telegram/webhook`, aislado del webhook de WhatsApp.
+
+**H-014 · Credenciales de Twilio expuestas en `.claude/settings.local.json` (HECHO, 20-ago-2026).** El push protection de GitHub bloqueó la subida: Account SID y API Key de Twilio en texto plano dentro del archivo de configuración local de Claude Code, líneas 37-39. **Siguen en el disco del Mac.** Riesgo bajo hoy porque el agente migró a Meta y Twilio ya no se usa — pero las credenciales deben **rotarse o eliminarse en el panel de Twilio**, no solo borrarse del archivo. El archivo quedó en `.gitignore` y fuera del repositorio.
+
+**H-013 · El código de producción no tiene repositorio propio — RESUELTO el 20-ago-2026.** Creados `titicheo65/maximus` (memoria) y `titicheo65/dimango-agent` (código), ambos privados. Verificado que no se subió ningún `.env`, `.db`, cuadrante de personal ni RCV del SII. Detalle del hallazgo original: El remote de `~/whatsapp-agentkit` es `github.com/Hainrixz/whatsapp-agentkit` — el repo del autor del AgentKit, no de Ricardo. Estado: **ahead 3, behind 2**. Los tres commits propios (agente DiMango, automatización de venta al Mallplaza, control de colación) existen solo en el Mac y en ServidorPlaya, **sin respaldo en ningún repositorio de Ricardo**. Es el mismo agujero de L-004 pero en producción. Acción: crear `dimango-agent` privado y cambiar el remote.
 
 **Riesgo asumido, declarado:** el agente corre en **ServidorPlaya**. Si cae la luz o internet en Playa Chinchorro, Maximus muere. Es L-002 otra vez — pieza nueva que solo Ricardo mantiene. Se acepta para las fases 1-2; antes de la fase 4 hay que decidir si migra a un servidor fuera del local.
 
