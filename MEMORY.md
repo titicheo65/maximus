@@ -246,7 +246,23 @@ Categoría: Finanzas/Pagos · Origen: Operación normal · Podía resolverlo otr
 
 ## Abierto — requiere decisión de Ricardo
 
-### P-001 · Plan de contingencia de emisión de DTE — SIN RESPUESTA, preguntado 4 veces
+### P-001 · Contingencia de emisión de DTE — RESPONDIDO Y DESESCALADO el 20-ago-2026
+
+**Respuestas de Ricardo (HECHO):**
+- DiMangoToGo **no emite**: emite **SimpleFactura**, proveedor externo certificado.
+- **Contingencia existente:** emisión manual desde la web de SimpleFactura si DiMangoToGo falla.
+- Folios CAF **al día**. **Cero fallas de emisión en julio.**
+- **Los encargados de ambos locales saben emitir manual.** La contingencia funciona sin Ricardo — cumple P3.
+
+**Maximus se equivocó en el tamaño del riesgo, y lo reconoce.** Se clasificó como riesgo #1 a $5,5M/día asumiendo que DiMangoToGo emitía por sí misma y que no había alternativa. Con proveedor certificado, emisión manual documentada, folios al día y un mes sin fallas, **ese número era una construcción de Maximus, no un hecho del negocio.** Lección: un riesgo estimado sin verificar la arquitectura real vale tan poco como un número inventado.
+
+**Riesgo residual, real pero menor:** el punto único ya no es DiMangoToGo — es **SimpleFactura e internet**. Ambas vías (app y web del proveedor) requieren conexión. No existe respaldo en papel porque en Chile la boleta es 100% electrónica (verificado en sii.cl, 20-ago-2026); el talonario timbrado ya no aplica.
+
+**Única pregunta abierta, para el proveedor y sin urgencia:** ¿DiMangoToGo/SimpleFactura **encolan** las boletas si cae internet y las timbran al recuperar conexión? El SII contempla ese modo —emisión sin timbre electrónico y timbrado posterior visible en el Resumen de Ventas Diarias—, pero hay que confirmar si el software lo implementa o simplemente falla.
+
+*(Nota normativa, cumplida: desde el 1-mar-2026 rige la entrega obligatoria de la boleta impresa o en digital en venta presencial. DiMango tiene impresoras en ambos locales.)*
+
+### ~~P-001 original~~ · Enunciado previo, conservado para trazabilidad
 Desde el 1-jul-2026 no existe sistema alternativo. Si DiMangoToGo no emite, DiMango no vende legalmente: ~$5,5M/día. **Es el riesgo número uno del negocio, por encima del tablero y de todo lo demás.**
 Preguntas abiertas: ¿DiMangoToGo está certificada ante el SII como sistema propio o emite vía proveedor por API? ¿Hay talonario de contingencia autorizado o el sistema gratuito del SII configurado y probado? ¿Los folios/CAF están al día? **¿Hubo fallas de emisión en julio?**
 **Nota Maximus 20-ago:** cuatro preguntas sin respuesta no es un pendiente, es evitación (`SOUL.md` — "está evitando una decisión importante"). Este ítem bloquea el resto de la agenda hasta que tenga respuesta.
@@ -309,7 +325,8 @@ Reordenadas por **valor en riesgo**, no por orden de aparición.
 
 | # | Qué | Por qué acá | Plazo |
 |---|---|---|---|
-| 1 | **P-001 — contingencia de emisión DTE** | $5,5M/día. Sin red desde D-008. Preguntado 4 veces | **Esta semana** |
+| ~~1~~ | ~~P-001 — contingencia de emisión DTE~~ | **CERRADO 20-ago.** SimpleFactura + emisión manual que los encargados saben usar. El riesgo estaba sobreestimado por Maximus | ✓ |
+| 1 | **P-003 — venta de julio por local** | El que más desbloquea: H-012 (los $36M), H-003 (viabilidad del Mall), ticket y transacciones por local | **Esta semana** |
 | ~~2~~ | ~~P-004 — costo laboral de julio~~ | **CERRADO 20-ago (H-011).** $30,27M líquido, 45 personas | ✓ |
 | 2 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012) | Días |
 | 3 | **P-003 — venta de julio por local** | Decide si el Mall es viable (H-003) y resuelve H-012 | Días |
