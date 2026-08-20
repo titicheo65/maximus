@@ -1,0 +1,957 @@
+[
+ {
+  "id": "M01",
+  "categoria": "recuperacion",
+  "pregunta": "¿Cuánto fue el costo laboral de julio y cómo se reparte por local?",
+  "notas_recuperadas": [
+   "H-011",
+   "P-004",
+   "M-002",
+   "H-015",
+   "P-003",
+   "H-002",
+   "H-008",
+   "M-006",
+   "M-004",
+   "S-009",
+   "S-002",
+   "H-012",
+   "L-003"
+  ],
+  "vieja": {
+   "respuesta": "**Costo laboral de julio: $30.271.531 líquido, 45 personas.**\n\nCargado (con leyes sociales): **$36–42M** — estimación, no dato.\n\n**Reparto por local:**\n\n| Local | Personas | Líquido | % |\n|---|---|---|---|\n| Playa Chinchorro | 30 | $21.411.531 | 70,7% |\n| Mall | 11 | $6.600.000 | 21,8% |\n| Ambos | 3 | $2.260.000 | 7,5% |\n\n**Caveat importante:** ese reparto no sirve para calcular margen por local. Playa concentra 30 personas porque **produce para los dos locales** — el Mall no produce nada, todo llega elaborado (H-008). Sin repartir el costo de producción, los porcentajes por local son engañosos.",
+   "ttft_ms": 1099,
+   "total_ms": 7254,
+   "tokens_in": 20286,
+   "cache_leido": 20255,
+   "sin_cache": 31,
+   "tokens_out": 235
+  },
+  "nueva": {
+   "respuesta": "**$30,27M líquido · 45 personas.** Con imposiciones cargadas: ~$37M.\n\n| Local | Personas | Líquido | % |\n|---|---|---|---|\n| Playa Chinchorro | 30 | $21,4M | 70,7% |\n| Mall | 11 | $6,6M | 21,8% |\n| Ambos | 3 | $2,3M | 7,5% |\n\n**Qué haría:** no interpretar el 70/22/8 como ineficiencia del Mall. Playa tiene 30 personas porque produce para los dos locales — el Mall no fabrica nada (H-008). El reparto de costo laboral por local es engañoso sin valorizar el traspaso de mercadería.\n\n**Alerta que sigue abierta:** de junio a julio entraron 8 personas (+21,6%), el costo subió 16,8% y la venta solo 7,5%. El costo laboral pasó de 17,0% a 18,5% de la venta. Nadie tomó esa decisión mirando ese número.",
+   "ttft_ms": 1549,
+   "total_ms": 5454,
+   "tokens_in": 7938,
+   "cache_leido": 0,
+   "sin_cache": 7938,
+   "tokens_out": 286
+  }
+ },
+ {
+  "id": "M02",
+  "categoria": "recuperacion",
+  "pregunta": "¿Cuál es el prime cost y qué significa que esté donde está?",
+  "notas_recuperadas": [
+   "M-004",
+   "H-006",
+   "H-001",
+   "H-012",
+   "M-005",
+   "H-016",
+   "S-006",
+   "H-011",
+   "M-002",
+   "H-003",
+   "P-005",
+   "M-001",
+   "L-001"
+  ],
+  "vieja": {
+   "respuesta": "**Prime cost: ≈57,7% de la venta neta.** Está sano.\n\n---\n\n**Qué significa:**\n\nEl prime cost es mercadería + costo laboral cargado sobre venta. En DiMango:\n- Mercadería: 28,7% (H-001)\n- Laboral cargado: ~29% (H-011, punto medio de $36-42M sobre $137,9M)\n\n**El umbral de la industria es 60-65%.** DiMango está 3-7 puntos por debajo. Eso dice que Ricardo compra bien y la dotación no está desbordada.\n\n---\n\n**Lo que NO dice:**\n\nEl prime cost sano no garantiza margen neto. H-012 muestra que siguen faltando ~$36M/mes sin explicar. El arriendo del Mall (37,4% de su venta, H-015) se come lo que el prime cost ahorra.\n\n**Traducción:** la cocina y el personal no son el problema. El problema está en los costos fijos —particularmente el Mall— o en costo que todavía no se capturó.",
+   "ttft_ms": 4792,
+   "total_ms": 13226,
+   "tokens_in": 20281,
+   "cache_leido": 20255,
+   "sin_cache": 26,
+   "tokens_out": 282
+  },
+  "nueva": {
+   "respuesta": "**Prime cost de julio: 57,7%** (mercadería 28,7% + laboral cargado ~29%).\n\n**Qué significa:** está sano. El umbral de alarma es 60-65%; sobre eso, vender más empeora el resultado porque cada peso de venta se come en insumos y sueldos. DiMango tiene 7 puntos de margen antes de entrar en zona de peligro.\n\n**La señal de alerta no es el nivel, es la tendencia:** el laboral subió de 17% a 18,5% en un mes (+8 personas, +21,6%) mientras la venta solo creció 7,5%. Si eso se repite, el prime cost se acerca al límite sin que nadie lo haya decidido mirando el número.",
+   "ttft_ms": 1540,
+   "total_ms": 5448,
+   "tokens_in": 7445,
+   "cache_leido": 0,
+   "sin_cache": 7445,
+   "tokens_out": 196
+  }
+ },
+ {
+  "id": "M03",
+  "categoria": "recuperacion",
+  "pregunta": "¿Qué pasó con Toteat y desde cuándo?",
+  "notas_recuperadas": [
+   "D-008",
+   "S-006",
+   "H-002",
+   "D-004",
+   "S-001",
+   "L-002",
+   "P-001",
+   "L-004",
+   "S-005",
+   "S-004",
+   "P-002"
+  ],
+  "vieja": {
+   "respuesta": "**Toteat terminó el 30 de junio de 2026.**\n\nDesde el 1 de julio, DiMango opera 100% sobre DiMangoToGo (app propia en Base44). La migración fue decisión de Ricardo.\n\n**Lo que ganó:** fuente única de verdad — desaparece el problema de dos POS con datos distintos.\n\n**Lo que perdió:** la red de seguridad. Ya no hay sistema alternativo si DiMangoToGo falla. Esa decisión es la que convirtió la contingencia de emisión en el riesgo que escalé cuatro veces (y que luego resultó estar cubierto por SimpleFactura).\n\nReferencia: `MEMORY.md` D-008.",
+   "ttft_ms": 1151,
+   "total_ms": 6484,
+   "tokens_in": 20279,
+   "cache_leido": 20255,
+   "sin_cache": 24,
+   "tokens_out": 181
+  },
+  "nueva": {
+   "respuesta": "**Toteat terminó el 30 de junio de 2026.** Desde el 1 de julio, DiMango opera 100% sobre DiMangoToGo.\n\n**Motivo:** Toteat cobraba por ventas. Ricardo prefiere pagarse a sí mismo (Aurexgroup le factura $1M/mes por DiMangoToGo) y controlar el sistema.\n\n**Consecuencia negativa:** desapareció la red de respaldo. Ya no hay sistema alternativo si DiMangoToGo falla.",
+   "ttft_ms": 1532,
+   "total_ms": 3078,
+   "tokens_in": 6665,
+   "cache_leido": 0,
+   "sin_cache": 6665,
+   "tokens_out": 133
+  }
+ },
+ {
+  "id": "M04",
+  "categoria": "conexion",
+  "pregunta": "¿Por qué no podemos saber si el local del Mall es rentable?",
+  "notas_recuperadas": [
+   "H-015",
+   "H-008",
+   "M-003",
+   "M-006",
+   "N-005",
+   "P-003",
+   "H-011",
+   "H-014",
+   "H-003",
+   "S-001",
+   "P-006",
+   "D-003",
+   "P-007",
+   "N-004"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** porque no existe el costo de mercadería por local, solo la venta.\n\n---\n\n**El problema es el traspaso diario Playa → Mall (H-008).**\n\nPlaya Chinchorro produce para ambos locales. Las compras entran por un solo punto (probablemente Playa), pero el traspaso al Mall no se registra valorizado. Entonces:\n\n- Venta por local: **sí existe** (H-015 — Mall $34M, Playa $100M en julio)\n- Costo de mercadería por local: **no existe**\n\nSin costo, no hay margen. Y sin margen, el arriendo de $12,7M/mes no se puede juzgar — solo sabemos que es 37,4% de la venta del Mall, casi el doble del umbral de viabilidad (20%), pero no cuánto queda después de la comida.\n\n---\n\n**Lo que falta para resolverlo:**\n\n1. Registrar el despacho Playa → Mall valorizado (el campo `cantidad_entregada` de `ChecklistPedido` ya existe en DiMangoWorking, pero sin costo unitario asociado).\n2. O cargar el costo en `Product.cost` de DiMangoToGo y calcular el margen desde la venta, sin pasar por bodega.\n\nLa segunda es más rápida. El campo existe y está en cero (H-016).",
+   "ttft_ms": 1132,
+   "total_ms": 11499,
+   "tokens_in": 20281,
+   "cache_leido": 20255,
+   "sin_cache": 26,
+   "tokens_out": 353
+  },
+  "nueva": {
+   "respuesta": "El traspaso entre locales no se registra valorizado.\n\nPlaya produce todo —helados, pizzas, pastas, repostería— y lo manda al Mall todos los días. Pero ese movimiento no tiene costo asignado: sale de Playa sin descargarse y entra al Mall sin cargarse. El Mall vende y cobra, pero el gasto de producir lo que vendió quedó en Playa.\n\n**Consecuencia:** solo existe la venta por local, no el costo por local. Y sin costo no hay margen.\n\nEl 37,4% de arriendo sobre venta neta que calculamos es real y ya es alarmante. Pero el \"11,8% que queda\" después de arriendo, mercadería y mano de obra es aritmética con un supuesto falso: que el 28,7% de mercadería se reparte parejo entre los dos locales. No es así —el Mall no compra insumos, recibe producto terminado— y no tenemos cómo saber cuánto vale lo que recibe.\n\n**Qué necesitamos para saberlo:**\n\n1. Que cada despacho de Playa al Mall se registre con el costo de lo que sale.\n2. O que exista un costo estándar por producto y se aplique a la venta del Mall.\n\nEl campo de costo por producto existe en DiMangoToGo. Está vacío.\n\n**Yo haría esto:** antes de decidir si el Mall se cierra, se renegocia o se aguanta, hay que llenar ese campo aunque sea con estimados gruesos. Sin eso, cualquier decisión es a ciegas.",
+   "ttft_ms": 2027,
+   "total_ms": 13352,
+   "tokens_in": 8124,
+   "cache_leido": 0,
+   "sin_cache": 8124,
+   "tokens_out": 403
+  }
+ },
+ {
+  "id": "M05",
+  "categoria": "conexion",
+  "pregunta": "¿Qué relación hay entre la migración a DiMangoToGo y el aumento del costo de medios de pago?",
+  "notas_recuperadas": [
+   "H-002",
+   "D-008",
+   "P-002",
+   "S-004",
+   "P-004",
+   "H-001",
+   "H-011",
+   "H-016",
+   "S-005",
+   "D-004",
+   "S-001",
+   "L-002",
+   "S-006",
+   "P-001",
+   "L-004"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** DiMangoToGo probablemente enruta más volumen hacia Mercado Pago, que cobra más que Transbank. La migración subió el costo de medios de pago en ~1 punto porcentual.\n\n---\n\n**Los números (H-002):**\n\n| Período | Costo medios de pago | % de venta |\n|---|---|---|\n| Mayo-Junio (con Toteat) | ~1,55% promedio | — |\n| **Julio (solo DiMangoToGo)** | $4.236.597 | **2,59%** |\n\n- Mercado Pago pasó de $1,73M → $2,40M (+39%) mientras la venta **caía** 7%.\n- Delta anualizado: **~$20,5M/año** de costo adicional.\n\n---\n\n**Por qué ocurre (hipótesis, no confirmado):**\n\nDiMangoToGo ofrece Mercado Pago como opción destacada o predeterminada en ciertos flujos (tótem, autoservicio, QR). Los clientes lo eligen más, y MP cobra más que Transbank.\n\n---\n\n**Caveat:** es un solo mes post-migración. Junio está distorsionado porque Transbank no facturó ese mes. Hay que confirmar con agosto.\n\n**Acción pendiente:** P-002 — comparar tasas efectivas de MP vs Transbank y evaluar si conviene reordenar la prioridad de medios de pago en la app.",
+   "ttft_ms": 1061,
+   "total_ms": 10994,
+   "tokens_in": 20295,
+   "cache_leido": 20255,
+   "sin_cache": 40,
+   "tokens_out": 385
+  },
+  "nueva": {
+   "respuesta": "La migración a DiMangoToGo (D-008) causó el aumento del costo de medios de pago (H-002).\n\n**El mecanismo:** DiMangoToGo enruta más volumen hacia Mercado Pago, que cobra más que Transbank. En julio, Mercado Pago subió 39% ($1,73M → $2,40M) mientras la venta caía 7%.\n\n**El costo:** de 1,55% pre-migración a 2,59% post-migración. Diferencia de 1,04 puntos = ~$20,5M/año.\n\n**Yo haría:** resolver P-002 (comparar comisiones efectivas). Si se confirma la hipótesis, se corrige cambiando el orden de preferencia de medios de pago en la app. Es una tarde de trabajo por $20M/año.\n\n**Caveat:** julio es un solo mes y junio está distorsionado porque Transbank no facturó. Pero el tamaño del efecto justifica actuar sin esperar más datos.",
+   "ttft_ms": 1133,
+   "total_ms": 7652,
+   "tokens_in": 7911,
+   "cache_leido": 0,
+   "sin_cache": 7911,
+   "tokens_out": 265
+  }
+ },
+ {
+  "id": "M06",
+  "categoria": "conexion",
+  "pregunta": "Si cerráramos el Mall, ¿qué pasaría con el costo laboral de Playa?",
+  "notas_recuperadas": [
+   "H-011",
+   "M-002",
+   "P-004",
+   "H-001",
+   "H-002",
+   "H-016",
+   "P-006",
+   "H-003",
+   "H-008",
+   "M-004",
+   "S-009",
+   "S-002",
+   "H-012",
+   "L-003"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** El costo laboral de Playa **no bajaría proporcionalmente** — probablemente subiría como porcentaje de la venta.\n\n---\n\n**Por qué:**\n\n1. **Playa produce para los dos locales** (H-008). Las 30 personas de Playa incluyen producción, heladería y cocina que abastecen al Mall. Si el Mall cierra, la venta del Mall desaparece ($34M/mes), pero la producción que la soportaba **no se elimina automáticamente** — hay que despedir o reubicar.\n\n2. **El Mall tiene 11 personas propias** ($6,6M líquido). Esas sí desaparecen con el local. Los 3 \"ambos\" ($2,26M) probablemente se quedan en Playa.\n\n3. **Aritmética cruda:**\n   - Hoy: $30,27M laboral / $134M venta = **22,6%**\n   - Si cierras Mall y despides sus 11: $23,67M / $100M (solo Playa) = **23,7%**\n   - Si además absorbes los 3 \"ambos\": $23,67M / $100M = igual\n\n   El porcentaje **sube**, no baja, porque el Mall tenía laboral más barato que su proporción de venta (21,8% del costo vs 25,35% de la venta).\n\n4. **El problema real:** parte del laboral de Playa está ahí porque produce para el Mall. Si el volumen cae 25%, ¿cuántos puestos de producción sobran? **No lo sé** — no hay dato de horas/hombre por producto ni de capacidad ociosa.\n\n---\n\n**Lo que necesitas saber antes de decidir:**\n\n- ¿Cuántas personas de producción en Playa trabajan exclusivamente para el volumen del Mall?\n- ¿Qué liquidaciones o indemnizaciones corresponden a los 11 del Mall?\n- ¿El contrato del Mall tiene cláusula de salida anticipada y cuánto cuesta?",
+   "ttft_ms": 1868,
+   "total_ms": 14632,
+   "tokens_in": 20288,
+   "cache_leido": 20255,
+   "sin_cache": 33,
+   "tokens_out": 530
+  },
+  "nueva": {
+   "respuesta": "**Conclusión:** No bajaría a $21,4M — probablemente quede en $24-26M, porque Playa absorbe gente del Mall y ya paga la producción de ambos.\n\n**Yo haría:** modelar el escenario antes de decidir nada.\n\n---\n\n**Por qué:**\n\n1. **Playa ya carga la producción.** El Mall no produce — todo sale de Playa (H-008). Los $6,6M del Mall son mayoritariamente garzones y caja, no cocina ni heladería.\n\n2. **Absorción parcial inevitable.** Si cierras el Mall y mantienes la venta de Playa, necesitas reforzar atención al cliente en Playa. No es 1:1, pero tampoco es cero.\n\n3. **Los 3 compartidos ($2,26M) no desaparecen.** Administración, supervisión — eso sigue.\n\n**Aritmética gruesa:**\n\n| Concepto | Hoy | Sin Mall |\n|---|---|---|\n| Mall directo | $6,6M | $0 |\n| Absorción estimada (40-50%) | — | +$2,6-3,3M |\n| Compartidos | $2,26M | $2,26M |\n| Playa directo | $21,4M | $21,4M |\n| **Total** | $30,3M | **$24-27M** |\n\n**Ahorro real: $3-6M/mes, no $8,9M.**\n\n---\n\n**Lo que no sé:** cuántos del Mall son indispensables si Playa sube su volumen, y cuánto volumen del Mall migra a Playa vs se pierde. Eso define si el ahorro es $3M o $6M.",
+   "ttft_ms": 1568,
+   "total_ms": 11829,
+   "tokens_in": 7921,
+   "cache_leido": 0,
+   "sin_cache": 7921,
+   "tokens_out": 448
+  }
+ },
+ {
+  "id": "M07",
+  "categoria": "conexion",
+  "pregunta": "¿Qué tendría que pasar para que Aurexgroup deje de estar parqueado?",
+  "notas_recuperadas": [
+   "D-001",
+   "D-002",
+   "H-004",
+   "D-008",
+   "L-002",
+   "L-003",
+   "P-006"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** Aurexgroup se revisa el **17 de noviembre de 2026** (D-001). Para que deje de estar parqueado ese día, necesita cumplir dos condiciones:\n\n1. **DiMango no puede seguir siendo el cuello de botella.** El objetivo de 90 días es que el negocio opere 7 días sin que Ricardo resuelva decisiones operacionales. Si para noviembre Ricardo sigue apagando incendios, no tiene horas para Aurexgroup —y aunque las tuviera, estaría creando otra dependencia sobre sí mismo.\n\n2. **Un cliente externo que no sea Ricardo.** El criterio de D-002 es claro: Aurexgroup solo tiene producto validado cuando alguien externo lo instala, opera y mantiene **sin intervención de Ricardo**. Hoy tiene cero facturación externa confirmada (H-004). Una transferencia interna de $1M/mes no cuenta.\n\n---\n\n**Lo que yo haría:** no esperar pasivamente al 17 de noviembre. Si en octubre DiMango está estable y aparece una oportunidad concreta de piloto externo con bajo costo de atención, reevaluar antes. Pero sin esas dos condiciones, desparquear Aurexgroup es repetir el error que lo parqueó.",
+   "ttft_ms": 1081,
+   "total_ms": 9783,
+   "tokens_in": 20286,
+   "cache_leido": 20255,
+   "sin_cache": 31,
+   "tokens_out": 323
+  },
+  "nueva": {
+   "respuesta": "**Dos cosas, en este orden:**\n\n1. **Que llegue el 17 de noviembre de 2026** — es la fecha de revisión obligatoria que fijaste. Antes de eso, no se toca.\n\n2. **Que DiMango cumpla el objetivo de los 90 días** — que funcione 30 días sin que seas necesario para decisiones operacionales normales. Si llegas a noviembre y sigues siendo el cuello de botella, Aurexgroup sigue parqueado porque el problema que justificó parquearlo no se resolvió.\n\n---\n\n**Yo agregaría un tercer filtro que ya está en D-002 pero no tiene fecha:**\n\nAntes de reactivar Aurexgroup como negocio comercializable, necesitas que al menos una solución pase el test completo: instalada en un negocio externo, operada sin tu intervención, medida. Hoy tienes cero validaciones externas (H-004). Mientras ese número sea cero, Aurexgroup es un proyecto interno de DiMango, no una empresa.",
+   "ttft_ms": 1478,
+   "total_ms": 7490,
+   "tokens_in": 5585,
+   "cache_leido": 0,
+   "sin_cache": 5585,
+   "tokens_out": 266
+  }
+ },
+ {
+  "id": "M08",
+  "categoria": "contradiccion",
+  "pregunta": "El residual del estado de resultados da 26% de margen. ¿Es creíble? ¿Por qué?",
+  "notas_recuperadas": [
+   "H-012",
+   "H-006",
+   "H-017",
+   "P-009",
+   "M-005",
+   "H-015",
+   "D-005",
+   "D-006",
+   "H-011",
+   "P-006",
+   "H-003",
+   "H-001"
+  ],
+  "vieja": {
+   "respuesta": "**No es creíble.** Un 26% de margen neto en gastronomía full-service es implausible — el rango típico de la industria es 3-8%.\n\n**Por qué no cuadra:**\n\nLos ~$36M/mes sin explicar (H-012) representan ~$430M al año. Con el costo laboral ya capturado y el prime cost sano (57,7%), ese residual debería estar mucho más cerca de cero, no de 26 puntos.\n\n**Qué falta, en orden de probabilidad:**\n\n1. **Arriendo de Playa Chinchorro** — H-003 solo capturó Plaza Oeste ($12,7M/mes). Si Playa tiene arriendo (o costo de oportunidad si es propio), es el candidato #1.\n2. **Honorarios y boletas de terceros** — no pasan por el RCV de compras.\n3. **Retiros del dueño** — si Ricardo saca dinero, no aparece como costo.\n4. **PPM/renta, contribuciones, gastos comunes** — pendientes de verificar.\n5. **Pagos en efectivo** — la planilla tiene notas \"cash\".\n\n**Siguiente paso concreto:** P-006 — confirmar si existe arriendo de Playa Chinchorro y por cuánto. Si es local propio, la explicación hay que buscarla en el resto de la lista.",
+   "ttft_ms": 2207,
+   "total_ms": 11529,
+   "tokens_in": 20292,
+   "cache_leido": 20255,
+   "sin_cache": 37,
+   "tokens_out": 358
+  },
+  "nueva": {
+   "respuesta": "**Conclusión:** No lo sé con certeza, y tú tampoco. Hay un conflicto abierto entre tu afirmación y mi estimación, y ninguno de los dos tiene la evidencia para cerrarlo.\n\n**Qué dice cada lado:**\n\n| Fuente | Posición | Autoridad |\n|--------|----------|-----------|\n| Tú (H-017) | \"Sí es creíble, es un poco lo que estamos manejando de ganancia\" | 4 |\n| Mi cálculo (H-012) | Probablemente falta costo por capturar; 26% es alto | 5 |\n\nPor la regla de prioridad, tu palabra gana sobre mi estimación. Pero la regla de conflictos me obliga a no resolverlo en silencio.\n\n**Por qué 26% sería anómalamente alto:**\nEl benchmark de gastronomía es 3-8% de margen neto. Pero ese benchmark asume arriendo en ambos locales. Playa es tuya y no paga arriendo (P-006). Eso sube el margen legítimo quizás a 15-18%, no a 26%.\n\n**Por qué podrías tener razón:**\nSi efectivamente no hay más costos escondidos y la caja creció ~$35M en julio, entonces el 26% es real y DiMango es estructuralmente más rentable que el promedio.\n\n**Cómo se cierra:**\nSaldo bancario al 1 de julio vs. saldo al 31 de julio. Si la caja creció ~$35M, es utilidad. Si no creció, hay costo que no estamos viendo. Es autoridad 1 — mata cualquier estimación o afirmación.\n\n**Yo haría:** pedir a Carla los saldos de las cuentas operativas al 1 y 31 de julio. Diez minutos de su tiempo cierran esto.",
+   "ttft_ms": 1673,
+   "total_ms": 10372,
+   "tokens_in": 7955,
+   "cache_leido": 0,
+   "sin_cache": 7955,
+   "tokens_out": 483
+  }
+ },
+ {
+  "id": "M09",
+  "categoria": "contradiccion",
+  "pregunta": "¿En qué se equivocó Maximus sobre el riesgo del DTE y por qué?",
+  "notas_recuperadas": [
+   "D-010",
+   "L-005",
+   "D-009",
+   "P-008",
+   "P-001",
+   "L-004",
+   "P-009",
+   "S-007",
+   "D-007",
+   "S-008",
+   "L-002"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** Sobrestimé el riesgo porque asumí una arquitectura que no verifiqué.\n\n**El error:**\nClasifiqué P-001 como \"riesgo #1 del negocio a $5,5M/día\" asumiendo que DiMangoToGo emitía boletas por sí misma y que no había alternativa. Repetí la advertencia cinco veces sin hacer las cuatro preguntas que yo mismo había planteado.\n\n**Lo que no sabía y debí verificar antes de alarmar:**\n1. DiMangoToGo **no emite** — emite SimpleFactura, un proveedor certificado externo.\n2. Existe contingencia manual desde la web del proveedor.\n3. Los encargados de ambos locales saben usarla.\n4. Cero fallas de emisión en julio.\n\n**Por qué me equivoqué:**\nConstruí un número de impacto ($5,5M/día) sobre un supuesto técnico no validado. Es exactamente lo que `SOUL.md` prohíbe: \"hipótesis etiquetada como hipótesis, estimación etiquetada como estimación, **nunca como dato**\". Lo hice de todos modos.\n\n**La lección (ya en L-004 implícita, ahora explícita):**\nUn riesgo estimado sin verificar la arquitectura real vale tan poco como un número inventado. Alarmar cinco veces no sustituye preguntar una vez bien.",
+   "ttft_ms": 1120,
+   "total_ms": 10432,
+   "tokens_in": 20288,
+   "cache_leido": 20255,
+   "sin_cache": 33,
+   "tokens_out": 371
+  },
+  "nueva": {
+   "respuesta": "## Respuesta\n\nMaximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día** y lo repitió cinco veces, cuando en realidad el riesgo era mínimo.\n\n### El error\n\nAsumí que DiMangoToGo emitía las boletas por sí misma y que no había alternativa. Construí un número de impacto (autoridad 5 = estimación propia) y lo presenté con el peso de un hecho verificado.\n\n### La realidad\n\n- DiMangoToGo **no emite**: emite **SimpleFactura**, proveedor certificado.\n- Existe contingencia manual desde la web del proveedor.\n- Los encargados de ambos locales saben usarla.\n- Folios al día, cero fallas en julio.\n\n### Por qué pasó\n\nNo verifiqué la arquitectura antes de cuantificar el riesgo. Estimé sobre un supuesto (que la app era el emisor) sin confirmarlo.\n\n### Regla derivada (L-005)\n\n> Un riesgo estimado sin verificar la arquitectura vale tan poco como un número inventado.\n\nTodo riesgo cuantificado debe declarar de qué arquitectura depende y verificarla antes de priorizar sobre ella.",
+   "ttft_ms": 1443,
+   "total_ms": 5910,
+   "tokens_in": 6807,
+   "cache_leido": 0,
+   "sin_cache": 6807,
+   "tokens_out": 323
+  }
+ },
+ {
+  "id": "M10",
+  "categoria": "contradiccion",
+  "pregunta": "¿El costo de mercadería de 28,7% es el costo real de lo que se consume?",
+  "notas_recuperadas": [
+   "H-001",
+   "H-002",
+   "H-011",
+   "H-016",
+   "M-002",
+   "P-004",
+   "H-003",
+   "L-003",
+   "P-005",
+   "M-004",
+   "M-001",
+   "H-006",
+   "L-001",
+   "D-008",
+   "S-005",
+   "S-004",
+   "P-002",
+   "H-008",
+   "S-009",
+   "S-002",
+   "H-012"
+  ],
+  "vieja": {
+   "respuesta": "**No. Es costo de compra, no de consumo.**\n\nEl 28,7% (H-001) sale del RCV del SII — lo que DiMango *compró*, no lo que se usó. La diferencia es la merma (robo, desperdicio, vencimiento, consumo interno no registrado).\n\n**Por qué importa:** sin inventario (P-005 confirma que no existe sistema), no hay forma de medir cuánto de lo comprado se vendió efectivamente. El margen bruto real puede ser peor que el calculado, y nadie lo sabe.\n\n**Lo que falta para tener el costo real:** un inventario que compare stock inicial + compras − stock final = consumo. Mientras no exista, el 28,7% es un piso optimista, no un dato de gestión.",
+   "ttft_ms": 1069,
+   "total_ms": 6330,
+   "tokens_in": 20288,
+   "cache_leido": 20255,
+   "sin_cache": 33,
+   "tokens_out": 201
+  },
+  "nueva": {
+   "respuesta": "**No. Es costo de compra, no de consumo.**\n\nEl 28,7% viene del RCV del SII: lo que DiMango pagó en facturas de alimentos y bebidas. Pero sin inventario (P-005), no existe registro de cuánto se consumió versus cuánto se perdió.\n\n**Lo que falta medir:**\n- Merma por vencimiento\n- Merma por preparación defectuosa\n- Pérdida no registrada (el eufemismo de robo)\n- Diferencia entre lo despachado a Mall y lo que llegó (H-008)\n\nEl costo real de consumo puede ser peor que 28,7%. No sabemos cuánto.\n\n---\n\n**Alternativa más barata que instalar inventario:** cargar `Product.cost` en DiMangoToGo (H-016). No mide merma, pero da margen bruto por producto sin infraestructura nueva. Responde \"qué productos ganan plata\" antes de responder \"cuánto se pierde\".",
+   "ttft_ms": 1068,
+   "total_ms": 7738,
+   "tokens_in": 9262,
+   "cache_leido": 0,
+   "sin_cache": 9262,
+   "tokens_out": 254
+  }
+ },
+ {
+  "id": "M11",
+  "categoria": "fuente",
+  "pregunta": "¿Cuánto vendimos hoy?",
+  "notas_recuperadas": [
+   "H-014",
+   "H-015",
+   "L-003",
+   "N-004",
+   "P-007",
+   "H-013",
+   "S-007",
+   "H-008",
+   "P-003",
+   "H-003",
+   "S-001",
+   "P-006",
+   "M-003",
+   "M-006",
+   "D-003",
+   "M-002",
+   "D-006",
+   "L-002"
+  ],
+  "vieja": {
+   "respuesta": "No tengo el dato de la venta de hoy.\n\n**Dónde consultarlo:** DiMangoToGo → `/AdminVentas`, filtrado por fecha y local.\n\nLo que sí tengo en memoria es el promedio diario de julio: **~$5,47M/día** entre ambos locales (aritmética sobre los $163,5M del mes). Si necesitas comparar contra eso, el número está ahí.",
+   "ttft_ms": 1274,
+   "total_ms": 4416,
+   "tokens_in": 20273,
+   "cache_leido": 20255,
+   "sin_cache": 18,
+   "tokens_out": 107
+  },
+  "nueva": {
+   "respuesta": "No tengo acceso a la venta de hoy.\n\n**Dónde está el dato:** DiMangoToGo `/AdminVentas` — venta en tiempo real por local y medio de pago.\n\n¿Quieres que te arme el paso a paso para sacarlo, o prefieres dictarme el número y lo registro?",
+   "ttft_ms": 1046,
+   "total_ms": 3294,
+   "tokens_in": 8897,
+   "cache_leido": 0,
+   "sin_cache": 8897,
+   "tokens_out": 84
+  }
+ },
+ {
+  "id": "M12",
+  "categoria": "fuente",
+  "pregunta": "¿Cuál es el dato más confiable que tenemos del costo laboral y cuál sería mejor?",
+  "notas_recuperadas": [
+   "M-002",
+   "P-004",
+   "H-011",
+   "H-001",
+   "H-002",
+   "H-016",
+   "H-003",
+   "L-003",
+   "M-004",
+   "H-008",
+   "S-009",
+   "S-002",
+   "H-012"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** El dato más confiable es **$30.271.531 líquido en julio, 45 personas** (H-011). Es un hecho verificado desde la planilla `suelgo_working.xlsx`.\n\n---\n\n**Lo que tenemos (bueno):**\n- Pago líquido real, cuadrado internamente (QUINCENA + extras + fin de mes = TOTAL2 en el 100% de las filas).\n- Desglose por local: Playa $21,4M (30 personas) / Mall $6,6M (11) / Ambos $2,3M (3).\n- Desglose por puesto: garzones $7,6M, cocina $6,8M, heladeros $4,7M, etc.\n- Serie: junio $25,9M → julio $30,3M → agosto $28,9M.\n\n**Lo que falta (el salto a \"mejor\"):**\n1. **Costo cargado real** — hoy es estimación ($36-42M) aplicando factor 1,20-1,38. El número exacto sale de Previred o de las liquidaciones de sueldo, no de la planilla de pagos.\n2. **Costo por local que sirva** — Playa concentra la producción para ambos locales (H-008), así que asignar 70% del costo a Playa no refleja realidad económica. Necesita repartición del costo de producción.\n\n**Siguiente paso concreto:** pedir las liquidaciones de julio o el resumen de Previred para cerrar el factor líquido→cargado y eliminar la banda de incertidumbre de $6M/mes.",
+   "ttft_ms": 1050,
+   "total_ms": 13272,
+   "tokens_in": 20289,
+   "cache_leido": 20255,
+   "sin_cache": 34,
+   "tokens_out": 421
+  },
+  "nueva": {
+   "respuesta": "**El más confiable que tenemos:** $30,27M líquido en julio, 45 personas (H-011). Autoridad 3 — viene de la planilla interna, verificada fila por fila.\n\n**Mejor sería:** el costo cargado real desde Previred (autoridad 1). Ricardo informó ~$37M con imposiciones, pero eso es autoridad 4 (su palabra). La diferencia entre $30M líquido y $37M cargado son ~$7M/mes que nadie ha cruzado contra un documento externo.\n\n**Qué hacer:** pedir a Carla (N-002) o sacar directo de Previred el total pagado en julio. Un número, cinco minutos, cierra el 18,5% de costo laboral sobre venta con precisión real.",
+   "ttft_ms": 1600,
+   "total_ms": 6451,
+   "tokens_in": 7650,
+   "cache_leido": 0,
+   "sin_cache": 7650,
+   "tokens_out": 203
+  }
+ },
+ {
+  "id": "M13",
+  "categoria": "fuente",
+  "pregunta": "¿La venta de julio fue $163.552.687? ¿Ese número cambia con el tiempo?",
+  "notas_recuperadas": [
+   "H-015",
+   "P-003",
+   "H-011",
+   "L-005",
+   "M-002",
+   "M-003",
+   "P-007",
+   "H-001",
+   "H-008",
+   "H-003",
+   "S-001",
+   "P-006",
+   "M-006",
+   "D-003",
+   "L-001",
+   "M-004",
+   "S-009",
+   "P-004",
+   "S-002",
+   "H-012"
+  ],
+  "vieja": {
+   "respuesta": "**Conclusión:** Sí, $163.552.687 es la facturación de julio según el dato original en `BRAIN.md`. Pero hay una discrepancia con un dato posterior que necesitas resolver.\n\n---\n\n**El conflicto:**\n\n| Fuente | Venta julio | Origen |\n|---|---|---|\n| `BRAIN.md` §1 | $163.552.687 | Dato original (HECHO) |\n| `MEMORY.md` H-015 | $134.015.045 neta / $159.477.904 c/IVA | DiMangoToGo `/AdminVentas` (HECHO, 20-ago) |\n\nLa diferencia es de **$4M–$29M** dependiendo de si comparas bruta, con IVA o neta.\n\n---\n\n**¿Cambia con el tiempo?**\n\nNo debería. Es venta cerrada de un mes pasado. Si cambia, es por:\n1. Ajuste de notas de crédito o anulaciones registradas después del cierre.\n2. Diferencia de criterio entre fuentes (con/sin IVA, con/sin propinas).\n3. Error en una de las dos fuentes.\n\n---\n\n**Lo que hay que hacer:**\n\nConfirmar cuál es el dato correcto y bajo qué definición (bruta, neta, con propinas). El número de `BRAIN.md` probablemente incluye IVA; el de H-015 lo separa. Una vez aclarado, corrijo `BRAIN.md` y los cálculos que dependen de él.",
+   "ttft_ms": 1237,
+   "total_ms": 10529,
+   "tokens_in": 20289,
+   "cache_leido": 20255,
+   "sin_cache": 34,
+   "tokens_out": 392
+  },
+  "nueva": {
+   "respuesta": "**No, la venta de julio no fue $163.552.687.**\n\nSegún H-015 (autoridad 2, fuente DiMangoToGo /AdminVentas):\n\n| Concepto | Monto |\n|---|---|\n| Venta bruta | $159.919.975 |\n| Venta con IVA | $159.477.904 |\n| **Venta neta** | **$134.015.045** |\n\nTu número ($163,5M) no coincide con ninguno de estos. Puede ser:\n- Una suma que incluye propinas ($10,7M) — pero aun así no cuadra\n- Un mes distinto\n- Un filtro diferente en /AdminVentas\n\n**¿Cambia con el tiempo?** No debería. La venta de julio 2026 es un dato histórico — lo que se facturó ese mes está cerrado. Si el número cambia en el sistema, hay un problema de integridad de datos que habría que investigar.\n\n**¿De dónde sacaste los $163,5M?**",
+   "ttft_ms": 1962,
+   "total_ms": 7009,
+   "tokens_in": 9820,
+   "cache_leido": 0,
+   "sin_cache": 9820,
+   "tokens_out": 265
+  }
+ },
+ {
+  "id": "M14",
+  "categoria": "persona",
+  "pregunta": "¿Quién es Cristian Vidal, qué hace y qué pendiente se relaciona con él?",
+  "notas_recuperadas": [
+   "N-003",
+   "H-014",
+   "R-001",
+   "N-002",
+   "S-009",
+   "D-005",
+   "D-007",
+   "H-003",
+   "H-013",
+   "S-007",
+   "R-002",
+   "E-001"
+  ],
+  "vieja": {
+   "respuesta": "**Cristian Vidal es el contador externo de DiMango.** Trabaja sobre el RCV del SII — contabilidad tributaria, no de gestión.\n\n**Pendientes relacionados:**\n1. Confirmar si Ricardo tiene acceso de consulta al trabajo de Cristian.\n2. Saber si la contabilidad va separada por local o consolidada — eso define si el margen por local sale de contabilidad o hay que construirlo desde DiMangoToGo.\n\nFuente: `MEMORY.md`, P-005.",
+   "ttft_ms": 1152,
+   "total_ms": 5186,
+   "tokens_in": 20289,
+   "cache_leido": 20255,
+   "sin_cache": 34,
+   "tokens_out": 135
+  },
+  "nueva": {
+   "respuesta": "Cristian Vidal es programador externo. Creó el software de remuneraciones que DiMango usa actualmente (S-009).\n\n**Pendiente relacionado:** Ricardo planteó reemplazar ese software con desarrollo propio. Está clasificado como **idea, no prioridad** — sería otro sistema que solo él mantiene, para reemplazar algo que funciona, mientras tiene cuatro frentes abiertos. Encaja directo en L-002 (la automatización profundiza el cuello de botella).\n\nNo hay tareas operativas abiertas asignadas a Cristian en la memoria.",
+   "ttft_ms": 2342,
+   "total_ms": 6130,
+   "tokens_in": 6652,
+   "cache_leido": 0,
+   "sin_cache": 6652,
+   "tokens_out": 147
+  }
+ },
+ {
+  "id": "M15",
+  "categoria": "no_sabe",
+  "pregunta": "¿Cuál es el margen bruto real por producto?",
+  "notas_recuperadas": [
+   "H-017",
+   "H-016",
+   "M-001",
+   "M-005",
+   "P-005",
+   "H-008",
+   "D-002",
+   "H-012",
+   "S-001",
+   "P-007",
+   "H-001"
+  ],
+  "vieja": {
+   "respuesta": "**No existe.**\n\nEl campo `Product.cost` está construido en DiMangoToGo pero **nadie lo llenó** (H-016). Cada producto muestra `COSTO NETO: $0`.\n\n---\n\n**Qué hacer:**\n\nCargar el costo unitario de los 20-30 productos de mayor venta. Con eso tienes margen bruto por producto y por categoría sin inventario ni contador. Máximo valor por mínimo esfuerzo.\n\n**Dónde está:** `/AdminVentas` en DiMangoToGo, o directo en el esquema `Product.cost`.",
+   "ttft_ms": 1105,
+   "total_ms": 6063,
+   "tokens_in": 20277,
+   "cache_leido": 20255,
+   "sin_cache": 22,
+   "tokens_out": 154
+  },
+  "nueva": {
+   "respuesta": "**No existe.** El campo `Product.cost` está construido en DiMangoToGo y está vacío (H-016).\n\n**Qué hacer:** Cargar el costo neto unitario de los productos. Con eso el sistema calcula margen bruto por producto y por categoría solo, sin inventario, sin contador.\n\n**Por qué esto primero:** Es el dato de mayor valor por mínimo esfuerzo de todo lo identificado. Responde la pregunta que nunca se pudo plantear: qué productos ganan plata y cuáles no.",
+   "ttft_ms": 1447,
+   "total_ms": 3774,
+   "tokens_in": 7061,
+   "cache_leido": 0,
+   "sin_cache": 7061,
+   "tokens_out": 138
+  }
+ },
+ {
+  "id": "R01",
+  "categoria": "ricardo",
+  "pregunta": "¿Cuántos km de trote o bicicleta debo hacer hoy?",
+  "notas_recuperadas": [
+   "H-014",
+   "H-013",
+   "S-007"
+  ],
+  "vieja": {
+   "respuesta": "No tengo esa información.\n\nMi memoria cubre DiMango, Aurexgroup y tu operación de negocio. No hay nada sobre rutinas de ejercicio, metas deportivas ni planes de entrenamiento.\n\nSi quieres que lo gestione, necesito que me des el contexto: qué estás entrenando, para qué, y con qué frecuencia.",
+   "ttft_ms": 1254,
+   "total_ms": 3660,
+   "tokens_in": 20283,
+   "cache_leido": 20255,
+   "sin_cache": 28,
+   "tokens_out": 93
+  },
+  "nueva": {
+   "respuesta": "No tengo esa información.\n\nMi memoria cubre DiMango, Aurexgroup y la operación del negocio. No hay datos sobre tu rutina de ejercicio, metas deportivas ni plan de entrenamiento.\n\nSi quieres que lo gestione, necesito que me pases el plan o las reglas que usas.",
+   "ttft_ms": 1371,
+   "total_ms": 3435,
+   "tokens_in": 4727,
+   "cache_leido": 0,
+   "sin_cache": 4727,
+   "tokens_out": 80
+  }
+ },
+ {
+  "id": "R02",
+  "categoria": "ricardo",
+  "pregunta": "¿Qué pagos de proveedores tengo esta semana?",
+  "notas_recuperadas": [
+   "H-002",
+   "P-002",
+   "S-004",
+   "S-002",
+   "S-003",
+   "S-005",
+   "D-006",
+   "D-004",
+   "D-008"
+  ],
+  "vieja": {
+   "respuesta": "No tengo esa información.\n\nMi memoria contiene estructura financiera (costos agregados, márgenes, arriendo) pero **no el calendario de pagos a proveedores ni las facturas pendientes por vencer.**\n\n**Dónde está el dato:**\n1. **Cristian Vidal** (tu contador) — tiene el RCV del SII con todas las facturas recibidas y sus fechas.\n2. **DiMangoWorking** — si registras pagos ahí, debería tener un módulo de cuentas por pagar.\n3. **Flujo de caja o planilla de tesorería** — si existe, no la he visto.\n\n¿Quieres que agregue \"visibilidad de pagos semanales\" como pendiente para el tablero de gestión, o tienes una fuente que puedo revisar?",
+   "ttft_ms": 1103,
+   "total_ms": 6482,
+   "tokens_in": 20279,
+   "cache_leido": 20255,
+   "sin_cache": 24,
+   "tokens_out": 205
+  },
+  "nueva": {
+   "respuesta": "No tengo esa información.\n\n**Dónde debería estar:** DiMangoWorking tiene una pantalla `/GestionFinanciera` (pagos a proveedores) y `/PedidoProveedor` (stock de proveedores), pero no tengo acceso a los datos cargados ahí ni a un calendario de vencimientos.\n\n**Qué necesito para responder:**\n1. Lista de facturas pendientes con fecha de vencimiento, o\n2. Acceso de lectura a DiMangoWorking, o\n3. Que me pases el listado manualmente.\n\n¿Tienes eso a mano o lo sacamos del sistema?",
+   "ttft_ms": 1571,
+   "total_ms": 4592,
+   "tokens_in": 6142,
+   "cache_leido": 0,
+   "sin_cache": 6142,
+   "tokens_out": 161
+  }
+ },
+ {
+  "id": "R03",
+  "categoria": "ricardo",
+  "pregunta": "¿Cómo está el stock de PF y Biofood?",
+  "notas_recuperadas": [
+   "S-002",
+   "P-007",
+   "L-002",
+   "H-011"
+  ],
+  "vieja": {
+   "respuesta": "**No tengo ese dato.**\n\nMi memoria no contiene información de stock de ningún proveedor, incluidos PF y Biofood. El inventario de DiMango **no existe como sistema** (ver P-005 en MEMORY.md): no hay control centralizado de existencias, solo registro de compras.\n\n**Dónde consultarlo:**\n1. Bodega física de Playa Chinchorro (es el centro de producción).\n2. Si hay registro parcial, estaría en DiMangoWorking — pero no tengo acceso a datos en tiempo real de ese sistema.\n\n¿Quieres que agregue el seguimiento de stock crítico como pendiente para el tablero de gestión?",
+   "ttft_ms": 1070,
+   "total_ms": 5729,
+   "tokens_in": 20280,
+   "cache_leido": 20255,
+   "sin_cache": 25,
+   "tokens_out": 170
+  },
+  "nueva": {
+   "respuesta": "No tengo ese dato.\n\n**Dónde debería estar:** DiMangoWorking (`/Inventario` o `MovimientoStock`) o el sistema de bodega que uses para esos proveedores.\n\n**Qué necesito:** un reporte de stock actual o acceso de lectura a esa pantalla.",
+   "ttft_ms": 1690,
+   "total_ms": 3765,
+   "tokens_in": 5461,
+   "cache_leido": 0,
+   "sin_cache": 5461,
+   "tokens_out": 79
+  }
+ },
+ {
+  "id": "R04",
+  "categoria": "ricardo",
+  "pregunta": "¿Qué pasó anoche en el Mall y quién estaba al tanto?",
+  "notas_recuperadas": [
+   "H-015",
+   "N-005",
+   "L-001",
+   "H-003",
+   "M-003",
+   "M-005",
+   "D-003",
+   "D-010",
+   "H-008",
+   "P-003",
+   "S-001",
+   "P-006",
+   "M-006",
+   "P-007",
+   "N-004",
+   "H-001"
+  ],
+  "vieja": {
+   "respuesta": "No tengo información sobre lo que pasó anoche en el Mall.\n\n**En mi memoria no hay ningún registro de incidentes, eventos ni comunicaciones del Mall posteriores al 20 de agosto de 2026.** La última referencia al Mall es el análisis financiero de ese día (H-015), que es de números, no de operación.\n\n**Dónde consultar:**\n1. WhatsApp del encargado del Mall (si existe ese canal)\n2. DiMangoWorking — si hay bitácora de turno o registro de incidentes\n3. Directamente con quien cerró anoche\n\n¿Qué pasó? Si me lo cuentas, lo registro en la bitácora de escalamientos (E-001+) con la clasificación que corresponda.",
+   "ttft_ms": 1087,
+   "total_ms": 5933,
+   "tokens_in": 20282,
+   "cache_leido": 20255,
+   "sin_cache": 27,
+   "tokens_out": 186
+  },
+  "nueva": {
+   "respuesta": "No tengo información sobre qué pasó anoche en el Mall.\n\nMi memoria contiene datos operacionales y financieros de DiMango, pero no registra incidentes nocturnos ni eventos recientes no documentados.\n\n**Para responder necesito que me cuentes qué ocurrió**, o que me indiques dónde está el registro (WhatsApp del equipo, correo, sistema de checklist, cámara).\n\n**Lo que sí sé sobre el Mall que podría ser relevante:**\n- Quienes reciben mercadería: Vivianda (L-V), Alejandra o Angélica (S-D), más el cocinero AM de turno (N-005)\n- Verónica despacha desde Playa (N-004)\n- El traspaso entre locales es el punto ciego operativo documentado (H-008)\n\n¿Qué pasó?",
+   "ttft_ms": 1608,
+   "total_ms": 6415,
+   "tokens_in": 8460,
+   "cache_leido": 0,
+   "sin_cache": 8460,
+   "tokens_out": 219
+  }
+ },
+ {
+  "id": "R05",
+  "categoria": "ricardo",
+  "pregunta": "¿Me consultaron antes de tomar esa decisión?",
+  "notas_recuperadas": [
+   "D-004",
+   "D-005",
+   "L-004",
+   "M-002",
+   "T-001",
+   "D-008",
+   "R-002",
+   "E-001",
+   "R-001",
+   "N-001",
+   "H-013",
+   "L-002"
+  ],
+  "vieja": {
+   "respuesta": "No tengo contexto de qué decisión hablas.\n\nNecesito que especifiques: ¿cuál decisión? Dame el tema o la fecha, y reviso si en `MEMORY.md` aparece consultado, decidido unilateralmente, o ni siquiera registrado.",
+   "ttft_ms": 1116,
+   "total_ms": 2925,
+   "tokens_in": 20276,
+   "cache_leido": 20255,
+   "sin_cache": 21,
+   "tokens_out": 71
+  },
+  "nueva": {
+   "respuesta": "**Conclusión:** No me consultaron. La decisión de crear los repositorios `titicheo65/maximus` y `titicheo65/dimango-agent` la tomé yo directamente durante la sesión del 20 de agosto.\n\n**Lo que pasé por alto:** Debí haber consultado antes de actuar. Crear repositorios privados con código de producción y la memoria del sistema es una decisión de infraestructura, no una corrección menor. Aplica el nivel 3 de R-002 (consulta antes), no el nivel 2.\n\n**Qué hacer:**\n- Si quieres revertirlo, los repos se pueden eliminar y volvemos al estado anterior.\n- Si está bien pero el proceso estuvo mal, lo registro como lección y ajusto mi protocolo.\n\n¿Cómo procedo?",
+   "ttft_ms": 1378,
+   "total_ms": 5725,
+   "tokens_in": 7015,
+   "cache_leido": 0,
+   "sin_cache": 7015,
+   "tokens_out": 206
+  }
+ },
+ {
+  "id": "R06",
+  "categoria": "ricardo",
+  "pregunta": "¿Cuánto vendió el Mall en julio y cuál es su ticket promedio?",
+  "notas_recuperadas": [
+   "H-015",
+   "M-006",
+   "H-011",
+   "N-005",
+   "H-003",
+   "M-003",
+   "P-003",
+   "P-004",
+   "H-008",
+   "S-001",
+   "P-006",
+   "D-003",
+   "M-004",
+   "S-009",
+   "M-002",
+   "S-002",
+   "H-012"
+  ],
+  "vieja": {
+   "respuesta": "**Venta del Mall en julio: $33.977.496 netos** (H-015, DiMangoToGo confirmado).\n\n**Ticket promedio del Mall: DESCONOCIDO.**\n\nEl dato de transacciones por local no está en la memoria. Sin número de transacciones, no hay ticket.\n\n**Dónde consultarlo:** DiMangoToGo `/AdminVentas`, filtrar julio por local Mall, buscar cantidad de boletas o transacciones. Es una consulta de 2 minutos.",
+   "ttft_ms": 1894,
+   "total_ms": 5433,
+   "tokens_in": 20283,
+   "cache_leido": 20255,
+   "sin_cache": 28,
+   "tokens_out": 127
+  },
+  "nueva": {
+   "respuesta": "**Mall julio 2026: $33.977.496 netos · ticket promedio ~$19.491.**\n\nEl ticket es 31% más alto que Playa (~$14.845). El problema del Mall no es el ticket —es el volumen contra un arriendo del 37,4% de su venta, casi el doble del umbral viable (20%).",
+   "ttft_ms": 2015,
+   "total_ms": 4968,
+   "tokens_in": 8780,
+   "cache_leido": 0,
+   "sin_cache": 8780,
+   "tokens_out": 87
+  }
+ },
+ {
+  "id": "R07",
+  "categoria": "ricardo",
+  "pregunta": "¿El Mall conviene o lo cierro?",
+  "notas_recuperadas": [
+   "H-015",
+   "N-005",
+   "H-003",
+   "M-003",
+   "M-005",
+   "D-003",
+   "H-006",
+   "H-008",
+   "P-003",
+   "S-001",
+   "P-006",
+   "M-006",
+   "P-007",
+   "N-004"
+  ],
+  "vieja": {
+   "respuesta": "## Conclusión\n\n**El Mall no se sostiene con los números actuales.** El arriendo se come el 37,4% de su venta neta — casi el doble del umbral de viabilidad de la industria (20%).\n\n---\n\n## Los números (H-015)\n\n| Concepto | Mall |\n|---|---|\n| Venta neta julio | $33,98M |\n| Arriendo | $12,72M (37,4%) |\n| Mercadería (28,7%) | $9,75M |\n| Laboral directo | $6,60M (19,4%) |\n| Medios de pago | $0,88M |\n| **Queda** | **~$4M (11,8%)** |\n\nY ese 11,8% todavía no descuenta: la producción de Playa que trabaja para el Mall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni administración. **Probablemente está en cero o bajo el agua.**\n\n---\n\n## Para que el Mall sea viable\n\nDos caminos, ambos duros:\n\n1. **Vender $63,6M netos** → crecer 87%, o\n2. **Renegociar arriendo a ~$6,8M** → bajar 47%\n\n---\n\n## Lo que falta para decidir\n\n1. **Leer el contrato de Plaza Oeste:** fecha de vencimiento, multa por salida anticipada, componente variable, posibilidad de renegociar.\n2. **Confirmar el costo real de mercadería del Mall** — hoy es supuesto (28,7% igual que Playa), pero el Mall no produce nada; el traspaso no está valorizado (H-008).\n\n---\n\n## Mi posición\n\n**No cierres todavía, pero abre la renegociación.** El contrato manda: si la salida cuesta más que 6-12 meses de pérdida, conviene aguantar y negociar. Si el contrato está cerca de vencer o tiene salida barata, es candidato a cerrar.\n\n¿Tienes el contrato a mano?",
+   "ttft_ms": 1160,
+   "total_ms": 20188,
+   "tokens_in": 20274,
+   "cache_leido": 20255,
+   "sin_cache": 19,
+   "tokens_out": 531
+  },
+  "nueva": {
+   "respuesta": "## Conclusión\n\n**No lo cierres todavía, pero tampoco lo dejes como está.** El Mall pierde plata o está en el borde — no lo sabemos con certeza porque falta el costo laboral asignado y el traspaso valorizado. Lo que sí sabemos: el arriendo es 37,4% de su venta cuando el umbral es 20%. Eso no se arregla vendiendo más; se arregla renegociando o saliendo.\n\n---\n\n## Qué haría yo\n\n**Antes de decidir, necesitas tres cosas que no tienes:**\n\n1. **El contrato del Mall.** Vencimiento, multa por salida anticipada, cláusula de reajuste, componente variable. Sin esto no sabes cuánto cuesta cerrar ni cuánto margen hay para negociar.\n\n2. **El costo laboral real del Mall.** Hoy imputas 19,4% con los 10 empleados \"Mall\", pero ignoras la mano de obra de Playa que produce todo lo que el Mall vende. El Mall no tiene cocina propia — su costo real es mayor.\n\n3. **El traspaso valorizado.** Sin saber cuánto cuesta lo que sale de Playa hacia el Mall, el margen del Mall es ficción.\n\n---\n\n## Por qué no cerrarlo hoy\n\n- **Playa no puede absorber esa venta.** Los $34M mensuales del Mall no se trasladan automáticamente a Chinchorro. Parte se pierde, parte nunca existió fuera del contexto \"paseo al mall\".\n- **Costo de salida desconocido.** Si el contrato tiene 18 meses de multa, cerrar hoy puede costar más que aguantar un año malo.\n- **Renegociación no intentada.** El mall tiene locales vacíos. Un arriendo de $12,7M sobre $34M de venta es un problema del arrendador también: si te vas, ellos pierden el 100%.\n\n---\n\n## Por qué no dejarlo como está\n\n- **37,4% de arriendo es inviable.** Para llegar al 20% necesitas vender $63,6M (+87%) o bajar el arriendo a $6,8M (-47%). Ninguna de las dos pasa sola.\n- **Playa está subsidiando al Mall.** Cada peso que ganas en Chinchorro paga las pérdidas del otro lado. Eso esconde el problema y te impide invertir donde sí rinde.\n\n---\n\n## Siguiente paso concreto\n\n**Pídele a Carla (N-002) el contrato de Plaza Oeste y extrae:** fecha de vencimiento, monto de la multa por salida anticipada, fórmula de reajuste y si hay componente variable sobre ventas.\n\nCon eso en la",
+   "ttft_ms": 1100,
+   "total_ms": 20901,
+   "tokens_in": 7805,
+   "cache_leido": 0,
+   "sin_cache": 7805,
+   "tokens_out": 700
+  }
+ },
+ {
+  "id": "R08",
+  "categoria": "ricardo",
+  "pregunta": "¿Quién hace la reposición del Mall y quién la recibe?",
+  "notas_recuperadas": [
+   "N-004",
+   "P-007",
+   "H-015",
+   "N-005",
+   "H-008",
+   "H-003",
+   "M-003",
+   "M-005",
+   "P-005",
+   "M-001",
+   "S-002",
+   "S-001",
+   "P-003",
+   "P-006",
+   "M-006",
+   "D-003"
+  ],
+  "vieja": {
+   "respuesta": "**No está en mi memoria.**\n\nLos archivos documentan el **flujo** (H-008: Playa despacha → Mall recibe, diario) y el **modelo de datos** (H-010: `ChecklistPedido` tiene campos `cantidad_solicitada` y `cantidad_entregada`), pero **no registran los nombres de las personas responsables** de despachar en Playa ni de recibir en el Mall.\n\n**Dónde consultar:** directamente con el encargado de cada local, o revisar si DiMangoWorking tiene asignación de roles por tarea.",
+   "ttft_ms": 602126,
+   "total_ms": 606446,
+   "tokens_in": 20281,
+   "cache_leido": 0,
+   "sin_cache": 26,
+   "tokens_out": 146
+  },
+  "nueva": {
+   "respuesta": "**Despacha:** Verónica (N-004), desde Playa Chinchorro, todos los días entre 10:00 y 11:45.\n\n**Reciben en el Mall:**\n- Lunes a viernes: Vivianda\n- Sábado y domingo: Alejandra o Angélica\n- Siempre presente: el cocinero a cargo del turno AM\n\n**El problema:** Verónica pide *y* despacha — no hay control cruzado. Cuatro personas distintas reciben según el día, lo que diluye la responsabilidad sobre faltantes. Es el punto de fuga clásico en operaciones de dos locales (P-007).",
+   "ttft_ms": 39282,
+   "total_ms": 41345,
+   "tokens_in": 8289,
+   "cache_leido": 0,
+   "sin_cache": 8289,
+   "tokens_out": 171
+  }
+ },
+ {
+  "id": "R09",
+  "categoria": "ricardo",
+  "pregunta": "¿Cuánto me cuesta tener 45 personas y cuánto subió respecto a junio?",
+  "notas_recuperadas": [
+   "H-011",
+   "M-002",
+   "D-010",
+   "L-002",
+   "N-005",
+   "P-007",
+   "D-008",
+   "H-002",
+   "H-008",
+   "M-004",
+   "S-009",
+   "P-004",
+   "S-002",
+   "H-012",
+   "L-003",
+   "P-008",
+   "D-007",
+   "S-007",
+   "D-009",
+   "S-008"
+  ],
+  "vieja": {
+   "respuesta": "**$30,27M líquido en julio, +16,8% vs junio.**\n\n---\n\n**Los números (H-011):**\n- Julio: $30.271.531 líquido, 45 personas\n- Junio: $25.930.000 líquido, 37 personas\n- Delta: +$4,34M (+16,8%)\n\n**Costo cargado (estimado):** $36-42M/mes. El factor exacto sale de Previred, no de la planilla.\n\n**El problema:** entraron 8 personas (+21,6%) y el costo subió 16,8%, pero la venta solo subió 7,5%. Como % de la venta neta: junio 17,0% → julio 18,5%. Nadie decidió eso mirando un número.\n\n**Distribución por local:**\n- Playa: 30 personas, $21,4M (70,7%)\n- Mall: 11 personas, $6,6M (21,8%)\n- Ambos: 3 personas, $2,26M (7,5%)",
+   "ttft_ms": 1249,
+   "total_ms": 8487,
+   "tokens_in": 20289,
+   "cache_leido": 20255,
+   "sin_cache": 34,
+   "tokens_out": 272
+  },
+  "nueva": {
+   "respuesta": "**$30,27M líquido en julio, $37M con imposiciones. Subió $4,34M (+16,8%) respecto a junio, cuando la venta solo subió 7,5%.**\n\n---\n\n**Qué hacer:** revisar si las 8 personas que entraron entre junio y julio siguen siendo necesarias. El costo laboral pasó de 17,0% a 18,5% de la venta — un punto y medio que son ~$20M al año si se sostiene.\n\n**Por qué importa:** entraron 8 personas (+21,6%), el costo subió 16,8%, la venta subió 7,5%. Nadie tomó esa decisión mirando este número.",
+   "ttft_ms": 1728,
+   "total_ms": 6503,
+   "tokens_in": 9456,
+   "cache_leido": 0,
+   "sin_cache": 9456,
+   "tokens_out": 179
+  }
+ },
+ {
+  "id": "R10",
+  "categoria": "ricardo",
+  "pregunta": "¿Qué es lo más urgente que tengo pendiente hoy?",
+  "notas_recuperadas": [
+   "H-014",
+   "R-001",
+   "D-005",
+   "D-007",
+   "H-003",
+   "M-006",
+   "N-002",
+   "T-001",
+   "H-013",
+   "S-007",
+   "R-002",
+   "E-001",
+   "D-004",
+   "N-001"
+  ],
+  "vieja": {
+   "respuesta": "**Lo más urgente: P-003 — venta de julio por local.**\n\nEstá marcado \"esta semana\" y desbloquea tres cosas a la vez:\n1. Si el Mall es viable (H-003 — arriendo al 37% de su venta es casi el doble del umbral)\n2. Los ~$36M/mes que siguen sin explicar (H-012)\n3. Ticket y transacciones por local, que hoy no existen\n\n**Qué hacer:** entrar a DiMangoToGo `/AdminVentas`, filtrar julio por local, sacar los tres números (bruta, c/IVA, neta) por separado. Son 10 minutos.\n\n---\n\n**Segundo en el día:** P-006 — confirmar si existe arriendo de Playa Chinchorro. Es el candidato #1 de los $36M sin explicar. Una pregunta al contador o una revisión de egresos.\n\n---\n\n**Para el sábado 22:** verificar tótems bajo carga (D-006). Ya está comprometido.",
+   "ttft_ms": 1002,
+   "total_ms": 9634,
+   "tokens_in": 20280,
+   "cache_leido": 20255,
+   "sin_cache": 25,
+   "tokens_out": 263
+  },
+  "nueva": {
+   "respuesta": "No tengo información de hoy. La memoria llega hasta el 20 de agosto de 2026 y no incluye una lista de pendientes con fecha ni prioridad asignada.\n\n**Lo que sí está abierto en la memoria:**\n\n1. **H-014 — Credenciales de Twilio expuestas.** Riesgo bajo (Twilio ya no se usa), pero siguen activas en el panel. Rotarlas o eliminarlas toma 5 minutos.\n\n2. **P-002 — Comparar comisión Mercado Pago vs Transbank.** H-002 dice que el costo de medios de pago saltó con la migración. Sin el dato no sabes cuánto estás perdiendo.\n\n3. **D-005 — Aceptar o rechazar la meta de 7 días sin ti.** La bitácora ya está corriendo, pero el objetivo sigue sin confirmación formal.\n\n**Yo haría:**\n\nPedirte que me dictes o mandes tu lista de hoy. Sin eso, estoy operando con memoria vieja y no puedo priorizar contra lo que realmente tienes encima.",
+   "ttft_ms": 1721,
+   "total_ms": 7808,
+   "tokens_in": 7309,
+   "cache_leido": 0,
+   "sin_cache": 7309,
+   "tokens_out": 284
+  }
+ }
+]

@@ -1,0 +1,842 @@
+<!doctype html><meta charset=utf-8>
+<title>Migración: 25 preguntas comparadas</title><style>
+body{background:#07080c;color:#dfe3ea;font:14px/1.6 -apple-system,BlinkMacSystemFont,sans-serif;
+ max-width:1400px;margin:0 auto;padding:34px 20px}
+h1{color:#f5a623;font-size:20px;letter-spacing:.05em}
+.meta{color:#5c6478;font-size:12.5px;margin:6px 0 30px}
+.p{margin-bottom:34px;border-top:1px solid #1c2030;padding-top:18px}
+.q{font-size:15px;color:#fff;margin-bottom:12px;font-weight:500}
+.id{color:#f5a623;font-weight:700;margin-right:6px}
+.cat{background:#171b26;color:#7d8698;font-size:10px;padding:2px 7px;border-radius:4px;margin-right:8px;
+ text-transform:uppercase;letter-spacing:.08em}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.col{background:#0e1118;border:1px solid #1c2030;border-radius:10px;padding:14px}
+.col.n{border-color:#2a4a3a}
+.h{font-size:10.5px;letter-spacing:.09em;color:#5c6478;margin-bottom:10px;font-weight:600}
+.col.n .h{color:#4a9e6f}
+.r{white-space:pre-wrap;font-size:13px;color:#c3cad6}
+.notas{margin-top:10px;padding-top:8px;border-top:1px solid #1c2030;font-size:10.5px;color:#454c5e}
+.w{background:#5f2f0d;color:#ffa06c;padding:1px 6px;border-radius:4px;font-size:10px}
+</style><h1>MIGRACIÓN DE MEMORIA · 25 PREGUNTAS COMPARADAS</h1>
+<div class=meta>Izquierda: los seis archivos completos (20.284 tokens). Derecha: core + índice + notas recuperadas (7.535 tokens promedio).<br>
+Mismo modelo, mismas instrucciones. Criterio de aprobación: cero pérdidas de información.</div>
+<div class=p>
+ <div class=q><span class=id>M01</span> <span class=cat>recuperacion</span> ¿Cuánto fue el costo laboral de julio y cómo se reparte por local?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,286 tok · 1,099 ms</div>
+   <div class=r>**Costo laboral de julio: $30.271.531 líquido, 45 personas.**
+
+Cargado (con leyes sociales): **$36–42M** — estimación, no dato.
+
+**Reparto por local:**
+
+| Local | Personas | Líquido | % |
+|---|---|---|---|
+| Playa Chinchorro | 30 | $21.411.531 | 70,7% |
+| Mall | 11 | $6.600.000 | 21,8% |
+| Ambos | 3 | $2.260.000 | 7,5% |
+
+**Caveat importante:** ese reparto no sirve para calcular margen por local. Playa concentra 30 personas porque **produce para los dos locales** — el Mall no produce nada, todo llega elaborado (H-008). Sin repartir el costo de producción, los porcentajes por local son engañosos.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,938 tok · 1,549 ms
+   </div>
+   <div class=r>**$30,27M líquido · 45 personas.** Con imposiciones cargadas: ~$37M.
+
+| Local | Personas | Líquido | % |
+|---|---|---|---|
+| Playa Chinchorro | 30 | $21,4M | 70,7% |
+| Mall | 11 | $6,6M | 21,8% |
+| Ambos | 3 | $2,3M | 7,5% |
+
+**Qué haría:** no interpretar el 70/22/8 como ineficiencia del Mall. Playa tiene 30 personas porque produce para los dos locales — el Mall no fabrica nada (H-008). El reparto de costo laboral por local es engañoso sin valorizar el traspaso de mercadería.
+
+**Alerta que sigue abierta:** de junio a julio entraron 8 personas (+21,6%), el costo subió 16,8% y la venta solo 7,5%. El costo laboral pasó de 17,0% a 18,5% de la venta. Nadie tomó esa decisión mirando ese número.</div>
+   <div class=notas>notas usadas: H-011, P-004, M-002, H-015, P-003, H-002, H-008, M-006, M-004, S-009, S-002, H-012, L-003</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M02</span> <span class=cat>recuperacion</span> ¿Cuál es el prime cost y qué significa que esté donde está?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,281 tok · 4,792 ms</div>
+   <div class=r>**Prime cost: ≈57,7% de la venta neta.** Está sano.
+
+---
+
+**Qué significa:**
+
+El prime cost es mercadería + costo laboral cargado sobre venta. En DiMango:
+- Mercadería: 28,7% (H-001)
+- Laboral cargado: ~29% (H-011, punto medio de $36-42M sobre $137,9M)
+
+**El umbral de la industria es 60-65%.** DiMango está 3-7 puntos por debajo. Eso dice que Ricardo compra bien y la dotación no está desbordada.
+
+---
+
+**Lo que NO dice:**
+
+El prime cost sano no garantiza margen neto. H-012 muestra que siguen faltando ~$36M/mes sin explicar. El arriendo del Mall (37,4% de su venta, H-015) se come lo que el prime cost ahorra.
+
+**Traducción:** la cocina y el personal no son el problema. El problema está en los costos fijos —particularmente el Mall— o en costo que todavía no se capturó.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,445 tok · 1,540 ms
+   </div>
+   <div class=r>**Prime cost de julio: 57,7%** (mercadería 28,7% + laboral cargado ~29%).
+
+**Qué significa:** está sano. El umbral de alarma es 60-65%; sobre eso, vender más empeora el resultado porque cada peso de venta se come en insumos y sueldos. DiMango tiene 7 puntos de margen antes de entrar en zona de peligro.
+
+**La señal de alerta no es el nivel, es la tendencia:** el laboral subió de 17% a 18,5% en un mes (+8 personas, +21,6%) mientras la venta solo creció 7,5%. Si eso se repite, el prime cost se acerca al límite sin que nadie lo haya decidido mirando el número.</div>
+   <div class=notas>notas usadas: M-004, H-006, H-001, H-012, M-005, H-016, S-006, H-011, M-002, H-003, P-005, M-001, L-001</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M03</span> <span class=cat>recuperacion</span> ¿Qué pasó con Toteat y desde cuándo?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,279 tok · 1,151 ms</div>
+   <div class=r>**Toteat terminó el 30 de junio de 2026.**
+
+Desde el 1 de julio, DiMango opera 100% sobre DiMangoToGo (app propia en Base44). La migración fue decisión de Ricardo.
+
+**Lo que ganó:** fuente única de verdad — desaparece el problema de dos POS con datos distintos.
+
+**Lo que perdió:** la red de seguridad. Ya no hay sistema alternativo si DiMangoToGo falla. Esa decisión es la que convirtió la contingencia de emisión en el riesgo que escalé cuatro veces (y que luego resultó estar cubierto por SimpleFactura).
+
+Referencia: `MEMORY.md` D-008.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 6,665 tok · 1,532 ms
+   </div>
+   <div class=r>**Toteat terminó el 30 de junio de 2026.** Desde el 1 de julio, DiMango opera 100% sobre DiMangoToGo.
+
+**Motivo:** Toteat cobraba por ventas. Ricardo prefiere pagarse a sí mismo (Aurexgroup le factura $1M/mes por DiMangoToGo) y controlar el sistema.
+
+**Consecuencia negativa:** desapareció la red de respaldo. Ya no hay sistema alternativo si DiMangoToGo falla.</div>
+   <div class=notas>notas usadas: D-008, S-006, H-002, D-004, S-001, L-002, P-001, L-004, S-005, S-004, P-002</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M04</span> <span class=cat>conexion</span> ¿Por qué no podemos saber si el local del Mall es rentable?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,281 tok · 1,132 ms</div>
+   <div class=r>**Conclusión:** porque no existe el costo de mercadería por local, solo la venta.
+
+---
+
+**El problema es el traspaso diario Playa → Mall (H-008).**
+
+Playa Chinchorro produce para ambos locales. Las compras entran por un solo punto (probablemente Playa), pero el traspaso al Mall no se registra valorizado. Entonces:
+
+- Venta por local: **sí existe** (H-015 — Mall $34M, Playa $100M en julio)
+- Costo de mercadería por local: **no existe**
+
+Sin costo, no hay margen. Y sin margen, el arriendo de $12,7M/mes no se puede juzgar — solo sabemos que es 37,4% de la venta del Mall, casi el doble del umbral de viabilidad (20%), pero no cuánto queda después de la comida.
+
+---
+
+**Lo que falta para resolverlo:**
+
+1. Registrar el despacho Playa → Mall valorizado (el campo `cantidad_entregada` de `ChecklistPedido` ya existe en DiMangoWorking, pero sin costo unitario asociado).
+2. O cargar el costo en `Product.cost` de DiMangoToGo y calcular el margen desde la venta, sin pasar por bodega.
+
+La segunda es más rápida. El campo existe y está en cero (H-016).</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 8,124 tok · 2,027 ms
+   </div>
+   <div class=r>El traspaso entre locales no se registra valorizado.
+
+Playa produce todo —helados, pizzas, pastas, repostería— y lo manda al Mall todos los días. Pero ese movimiento no tiene costo asignado: sale de Playa sin descargarse y entra al Mall sin cargarse. El Mall vende y cobra, pero el gasto de producir lo que vendió quedó en Playa.
+
+**Consecuencia:** solo existe la venta por local, no el costo por local. Y sin costo no hay margen.
+
+El 37,4% de arriendo sobre venta neta que calculamos es real y ya es alarmante. Pero el &quot;11,8% que queda&quot; después de arriendo, mercadería y mano de obra es aritmética con un supuesto falso: que el 28,7% de mercadería se reparte parejo entre los dos locales. No es así —el Mall no compra insumos, recibe producto terminado— y no tenemos cómo saber cuánto vale lo que recibe.
+
+**Qué necesitamos para saberlo:**
+
+1. Que cada despacho de Playa al Mall se registre con el costo de lo que sale.
+2. O que exista un costo estándar por producto y se aplique a la venta del Mall.
+
+El campo de costo por producto existe en DiMangoToGo. Está vacío.
+
+**Yo haría esto:** antes de decidir si el Mall se cierra, se renegocia o se aguanta, hay que llenar ese campo aunque sea con estimados gruesos. Sin eso, cualquier decisión es a ciegas.</div>
+   <div class=notas>notas usadas: H-015, H-008, M-003, M-006, N-005, P-003, H-011, H-014, H-003, S-001, P-006, D-003, P-007, N-004</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M05</span> <span class=cat>conexion</span> ¿Qué relación hay entre la migración a DiMangoToGo y el aumento del costo de medios de pago?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,295 tok · 1,061 ms</div>
+   <div class=r>**Conclusión:** DiMangoToGo probablemente enruta más volumen hacia Mercado Pago, que cobra más que Transbank. La migración subió el costo de medios de pago en ~1 punto porcentual.
+
+---
+
+**Los números (H-002):**
+
+| Período | Costo medios de pago | % de venta |
+|---|---|---|
+| Mayo-Junio (con Toteat) | ~1,55% promedio | — |
+| **Julio (solo DiMangoToGo)** | $4.236.597 | **2,59%** |
+
+- Mercado Pago pasó de $1,73M → $2,40M (+39%) mientras la venta **caía** 7%.
+- Delta anualizado: **~$20,5M/año** de costo adicional.
+
+---
+
+**Por qué ocurre (hipótesis, no confirmado):**
+
+DiMangoToGo ofrece Mercado Pago como opción destacada o predeterminada en ciertos flujos (tótem, autoservicio, QR). Los clientes lo eligen más, y MP cobra más que Transbank.
+
+---
+
+**Caveat:** es un solo mes post-migración. Junio está distorsionado porque Transbank no facturó ese mes. Hay que confirmar con agosto.
+
+**Acción pendiente:** P-002 — comparar tasas efectivas de MP vs Transbank y evaluar si conviene reordenar la prioridad de medios de pago en la app.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,911 tok · 1,133 ms
+   </div>
+   <div class=r>La migración a DiMangoToGo (D-008) causó el aumento del costo de medios de pago (H-002).
+
+**El mecanismo:** DiMangoToGo enruta más volumen hacia Mercado Pago, que cobra más que Transbank. En julio, Mercado Pago subió 39% ($1,73M → $2,40M) mientras la venta caía 7%.
+
+**El costo:** de 1,55% pre-migración a 2,59% post-migración. Diferencia de 1,04 puntos = ~$20,5M/año.
+
+**Yo haría:** resolver P-002 (comparar comisiones efectivas). Si se confirma la hipótesis, se corrige cambiando el orden de preferencia de medios de pago en la app. Es una tarde de trabajo por $20M/año.
+
+**Caveat:** julio es un solo mes y junio está distorsionado porque Transbank no facturó. Pero el tamaño del efecto justifica actuar sin esperar más datos.</div>
+   <div class=notas>notas usadas: H-002, D-008, P-002, S-004, P-004, H-001, H-011, H-016, S-005, D-004, S-001, L-002, S-006, P-001, L-004</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M06</span> <span class=cat>conexion</span> Si cerráramos el Mall, ¿qué pasaría con el costo laboral de Playa?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,288 tok · 1,868 ms</div>
+   <div class=r>**Conclusión:** El costo laboral de Playa **no bajaría proporcionalmente** — probablemente subiría como porcentaje de la venta.
+
+---
+
+**Por qué:**
+
+1. **Playa produce para los dos locales** (H-008). Las 30 personas de Playa incluyen producción, heladería y cocina que abastecen al Mall. Si el Mall cierra, la venta del Mall desaparece ($34M/mes), pero la producción que la soportaba **no se elimina automáticamente** — hay que despedir o reubicar.
+
+2. **El Mall tiene 11 personas propias** ($6,6M líquido). Esas sí desaparecen con el local. Los 3 &quot;ambos&quot; ($2,26M) probablemente se quedan en Playa.
+
+3. **Aritmética cruda:**
+   - Hoy: $30,27M laboral / $134M venta = **22,6%**
+   - Si cierras Mall y despides sus 11: $23,67M / $100M (solo Playa) = **23,7%**
+   - Si además absorbes los 3 &quot;ambos&quot;: $23,67M / $100M = igual
+
+   El porcentaje **sube**, no baja, porque el Mall tenía laboral más barato que su proporción de venta (21,8% del costo vs 25,35% de la venta).
+
+4. **El problema real:** parte del laboral de Playa está ahí porque produce para el Mall. Si el volumen cae 25%, ¿cuántos puestos de producción sobran? **No lo sé** — no hay dato de horas/hombre por producto ni de capacidad ociosa.
+
+---
+
+**Lo que necesitas saber antes de decidir:**
+
+- ¿Cuántas personas de producción en Playa trabajan exclusivamente para el volumen del Mall?
+- ¿Qué liquidaciones o indemnizaciones corresponden a los 11 del Mall?
+- ¿El contrato del Mall tiene cláusula de salida anticipada y cuánto cuesta?</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,921 tok · 1,568 ms
+   </div>
+   <div class=r>**Conclusión:** No bajaría a $21,4M — probablemente quede en $24-26M, porque Playa absorbe gente del Mall y ya paga la producción de ambos.
+
+**Yo haría:** modelar el escenario antes de decidir nada.
+
+---
+
+**Por qué:**
+
+1. **Playa ya carga la producción.** El Mall no produce — todo sale de Playa (H-008). Los $6,6M del Mall son mayoritariamente garzones y caja, no cocina ni heladería.
+
+2. **Absorción parcial inevitable.** Si cierras el Mall y mantienes la venta de Playa, necesitas reforzar atención al cliente en Playa. No es 1:1, pero tampoco es cero.
+
+3. **Los 3 compartidos ($2,26M) no desaparecen.** Administración, supervisión — eso sigue.
+
+**Aritmética gruesa:**
+
+| Concepto | Hoy | Sin Mall |
+|---|---|---|
+| Mall directo | $6,6M | $0 |
+| Absorción estimada (40-50%) | — | +$2,6-3,3M |
+| Compartidos | $2,26M | $2,26M |
+| Playa directo | $21,4M | $21,4M |
+| **Total** | $30,3M | **$24-27M** |
+
+**Ahorro real: $3-6M/mes, no $8,9M.**
+
+---
+
+**Lo que no sé:** cuántos del Mall son indispensables si Playa sube su volumen, y cuánto volumen del Mall migra a Playa vs se pierde. Eso define si el ahorro es $3M o $6M.</div>
+   <div class=notas>notas usadas: H-011, M-002, P-004, H-001, H-002, H-016, P-006, H-003, H-008, M-004, S-009, S-002, H-012, L-003</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M07</span> <span class=cat>conexion</span> ¿Qué tendría que pasar para que Aurexgroup deje de estar parqueado?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,286 tok · 1,081 ms</div>
+   <div class=r>**Conclusión:** Aurexgroup se revisa el **17 de noviembre de 2026** (D-001). Para que deje de estar parqueado ese día, necesita cumplir dos condiciones:
+
+1. **DiMango no puede seguir siendo el cuello de botella.** El objetivo de 90 días es que el negocio opere 7 días sin que Ricardo resuelva decisiones operacionales. Si para noviembre Ricardo sigue apagando incendios, no tiene horas para Aurexgroup —y aunque las tuviera, estaría creando otra dependencia sobre sí mismo.
+
+2. **Un cliente externo que no sea Ricardo.** El criterio de D-002 es claro: Aurexgroup solo tiene producto validado cuando alguien externo lo instala, opera y mantiene **sin intervención de Ricardo**. Hoy tiene cero facturación externa confirmada (H-004). Una transferencia interna de $1M/mes no cuenta.
+
+---
+
+**Lo que yo haría:** no esperar pasivamente al 17 de noviembre. Si en octubre DiMango está estable y aparece una oportunidad concreta de piloto externo con bajo costo de atención, reevaluar antes. Pero sin esas dos condiciones, desparquear Aurexgroup es repetir el error que lo parqueó.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 5,585 tok · 1,478 ms
+   </div>
+   <div class=r>**Dos cosas, en este orden:**
+
+1. **Que llegue el 17 de noviembre de 2026** — es la fecha de revisión obligatoria que fijaste. Antes de eso, no se toca.
+
+2. **Que DiMango cumpla el objetivo de los 90 días** — que funcione 30 días sin que seas necesario para decisiones operacionales normales. Si llegas a noviembre y sigues siendo el cuello de botella, Aurexgroup sigue parqueado porque el problema que justificó parquearlo no se resolvió.
+
+---
+
+**Yo agregaría un tercer filtro que ya está en D-002 pero no tiene fecha:**
+
+Antes de reactivar Aurexgroup como negocio comercializable, necesitas que al menos una solución pase el test completo: instalada en un negocio externo, operada sin tu intervención, medida. Hoy tienes cero validaciones externas (H-004). Mientras ese número sea cero, Aurexgroup es un proyecto interno de DiMango, no una empresa.</div>
+   <div class=notas>notas usadas: D-001, D-002, H-004, D-008, L-002, L-003, P-006</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M08</span> <span class=cat>contradiccion</span> El residual del estado de resultados da 26% de margen. ¿Es creíble? ¿Por qué?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,292 tok · 2,207 ms</div>
+   <div class=r>**No es creíble.** Un 26% de margen neto en gastronomía full-service es implausible — el rango típico de la industria es 3-8%.
+
+**Por qué no cuadra:**
+
+Los ~$36M/mes sin explicar (H-012) representan ~$430M al año. Con el costo laboral ya capturado y el prime cost sano (57,7%), ese residual debería estar mucho más cerca de cero, no de 26 puntos.
+
+**Qué falta, en orden de probabilidad:**
+
+1. **Arriendo de Playa Chinchorro** — H-003 solo capturó Plaza Oeste ($12,7M/mes). Si Playa tiene arriendo (o costo de oportunidad si es propio), es el candidato #1.
+2. **Honorarios y boletas de terceros** — no pasan por el RCV de compras.
+3. **Retiros del dueño** — si Ricardo saca dinero, no aparece como costo.
+4. **PPM/renta, contribuciones, gastos comunes** — pendientes de verificar.
+5. **Pagos en efectivo** — la planilla tiene notas &quot;cash&quot;.
+
+**Siguiente paso concreto:** P-006 — confirmar si existe arriendo de Playa Chinchorro y por cuánto. Si es local propio, la explicación hay que buscarla en el resto de la lista.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,955 tok · 1,673 ms
+   </div>
+   <div class=r>**Conclusión:** No lo sé con certeza, y tú tampoco. Hay un conflicto abierto entre tu afirmación y mi estimación, y ninguno de los dos tiene la evidencia para cerrarlo.
+
+**Qué dice cada lado:**
+
+| Fuente | Posición | Autoridad |
+|--------|----------|-----------|
+| Tú (H-017) | &quot;Sí es creíble, es un poco lo que estamos manejando de ganancia&quot; | 4 |
+| Mi cálculo (H-012) | Probablemente falta costo por capturar; 26% es alto | 5 |
+
+Por la regla de prioridad, tu palabra gana sobre mi estimación. Pero la regla de conflictos me obliga a no resolverlo en silencio.
+
+**Por qué 26% sería anómalamente alto:**
+El benchmark de gastronomía es 3-8% de margen neto. Pero ese benchmark asume arriendo en ambos locales. Playa es tuya y no paga arriendo (P-006). Eso sube el margen legítimo quizás a 15-18%, no a 26%.
+
+**Por qué podrías tener razón:**
+Si efectivamente no hay más costos escondidos y la caja creció ~$35M en julio, entonces el 26% es real y DiMango es estructuralmente más rentable que el promedio.
+
+**Cómo se cierra:**
+Saldo bancario al 1 de julio vs. saldo al 31 de julio. Si la caja creció ~$35M, es utilidad. Si no creció, hay costo que no estamos viendo. Es autoridad 1 — mata cualquier estimación o afirmación.
+
+**Yo haría:** pedir a Carla los saldos de las cuentas operativas al 1 y 31 de julio. Diez minutos de su tiempo cierran esto.</div>
+   <div class=notas>notas usadas: H-012, H-006, H-017, P-009, M-005, H-015, D-005, D-006, H-011, P-006, H-003, H-001</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M09</span> <span class=cat>contradiccion</span> ¿En qué se equivocó Maximus sobre el riesgo del DTE y por qué?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,288 tok · 1,120 ms</div>
+   <div class=r>**Conclusión:** Sobrestimé el riesgo porque asumí una arquitectura que no verifiqué.
+
+**El error:**
+Clasifiqué P-001 como &quot;riesgo #1 del negocio a $5,5M/día&quot; asumiendo que DiMangoToGo emitía boletas por sí misma y que no había alternativa. Repetí la advertencia cinco veces sin hacer las cuatro preguntas que yo mismo había planteado.
+
+**Lo que no sabía y debí verificar antes de alarmar:**
+1. DiMangoToGo **no emite** — emite SimpleFactura, un proveedor certificado externo.
+2. Existe contingencia manual desde la web del proveedor.
+3. Los encargados de ambos locales saben usarla.
+4. Cero fallas de emisión en julio.
+
+**Por qué me equivoqué:**
+Construí un número de impacto ($5,5M/día) sobre un supuesto técnico no validado. Es exactamente lo que `SOUL.md` prohíbe: &quot;hipótesis etiquetada como hipótesis, estimación etiquetada como estimación, **nunca como dato**&quot;. Lo hice de todos modos.
+
+**La lección (ya en L-004 implícita, ahora explícita):**
+Un riesgo estimado sin verificar la arquitectura real vale tan poco como un número inventado. Alarmar cinco veces no sustituye preguntar una vez bien.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 6,807 tok · 1,443 ms
+   </div>
+   <div class=r>## Respuesta
+
+Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día** y lo repitió cinco veces, cuando en realidad el riesgo era mínimo.
+
+### El error
+
+Asumí que DiMangoToGo emitía las boletas por sí misma y que no había alternativa. Construí un número de impacto (autoridad 5 = estimación propia) y lo presenté con el peso de un hecho verificado.
+
+### La realidad
+
+- DiMangoToGo **no emite**: emite **SimpleFactura**, proveedor certificado.
+- Existe contingencia manual desde la web del proveedor.
+- Los encargados de ambos locales saben usarla.
+- Folios al día, cero fallas en julio.
+
+### Por qué pasó
+
+No verifiqué la arquitectura antes de cuantificar el riesgo. Estimé sobre un supuesto (que la app era el emisor) sin confirmarlo.
+
+### Regla derivada (L-005)
+
+&gt; Un riesgo estimado sin verificar la arquitectura vale tan poco como un número inventado.
+
+Todo riesgo cuantificado debe declarar de qué arquitectura depende y verificarla antes de priorizar sobre ella.</div>
+   <div class=notas>notas usadas: D-010, L-005, D-009, P-008, P-001, L-004, P-009, S-007, D-007, S-008, L-002</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M10</span> <span class=cat>contradiccion</span> ¿El costo de mercadería de 28,7% es el costo real de lo que se consume?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,288 tok · 1,069 ms</div>
+   <div class=r>**No. Es costo de compra, no de consumo.**
+
+El 28,7% (H-001) sale del RCV del SII — lo que DiMango *compró*, no lo que se usó. La diferencia es la merma (robo, desperdicio, vencimiento, consumo interno no registrado).
+
+**Por qué importa:** sin inventario (P-005 confirma que no existe sistema), no hay forma de medir cuánto de lo comprado se vendió efectivamente. El margen bruto real puede ser peor que el calculado, y nadie lo sabe.
+
+**Lo que falta para tener el costo real:** un inventario que compare stock inicial + compras − stock final = consumo. Mientras no exista, el 28,7% es un piso optimista, no un dato de gestión.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 9,262 tok · 1,068 ms
+   </div>
+   <div class=r>**No. Es costo de compra, no de consumo.**
+
+El 28,7% viene del RCV del SII: lo que DiMango pagó en facturas de alimentos y bebidas. Pero sin inventario (P-005), no existe registro de cuánto se consumió versus cuánto se perdió.
+
+**Lo que falta medir:**
+- Merma por vencimiento
+- Merma por preparación defectuosa
+- Pérdida no registrada (el eufemismo de robo)
+- Diferencia entre lo despachado a Mall y lo que llegó (H-008)
+
+El costo real de consumo puede ser peor que 28,7%. No sabemos cuánto.
+
+---
+
+**Alternativa más barata que instalar inventario:** cargar `Product.cost` en DiMangoToGo (H-016). No mide merma, pero da margen bruto por producto sin infraestructura nueva. Responde &quot;qué productos ganan plata&quot; antes de responder &quot;cuánto se pierde&quot;.</div>
+   <div class=notas>notas usadas: H-001, H-002, H-011, H-016, M-002, P-004, H-003, L-003, P-005, M-004, M-001, H-006, L-001, D-008, S-005, S-004, P-002, H-008, S-009, S-002, H-012</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M11</span> <span class=cat>fuente</span> ¿Cuánto vendimos hoy?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,273 tok · 1,274 ms</div>
+   <div class=r>No tengo el dato de la venta de hoy.
+
+**Dónde consultarlo:** DiMangoToGo → `/AdminVentas`, filtrado por fecha y local.
+
+Lo que sí tengo en memoria es el promedio diario de julio: **~$5,47M/día** entre ambos locales (aritmética sobre los $163,5M del mes). Si necesitas comparar contra eso, el número está ahí.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 8,897 tok · 1,046 ms
+   </div>
+   <div class=r>No tengo acceso a la venta de hoy.
+
+**Dónde está el dato:** DiMangoToGo `/AdminVentas` — venta en tiempo real por local y medio de pago.
+
+¿Quieres que te arme el paso a paso para sacarlo, o prefieres dictarme el número y lo registro?</div>
+   <div class=notas>notas usadas: H-014, H-015, L-003, N-004, P-007, H-013, S-007, H-008, P-003, H-003, S-001, P-006, M-003, M-006, D-003, M-002, D-006, L-002</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M12</span> <span class=cat>fuente</span> ¿Cuál es el dato más confiable que tenemos del costo laboral y cuál sería mejor?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,289 tok · 1,050 ms</div>
+   <div class=r>**Conclusión:** El dato más confiable es **$30.271.531 líquido en julio, 45 personas** (H-011). Es un hecho verificado desde la planilla `suelgo_working.xlsx`.
+
+---
+
+**Lo que tenemos (bueno):**
+- Pago líquido real, cuadrado internamente (QUINCENA + extras + fin de mes = TOTAL2 en el 100% de las filas).
+- Desglose por local: Playa $21,4M (30 personas) / Mall $6,6M (11) / Ambos $2,3M (3).
+- Desglose por puesto: garzones $7,6M, cocina $6,8M, heladeros $4,7M, etc.
+- Serie: junio $25,9M → julio $30,3M → agosto $28,9M.
+
+**Lo que falta (el salto a &quot;mejor&quot;):**
+1. **Costo cargado real** — hoy es estimación ($36-42M) aplicando factor 1,20-1,38. El número exacto sale de Previred o de las liquidaciones de sueldo, no de la planilla de pagos.
+2. **Costo por local que sirva** — Playa concentra la producción para ambos locales (H-008), así que asignar 70% del costo a Playa no refleja realidad económica. Necesita repartición del costo de producción.
+
+**Siguiente paso concreto:** pedir las liquidaciones de julio o el resumen de Previred para cerrar el factor líquido→cargado y eliminar la banda de incertidumbre de $6M/mes.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,650 tok · 1,600 ms
+   </div>
+   <div class=r>**El más confiable que tenemos:** $30,27M líquido en julio, 45 personas (H-011). Autoridad 3 — viene de la planilla interna, verificada fila por fila.
+
+**Mejor sería:** el costo cargado real desde Previred (autoridad 1). Ricardo informó ~$37M con imposiciones, pero eso es autoridad 4 (su palabra). La diferencia entre $30M líquido y $37M cargado son ~$7M/mes que nadie ha cruzado contra un documento externo.
+
+**Qué hacer:** pedir a Carla (N-002) o sacar directo de Previred el total pagado en julio. Un número, cinco minutos, cierra el 18,5% de costo laboral sobre venta con precisión real.</div>
+   <div class=notas>notas usadas: M-002, P-004, H-011, H-001, H-002, H-016, H-003, L-003, M-004, H-008, S-009, S-002, H-012</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M13</span> <span class=cat>fuente</span> ¿La venta de julio fue $163.552.687? ¿Ese número cambia con el tiempo?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,289 tok · 1,237 ms</div>
+   <div class=r>**Conclusión:** Sí, $163.552.687 es la facturación de julio según el dato original en `BRAIN.md`. Pero hay una discrepancia con un dato posterior que necesitas resolver.
+
+---
+
+**El conflicto:**
+
+| Fuente | Venta julio | Origen |
+|---|---|---|
+| `BRAIN.md` §1 | $163.552.687 | Dato original (HECHO) |
+| `MEMORY.md` H-015 | $134.015.045 neta / $159.477.904 c/IVA | DiMangoToGo `/AdminVentas` (HECHO, 20-ago) |
+
+La diferencia es de **$4M–$29M** dependiendo de si comparas bruta, con IVA o neta.
+
+---
+
+**¿Cambia con el tiempo?**
+
+No debería. Es venta cerrada de un mes pasado. Si cambia, es por:
+1. Ajuste de notas de crédito o anulaciones registradas después del cierre.
+2. Diferencia de criterio entre fuentes (con/sin IVA, con/sin propinas).
+3. Error en una de las dos fuentes.
+
+---
+
+**Lo que hay que hacer:**
+
+Confirmar cuál es el dato correcto y bajo qué definición (bruta, neta, con propinas). El número de `BRAIN.md` probablemente incluye IVA; el de H-015 lo separa. Una vez aclarado, corrijo `BRAIN.md` y los cálculos que dependen de él.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 9,820 tok · 1,962 ms
+   </div>
+   <div class=r>**No, la venta de julio no fue $163.552.687.**
+
+Según H-015 (autoridad 2, fuente DiMangoToGo /AdminVentas):
+
+| Concepto | Monto |
+|---|---|
+| Venta bruta | $159.919.975 |
+| Venta con IVA | $159.477.904 |
+| **Venta neta** | **$134.015.045** |
+
+Tu número ($163,5M) no coincide con ninguno de estos. Puede ser:
+- Una suma que incluye propinas ($10,7M) — pero aun así no cuadra
+- Un mes distinto
+- Un filtro diferente en /AdminVentas
+
+**¿Cambia con el tiempo?** No debería. La venta de julio 2026 es un dato histórico — lo que se facturó ese mes está cerrado. Si el número cambia en el sistema, hay un problema de integridad de datos que habría que investigar.
+
+**¿De dónde sacaste los $163,5M?**</div>
+   <div class=notas>notas usadas: H-015, P-003, H-011, L-005, M-002, M-003, P-007, H-001, H-008, H-003, S-001, P-006, M-006, D-003, L-001, M-004, S-009, P-004, S-002, H-012</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M14</span> <span class=cat>persona</span> ¿Quién es Cristian Vidal, qué hace y qué pendiente se relaciona con él?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,289 tok · 1,152 ms</div>
+   <div class=r>**Cristian Vidal es el contador externo de DiMango.** Trabaja sobre el RCV del SII — contabilidad tributaria, no de gestión.
+
+**Pendientes relacionados:**
+1. Confirmar si Ricardo tiene acceso de consulta al trabajo de Cristian.
+2. Saber si la contabilidad va separada por local o consolidada — eso define si el margen por local sale de contabilidad o hay que construirlo desde DiMangoToGo.
+
+Fuente: `MEMORY.md`, P-005.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 6,652 tok · 2,342 ms
+   </div>
+   <div class=r>Cristian Vidal es programador externo. Creó el software de remuneraciones que DiMango usa actualmente (S-009).
+
+**Pendiente relacionado:** Ricardo planteó reemplazar ese software con desarrollo propio. Está clasificado como **idea, no prioridad** — sería otro sistema que solo él mantiene, para reemplazar algo que funciona, mientras tiene cuatro frentes abiertos. Encaja directo en L-002 (la automatización profundiza el cuello de botella).
+
+No hay tareas operativas abiertas asignadas a Cristian en la memoria.</div>
+   <div class=notas>notas usadas: N-003, H-014, R-001, N-002, S-009, D-005, D-007, H-003, H-013, S-007, R-002, E-001</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>M15</span> <span class=cat>no_sabe</span> ¿Cuál es el margen bruto real por producto?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,277 tok · 1,105 ms</div>
+   <div class=r>**No existe.**
+
+El campo `Product.cost` está construido en DiMangoToGo pero **nadie lo llenó** (H-016). Cada producto muestra `COSTO NETO: $0`.
+
+---
+
+**Qué hacer:**
+
+Cargar el costo unitario de los 20-30 productos de mayor venta. Con eso tienes margen bruto por producto y por categoría sin inventario ni contador. Máximo valor por mínimo esfuerzo.
+
+**Dónde está:** `/AdminVentas` en DiMangoToGo, o directo en el esquema `Product.cost`.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,061 tok · 1,447 ms
+   </div>
+   <div class=r>**No existe.** El campo `Product.cost` está construido en DiMangoToGo y está vacío (H-016).
+
+**Qué hacer:** Cargar el costo neto unitario de los productos. Con eso el sistema calcula margen bruto por producto y por categoría solo, sin inventario, sin contador.
+
+**Por qué esto primero:** Es el dato de mayor valor por mínimo esfuerzo de todo lo identificado. Responde la pregunta que nunca se pudo plantear: qué productos ganan plata y cuáles no.</div>
+   <div class=notas>notas usadas: H-017, H-016, M-001, M-005, P-005, H-008, D-002, H-012, S-001, P-007, H-001</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R01</span> <span class=cat>ricardo</span> ¿Cuántos km de trote o bicicleta debo hacer hoy?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,283 tok · 1,254 ms</div>
+   <div class=r>No tengo esa información.
+
+Mi memoria cubre DiMango, Aurexgroup y tu operación de negocio. No hay nada sobre rutinas de ejercicio, metas deportivas ni planes de entrenamiento.
+
+Si quieres que lo gestione, necesito que me des el contexto: qué estás entrenando, para qué, y con qué frecuencia.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 4,727 tok · 1,371 ms
+   </div>
+   <div class=r>No tengo esa información.
+
+Mi memoria cubre DiMango, Aurexgroup y la operación del negocio. No hay datos sobre tu rutina de ejercicio, metas deportivas ni plan de entrenamiento.
+
+Si quieres que lo gestione, necesito que me pases el plan o las reglas que usas.</div>
+   <div class=notas>notas usadas: H-014, H-013, S-007</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R02</span> <span class=cat>ricardo</span> ¿Qué pagos de proveedores tengo esta semana?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,279 tok · 1,103 ms</div>
+   <div class=r>No tengo esa información.
+
+Mi memoria contiene estructura financiera (costos agregados, márgenes, arriendo) pero **no el calendario de pagos a proveedores ni las facturas pendientes por vencer.**
+
+**Dónde está el dato:**
+1. **Cristian Vidal** (tu contador) — tiene el RCV del SII con todas las facturas recibidas y sus fechas.
+2. **DiMangoWorking** — si registras pagos ahí, debería tener un módulo de cuentas por pagar.
+3. **Flujo de caja o planilla de tesorería** — si existe, no la he visto.
+
+¿Quieres que agregue &quot;visibilidad de pagos semanales&quot; como pendiente para el tablero de gestión, o tienes una fuente que puedo revisar?</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 6,142 tok · 1,571 ms
+   </div>
+   <div class=r>No tengo esa información.
+
+**Dónde debería estar:** DiMangoWorking tiene una pantalla `/GestionFinanciera` (pagos a proveedores) y `/PedidoProveedor` (stock de proveedores), pero no tengo acceso a los datos cargados ahí ni a un calendario de vencimientos.
+
+**Qué necesito para responder:**
+1. Lista de facturas pendientes con fecha de vencimiento, o
+2. Acceso de lectura a DiMangoWorking, o
+3. Que me pases el listado manualmente.
+
+¿Tienes eso a mano o lo sacamos del sistema?</div>
+   <div class=notas>notas usadas: H-002, P-002, S-004, S-002, S-003, S-005, D-006, D-004, D-008</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R03</span> <span class=cat>ricardo</span> ¿Cómo está el stock de PF y Biofood?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,280 tok · 1,070 ms</div>
+   <div class=r>**No tengo ese dato.**
+
+Mi memoria no contiene información de stock de ningún proveedor, incluidos PF y Biofood. El inventario de DiMango **no existe como sistema** (ver P-005 en MEMORY.md): no hay control centralizado de existencias, solo registro de compras.
+
+**Dónde consultarlo:**
+1. Bodega física de Playa Chinchorro (es el centro de producción).
+2. Si hay registro parcial, estaría en DiMangoWorking — pero no tengo acceso a datos en tiempo real de ese sistema.
+
+¿Quieres que agregue el seguimiento de stock crítico como pendiente para el tablero de gestión?</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 5,461 tok · 1,690 ms
+   </div>
+   <div class=r>No tengo ese dato.
+
+**Dónde debería estar:** DiMangoWorking (`/Inventario` o `MovimientoStock`) o el sistema de bodega que uses para esos proveedores.
+
+**Qué necesito:** un reporte de stock actual o acceso de lectura a esa pantalla.</div>
+   <div class=notas>notas usadas: S-002, P-007, L-002, H-011</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R04</span> <span class=cat>ricardo</span> ¿Qué pasó anoche en el Mall y quién estaba al tanto?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,282 tok · 1,087 ms</div>
+   <div class=r>No tengo información sobre lo que pasó anoche en el Mall.
+
+**En mi memoria no hay ningún registro de incidentes, eventos ni comunicaciones del Mall posteriores al 20 de agosto de 2026.** La última referencia al Mall es el análisis financiero de ese día (H-015), que es de números, no de operación.
+
+**Dónde consultar:**
+1. WhatsApp del encargado del Mall (si existe ese canal)
+2. DiMangoWorking — si hay bitácora de turno o registro de incidentes
+3. Directamente con quien cerró anoche
+
+¿Qué pasó? Si me lo cuentas, lo registro en la bitácora de escalamientos (E-001+) con la clasificación que corresponda.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 8,460 tok · 1,608 ms
+   </div>
+   <div class=r>No tengo información sobre qué pasó anoche en el Mall.
+
+Mi memoria contiene datos operacionales y financieros de DiMango, pero no registra incidentes nocturnos ni eventos recientes no documentados.
+
+**Para responder necesito que me cuentes qué ocurrió**, o que me indiques dónde está el registro (WhatsApp del equipo, correo, sistema de checklist, cámara).
+
+**Lo que sí sé sobre el Mall que podría ser relevante:**
+- Quienes reciben mercadería: Vivianda (L-V), Alejandra o Angélica (S-D), más el cocinero AM de turno (N-005)
+- Verónica despacha desde Playa (N-004)
+- El traspaso entre locales es el punto ciego operativo documentado (H-008)
+
+¿Qué pasó?</div>
+   <div class=notas>notas usadas: H-015, N-005, L-001, H-003, M-003, M-005, D-003, D-010, H-008, P-003, S-001, P-006, M-006, P-007, N-004, H-001</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R05</span> <span class=cat>ricardo</span> ¿Me consultaron antes de tomar esa decisión?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,276 tok · 1,116 ms</div>
+   <div class=r>No tengo contexto de qué decisión hablas.
+
+Necesito que especifiques: ¿cuál decisión? Dame el tema o la fecha, y reviso si en `MEMORY.md` aparece consultado, decidido unilateralmente, o ni siquiera registrado.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,015 tok · 1,378 ms
+   </div>
+   <div class=r>**Conclusión:** No me consultaron. La decisión de crear los repositorios `titicheo65/maximus` y `titicheo65/dimango-agent` la tomé yo directamente durante la sesión del 20 de agosto.
+
+**Lo que pasé por alto:** Debí haber consultado antes de actuar. Crear repositorios privados con código de producción y la memoria del sistema es una decisión de infraestructura, no una corrección menor. Aplica el nivel 3 de R-002 (consulta antes), no el nivel 2.
+
+**Qué hacer:**
+- Si quieres revertirlo, los repos se pueden eliminar y volvemos al estado anterior.
+- Si está bien pero el proceso estuvo mal, lo registro como lección y ajusto mi protocolo.
+
+¿Cómo procedo?</div>
+   <div class=notas>notas usadas: D-004, D-005, L-004, M-002, T-001, D-008, R-002, E-001, R-001, N-001, H-013, L-002</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R06</span> <span class=cat>ricardo</span> ¿Cuánto vendió el Mall en julio y cuál es su ticket promedio?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,283 tok · 1,894 ms</div>
+   <div class=r>**Venta del Mall en julio: $33.977.496 netos** (H-015, DiMangoToGo confirmado).
+
+**Ticket promedio del Mall: DESCONOCIDO.**
+
+El dato de transacciones por local no está en la memoria. Sin número de transacciones, no hay ticket.
+
+**Dónde consultarlo:** DiMangoToGo `/AdminVentas`, filtrar julio por local Mall, buscar cantidad de boletas o transacciones. Es una consulta de 2 minutos.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 8,780 tok · 2,015 ms
+   </div>
+   <div class=r>**Mall julio 2026: $33.977.496 netos · ticket promedio ~$19.491.**
+
+El ticket es 31% más alto que Playa (~$14.845). El problema del Mall no es el ticket —es el volumen contra un arriendo del 37,4% de su venta, casi el doble del umbral viable (20%).</div>
+   <div class=notas>notas usadas: H-015, M-006, H-011, N-005, H-003, M-003, P-003, P-004, H-008, S-001, P-006, D-003, M-004, S-009, M-002, S-002, H-012</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R07</span> <span class=cat>ricardo</span> ¿El Mall conviene o lo cierro?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,274 tok · 1,160 ms</div>
+   <div class=r>## Conclusión
+
+**El Mall no se sostiene con los números actuales.** El arriendo se come el 37,4% de su venta neta — casi el doble del umbral de viabilidad de la industria (20%).
+
+---
+
+## Los números (H-015)
+
+| Concepto | Mall |
+|---|---|
+| Venta neta julio | $33,98M |
+| Arriendo | $12,72M (37,4%) |
+| Mercadería (28,7%) | $9,75M |
+| Laboral directo | $6,60M (19,4%) |
+| Medios de pago | $0,88M |
+| **Queda** | **~$4M (11,8%)** |
+
+Y ese 11,8% todavía no descuenta: la producción de Playa que trabaja para el Mall (H-008), los 3 empleados &quot;ambos&quot;, servicios, gastos comunes ni administración. **Probablemente está en cero o bajo el agua.**
+
+---
+
+## Para que el Mall sea viable
+
+Dos caminos, ambos duros:
+
+1. **Vender $63,6M netos** → crecer 87%, o
+2. **Renegociar arriendo a ~$6,8M** → bajar 47%
+
+---
+
+## Lo que falta para decidir
+
+1. **Leer el contrato de Plaza Oeste:** fecha de vencimiento, multa por salida anticipada, componente variable, posibilidad de renegociar.
+2. **Confirmar el costo real de mercadería del Mall** — hoy es supuesto (28,7% igual que Playa), pero el Mall no produce nada; el traspaso no está valorizado (H-008).
+
+---
+
+## Mi posición
+
+**No cierres todavía, pero abre la renegociación.** El contrato manda: si la salida cuesta más que 6-12 meses de pérdida, conviene aguantar y negociar. Si el contrato está cerca de vencer o tiene salida barata, es candidato a cerrar.
+
+¿Tienes el contrato a mano?</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,805 tok · 1,100 ms
+   </div>
+   <div class=r>## Conclusión
+
+**No lo cierres todavía, pero tampoco lo dejes como está.** El Mall pierde plata o está en el borde — no lo sabemos con certeza porque falta el costo laboral asignado y el traspaso valorizado. Lo que sí sabemos: el arriendo es 37,4% de su venta cuando el umbral es 20%. Eso no se arregla vendiendo más; se arregla renegociando o saliendo.
+
+---
+
+## Qué haría yo
+
+**Antes de decidir, necesitas tres cosas que no tienes:**
+
+1. **El contrato del Mall.** Vencimiento, multa por salida anticipada, cláusula de reajuste, componente variable. Sin esto no sabes cuánto cuesta cerrar ni cuánto margen hay para negociar.
+
+2. **El costo laboral real del Mall.** Hoy imputas 19,4% con los 10 empleados &quot;Mall&quot;, pero ignoras la mano de obra de Playa que produce todo lo que el Mall vende. El Mall no tiene cocina propia — su costo real es mayor.
+
+3. **El traspaso valorizado.** Sin saber cuánto cuesta lo que sale de Playa hacia el Mall, el margen del Mall es ficción.
+
+---
+
+## Por qué no cerrarlo hoy
+
+- **Playa no puede absorber esa venta.** Los $34M mensuales del Mall no se trasladan automáticamente a Chinchorro. Parte se pierde, parte nunca existió fuera del contexto &quot;paseo al mall&quot;.
+- **Costo de salida desconocido.** Si el contrato tiene 18 meses de multa, cerrar hoy puede costar más que aguantar un año malo.
+- **Renegociación no intentada.** El mall tiene locales vacíos. Un arriendo de $12,7M sobre $34M de venta es un problema del arrendador también: si te vas, ellos pierden el 100%.
+
+---
+
+## Por qué no dejarlo como está
+
+- **37,4% de arriendo es inviable.** Para llegar al 20% necesitas vender $63,6M (+87%) o bajar el arriendo a $6,8M (-47%). Ninguna de las dos pasa sola.
+- **Playa está subsidiando al Mall.** Cada peso que ganas en Chinchorro paga las pérdidas del otro lado. Eso esconde el problema y te impide invertir donde sí rinde.
+
+---
+
+## Siguiente paso concreto
+
+**Pídele a Carla (N-002) el contrato de Plaza Oeste y extrae:** fecha de vencimiento, monto de la multa por salida anticipada, fórmula de reajuste y si hay componente variable sobre ventas.
+
+Con eso en la</div>
+   <div class=notas>notas usadas: H-015, N-005, H-003, M-003, M-005, D-003, H-006, H-008, P-003, S-001, P-006, M-006, P-007, N-004</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R08</span> <span class=cat>ricardo</span> ¿Quién hace la reposición del Mall y quién la recibe?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,281 tok · 602,126 ms</div>
+   <div class=r>**No está en mi memoria.**
+
+Los archivos documentan el **flujo** (H-008: Playa despacha → Mall recibe, diario) y el **modelo de datos** (H-010: `ChecklistPedido` tiene campos `cantidad_solicitada` y `cantidad_entregada`), pero **no registran los nombres de las personas responsables** de despachar en Playa ni de recibir en el Mall.
+
+**Dónde consultar:** directamente con el encargado de cada local, o revisar si DiMangoWorking tiene asignación de roles por tarea.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 8,289 tok · 39,282 ms
+   <span class=w>red lenta</span></div>
+   <div class=r>**Despacha:** Verónica (N-004), desde Playa Chinchorro, todos los días entre 10:00 y 11:45.
+
+**Reciben en el Mall:**
+- Lunes a viernes: Vivianda
+- Sábado y domingo: Alejandra o Angélica
+- Siempre presente: el cocinero a cargo del turno AM
+
+**El problema:** Verónica pide *y* despacha — no hay control cruzado. Cuatro personas distintas reciben según el día, lo que diluye la responsabilidad sobre faltantes. Es el punto de fuga clásico en operaciones de dos locales (P-007).</div>
+   <div class=notas>notas usadas: N-004, P-007, H-015, N-005, H-008, H-003, M-003, M-005, P-005, M-001, S-002, S-001, P-003, P-006, M-006, D-003</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R09</span> <span class=cat>ricardo</span> ¿Cuánto me cuesta tener 45 personas y cuánto subió respecto a junio?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,289 tok · 1,249 ms</div>
+   <div class=r>**$30,27M líquido en julio, +16,8% vs junio.**
+
+---
+
+**Los números (H-011):**
+- Julio: $30.271.531 líquido, 45 personas
+- Junio: $25.930.000 líquido, 37 personas
+- Delta: +$4,34M (+16,8%)
+
+**Costo cargado (estimado):** $36-42M/mes. El factor exacto sale de Previred, no de la planilla.
+
+**El problema:** entraron 8 personas (+21,6%) y el costo subió 16,8%, pero la venta solo subió 7,5%. Como % de la venta neta: junio 17,0% → julio 18,5%. Nadie decidió eso mirando un número.
+
+**Distribución por local:**
+- Playa: 30 personas, $21,4M (70,7%)
+- Mall: 11 personas, $6,6M (21,8%)
+- Ambos: 3 personas, $2,26M (7,5%)</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 9,456 tok · 1,728 ms
+   </div>
+   <div class=r>**$30,27M líquido en julio, $37M con imposiciones. Subió $4,34M (+16,8%) respecto a junio, cuando la venta solo subió 7,5%.**
+
+---
+
+**Qué hacer:** revisar si las 8 personas que entraron entre junio y julio siguen siendo necesarias. El costo laboral pasó de 17,0% a 18,5% de la venta — un punto y medio que son ~$20M al año si se sostiene.
+
+**Por qué importa:** entraron 8 personas (+21,6%), el costo subió 16,8%, la venta subió 7,5%. Nadie tomó esa decisión mirando este número.</div>
+   <div class=notas>notas usadas: H-011, M-002, D-010, L-002, N-005, P-007, D-008, H-002, H-008, M-004, S-009, P-004, S-002, H-012, L-003, P-008, D-007, S-007, D-009, S-008</div></div>
+ </div></div><div class=p>
+ <div class=q><span class=id>R10</span> <span class=cat>ricardo</span> ¿Qué es lo más urgente que tengo pendiente hoy?</div>
+ <div class=cols>
+  <div class=col><div class=h>MEMORIA VIEJA · 20,280 tok · 1,002 ms</div>
+   <div class=r>**Lo más urgente: P-003 — venta de julio por local.**
+
+Está marcado &quot;esta semana&quot; y desbloquea tres cosas a la vez:
+1. Si el Mall es viable (H-003 — arriendo al 37% de su venta es casi el doble del umbral)
+2. Los ~$36M/mes que siguen sin explicar (H-012)
+3. Ticket y transacciones por local, que hoy no existen
+
+**Qué hacer:** entrar a DiMangoToGo `/AdminVentas`, filtrar julio por local, sacar los tres números (bruta, c/IVA, neta) por separado. Son 10 minutos.
+
+---
+
+**Segundo en el día:** P-006 — confirmar si existe arriendo de Playa Chinchorro. Es el candidato #1 de los $36M sin explicar. Una pregunta al contador o una revisión de egresos.
+
+---
+
+**Para el sábado 22:** verificar tótems bajo carga (D-006). Ya está comprometido.</div></div>
+  <div class="col n"><div class=h>MEMORIA NUEVA · 7,309 tok · 1,721 ms
+   </div>
+   <div class=r>No tengo información de hoy. La memoria llega hasta el 20 de agosto de 2026 y no incluye una lista de pendientes con fecha ni prioridad asignada.
+
+**Lo que sí está abierto en la memoria:**
+
+1. **H-014 — Credenciales de Twilio expuestas.** Riesgo bajo (Twilio ya no se usa), pero siguen activas en el panel. Rotarlas o eliminarlas toma 5 minutos.
+
+2. **P-002 — Comparar comisión Mercado Pago vs Transbank.** H-002 dice que el costo de medios de pago saltó con la migración. Sin el dato no sabes cuánto estás perdiendo.
+
+3. **D-005 — Aceptar o rechazar la meta de 7 días sin ti.** La bitácora ya está corriendo, pero el objetivo sigue sin confirmación formal.
+
+**Yo haría:**
+
+Pedirte que me dictes o mandes tu lista de hoy. Sin eso, estoy operando con memoria vieja y no puedo priorizar contra lo que realmente tienes encima.</div>
+   <div class=notas>notas usadas: H-014, R-001, D-005, D-007, H-003, M-006, N-002, T-001, H-013, S-007, R-002, E-001, D-004, N-001</div></div>
+ </div></div>

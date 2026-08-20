@@ -124,7 +124,7 @@
    ],
    "cuerpo": "\"No tuvimos errores\" no cuenta como verificación.\n\nTodo cambio en producción necesita una prueba explícita con **criterio de\naprobación fijado de antemano** y una fecha de verificación bajo carga real.\nMaximus no cierra un pendiente sin eso.",
    "origen": "acordada con Ricardo, 19-ago-2026",
-   "grado": 6,
+   "grado": 7,
    "color": "#f5a623"
   },
   {
@@ -179,7 +179,27 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 9,
+   "grado": 10,
+   "color": "#f5a623"
+  },
+  {
+   "id": "D-011",
+   "tipo": "decision",
+   "titulo": "Migración a memoria atómica aprobada para texto, bloqueada para voz",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-20",
+   "tags": [
+    "memoria",
+    "migracion",
+    "rag",
+    "latencia",
+    "cache"
+   ],
+   "cuerpo": "**Resultado del banco de pruebas, contra el criterio fijado de antemano:**\n\n| Criterio | Resultado | |\n|---|---|---|\n| Cero pérdidas de información | 0 detectadas | ✅ |\n| Primer token bajo 800 ms | 1.558 ms (mediana) | ❌ |\n| Ricardo da el visto bueno | otorgado | ✅ |\n\n| | Vieja | Nueva | |\n|---|---|---|---|\n| Tokens de entrada | 20.284 | 7.535 | **−63%** |\n| Primer token (mediana) | 1.126 ms | 1.558 ms | +38% |\n\n**La memoria nueva resultó superior en dos casos concretos, no solo equivalente:**\n\n1. **M14 — la memoria vieja miente.** Sigue diciendo que Cristian Vidal es el\n   contador externo. Es programador (N-003); la contadora es Carla Montoya\n   (N-002). Las notas atómicas tienen el dato corregido; los archivos originales\n   no.\n2. **M08 — manejo de contradicciones.** Ante \"¿es creíble el 26% de margen?\", la\n   memoria vieja respondió *\"no es creíble\"* y eligió un lado en silencio. La\n   nueva declaró el conflicto entre H-012 y H-017 con sus autoridades. Eso solo\n   es posible con notas tipadas y `estado: conflicto`.\n\n**Decisión:**\n- **Texto (WhatsApp/Telegram): migrado.** 1,5 s es imperceptible en un canal\n  donde ya se espera la respuesta.\n- **Voz: bloqueada.** El criterio de 800 ms era para conversación fluida y no se\n  cumplió.\n\n**Causa de la latencia, pendiente de resolver:** el prompt caching **no está\nacertando** (0 tokens leídos en las 25). El contexto se separó en bloque fijo\n(core + índice) y bloque variable (notas), justamente para que el prefijo se\ncachee, y aun así el cache no dio. Es un defecto de implementación, no del\ndiseño. Hasta arreglarlo, la recuperación ahorra tokens pero cuesta latencia.\n\n**Salvaguarda en producción:** `agent/maximus.py` usa la memoria atómica solo si\nencuentra `memoria/indice.json` y `core/SOUL.md`. Si falta cualquiera de los dos,\nvuelve solo a los seis archivos completos. Falla cerrado: antes memoria completa\ny lenta que memoria a medias.\n\n**Los archivos originales siguen intactos** en la raíz y congelados en `archivo/`.",
+   "origen": "banco de 25 preguntas corrido el 20-ago-2026, brain/evaluacion.json",
+   "grado": 3,
    "color": "#f5a623"
   },
   {
@@ -509,7 +529,7 @@
    ],
    "cuerpo": "Existían dos `MEMORY.md` divergentes: uno en `~/harvey/` y otro en\n`~/Downloads/` (más avanzado). Trabajar sobre el equivocado habría significado\nrepetir decisiones ya tomadas y perder los hallazgos financieros.\n\n**Es el mismo error que D-008 acaba de eliminar en el POS**, replicado en el\nsistema que existe para evitar ese error.\n\n**Regla derivada:** la memoria vive en `~/harvey/`, versionada en git. Los\narchivos que salen a otra carpeta son exportaciones de solo lectura y mueren\nahí. Toda sesión arranca con `cd ~/harvey`.",
    "origen": "observado directamente el 20-ago-2026",
-   "grado": 3,
+   "grado": 4,
    "color": "#27c93f"
   },
   {
@@ -1247,6 +1267,21 @@
    "de": "D-010",
    "a": "D-007",
    "rel": "regulado_por"
+  },
+  {
+   "de": "D-011",
+   "a": "D-007",
+   "rel": "regulado_por"
+  },
+  {
+   "de": "D-011",
+   "a": "L-004",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-011",
+   "a": "D-010",
+   "rel": "relacionado"
   },
   {
    "de": "E-001",
