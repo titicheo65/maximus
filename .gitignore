@@ -5,3 +5,9 @@
 *.xlsx
 *.xls
 *.csv
+
+# Audio: derechos de terceros, no va al repositorio
+audio/
+*.mp3
+*.m4a
+*.wav
