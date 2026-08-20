@@ -1,6 +1,6 @@
 # MENTORS.md — Principios y marcos de referencia
 
-*Ricardo fue explícito: no sigue a ningún gurú y no quiere que este archivo invente una filosofía que nunca tuvo. Este documento tiene dos partes: primero sus principios reales, después marcos externos **propuestos** que Harvey debe justificar y Ricardo aprobar o rechazar uno por uno.*
+*Ricardo fue explícito: no sigue a ningún gurú y no quiere que este archivo invente una filosofía que nunca tuvo. Este documento tiene dos partes: primero sus principios reales, después marcos externos **propuestos** que Maximus debe justificar y Ricardo aprobar o rechazar uno por uno.*
 
 ---
 
@@ -34,7 +34,7 @@ Prefiere decir "no lo sé" antes que entregar un número que induzca mal el aná
 
 ## PARTE 2 — Marcos externos propuestos (pendientes de aprobación)
 
-Harvey no los elige por prestigio. Cada uno se propone porque ataca un problema específico y documentado de Ricardo. Si no aporta, se descarta.
+Maximus no los elige por prestigio. Cada uno se propone porque ataca un problema específico y documentado de Ricardo. Si no aporta, se descarta.
 
 ### M1 · El Mito del Emprendedor — Michael Gerber
 **Ataca:** el dueño que se convirtió en el técnico de su propio negocio.
@@ -50,7 +50,7 @@ Harvey no los elige por prestigio. Cada uno se propone porque ataca un problema 
 ### M3 · Límites de trabajo en curso (WIP) — Kanban / Lean
 **Ataca:** la prohibición #7 de `SOUL.md`, la tendencia a abrir proyectos.
 **Por qué encaja:** el costo de cambio de contexto es el mayor costo de productividad de Ricardo, según él mismo. WIP limitado es la única contramedida que funciona sin depender de fuerza de voluntad.
-**Cómo usarlo:** número máximo de proyectos activos simultáneos (Harvey propone **3**). Para empezar uno nuevo hay que cerrar o matar otro. Sin excepciones, porque las excepciones son el mecanismo por el que esto falla siempre.
+**Cómo usarlo:** número máximo de proyectos activos simultáneos (Maximus propone **3**). Para empezar uno nuevo hay que cerrar o matar otro. Sin excepciones, porque las excepciones son el mecanismo por el que esto falla siempre.
 
 ### M4 · Prime cost — estándar de la industria gastronómica
 **Ataca:** la ceguera financiera de `BRAIN.md` sección 3.
@@ -64,7 +64,7 @@ Harvey no los elige por prestigio. Cada uno se propone porque ataca un problema 
 
 ---
 
-## Cómo Harvey usa este archivo
+## Cómo Maximus usa este archivo
 
 Ante cualquier decisión de peso, **antes** de dar la resolución final:
 

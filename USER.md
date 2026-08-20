@@ -1,6 +1,6 @@
 # USER.md — Ricardo Vinet
 
-*Fuente: entrevista del 19 de agosto de 2026. Cada dato está etiquetado como HECHO (dado por Ricardo), ARITMÉTICA (calculado por Harvey) o PENDIENTE (no confirmado).*
+*Fuente: entrevista del 19 de agosto de 2026. Cada dato está etiquetado como HECHO (dado por Ricardo), ARITMÉTICA (calculado por Maximus) o PENDIENTE (no confirmado).*
 
 ## Perfil
 
@@ -8,7 +8,7 @@
 **Ubicación:** Arica, Chile (zona horaria America/Santiago)
 **Rol autodescrito:** empresario, operador y creador de soluciones.
 
-Se define en tres dimensiones simultáneas, y exige que Harvey razone siempre desde las tres:
+Se define en tres dimensiones simultáneas, y exige que Maximus razone siempre desde las tres:
 
 - **operador** — gestiona una empresa real de 45 personas
 - **empresario** — dueño, decide inversión y estrategia
@@ -39,15 +39,15 @@ Empresa tecnológica. Soluciones digitales y de automatización para restaurante
 Comprador objetivo: dueño, socio, gerente general, gerente de operaciones, responsable de tecnología. Empresas: restaurantes independientes, grupos gastronómicos, cadenas, cafeterías. Mercado inicial Chile, después LATAM.
 Etapa: inicial. **Facturación externa validada: cero confirmada.**
 
-**Decisión de Ricardo (19-ago-2026):** ignorar Aurexgroup y enfocar 100% en DiMango. Harvey no lo elimina — lo parquea con fecha de revisión.
+**Decisión de Ricardo (19-ago-2026):** ignorar Aurexgroup y enfocar 100% en DiMango. Maximus no lo elimina — lo parquea con fecha de revisión.
 
-## Modo de trabajo de Ricardo (dato crítico para Harvey)
+## Modo de trabajo de Ricardo (dato crítico para Maximus)
 
 Semana de referencia (10-16 de agosto de 2026), tal como la reportó:
 
 POS Transbank nuevos en ambos locales · seguimiento de proveedores · compra e instalación Marsol con capacitación · contratos y anexos de trabajadores · abastecimiento y pedidos · pruebas de pago digital · desarrollo de DiMangoToGo · diseño de tótem/autoservicio · material de marketing y pantallas · resolución de problemas tecnológicos · decisiones operativas de los locales · administración y personal.
 
-**Lectura de Harvey (HIPÓTESIS):** de doce frentes, siete son tecnología que Ricardo eligió tomar. No está atrapado solo por la operación — está eligiendo el trabajo técnico, que es más entretenido que el trabajo duro de delegar, promover y despedir. El cambio permanente de contexto es su mayor costo de productividad, reconocido por él mismo.
+**Lectura de Maximus (HIPÓTESIS):** de doce frentes, siete son tecnología que Ricardo eligió tomar. No está atrapado solo por la operación — está eligiendo el trabajo técnico, que es más entretenido que el trabajo duro de delegar, promover y despedir. El cambio permanente de contexto es su mayor costo de productividad, reconocido por él mismo.
 
 ## Cómo hablarle
 
@@ -62,4 +62,4 @@ Componentes que él identificó: definir responsables · definir autoridad · id
 
 No significa dejar de participar. Significa mover su trabajo desde **resolver operación** hacia **dirigir, mejorar y crear**.
 
-**Objeción de Harvey (abierta, ver MEMORY.md D-005):** eso es un programa de ocho frentes, no un objetivo. No tiene métrica ni fecha de verificación. Un objetivo que no se puede fallar en una fecha concreta no es un objetivo.
+**Objeción de Maximus (abierta, ver MEMORY.md D-005):** eso es un programa de ocho frentes, no un objetivo. No tiene métrica ni fecha de verificación. Un objetivo que no se puede fallar en una fecha concreta no es un objetivo.

@@ -1,1 +1,7 @@
 .DS_Store
+.claude/settings.local.json
+
+# Nunca: datos personales de terceros (sueldos nominales, liquidaciones)
+*.xlsx
+*.xls
+*.csv
