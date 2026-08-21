@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 10,
+   "grado": 11,
    "color": "#f5a623"
   },
   {
@@ -671,7 +671,7 @@
    ],
    "cuerpo": "Empresario, operador y creador de productos tecnológicos. Arica, Chile.\nTres dimensiones simultáneas que exige que Maximus considere siempre.\n\n**Es el cuello de botella identificado de DiMango.** Objetivo #1: que DiMango\nopere sin él.\n\nPiensa hablando: sus audios traen más contexto que sus mensajes escritos.",
    "origen": "entrevista 19-ago-2026",
-   "grado": 2,
+   "grado": 3,
    "color": "#ffffff"
   },
   {
@@ -889,7 +889,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff5f56"
   },
   {
@@ -1072,7 +1072,7 @@
    ],
    "cuerpo": "FastAPI en Python. Proveedor Meta (número local chileno). Transcribe notas de\nvoz con Groq Whisper. Corre en `C:\\dimango-agent`, puerto 8000.\n\n**Dos roles sobre el mismo canal:** atención al cliente (reservas, pedidos,\ntickets) y Maximus (gestión, memoria completa, solo para el número de Ricardo).\nAmbos fallan cerrado: sin variables configuradas, se comporta como siempre.\n\n**Módulos:** `maximus.py`, `telegram_maximus.py`, `voz.py` (edge-tts con voz\nchilena, ElevenLabs opcional), `colacion.py`.",
    "origen": "repo titicheo65/dimango-agent",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff8c42"
   },
   {
@@ -1110,6 +1110,26 @@
    "cuerpo": "Software contable que genera las remuneraciones, creado por Cristian Vidal\n(N-003).\n\nRicardo planteó reemplazarlo con desarrollo propio. **Clasificado como idea, no\nprioridad:** L-002 puro — otro sistema que solo él mantendría, para reemplazar\nalgo que funciona, con cuatro frentes abiertos.",
    "origen": "informado por Ricardo, 20-ago-2026",
    "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-010",
+   "tipo": "sistema",
+   "titulo": "Briefing matutino automatizado",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-20",
+   "tags": [
+    "briefing",
+    "automatizacion",
+    "voz",
+    "calendario",
+    "gmail"
+   ],
+   "cuerpo": "Corre todos los días a las **07:36** en el Mac de Ricardo. Si el equipo está\napagado a esa hora, se ejecuta al encenderlo.\n\n**Qué junta:**\n- Clima de Arica (open-meteo) y dólar/euro/UF (mindicador.cl) — sin autenticación\n- Correos no leídos de las últimas 24 h: **solo cantidad y remitentes**, nunca el\n  contenido\n- Eventos del día del calendario principal\n- Pendientes abiertos y conflictos sin resolver de la memoria atómica\n\n**Cómo sale:** lo redacta Maximus con el criterio de SOUL.md y lo dice en voz\nalta (edge-tts, voz chilena). Máximo 8 líneas, cierra proponiendo una cosa\nconcreta.\n\n**Por qué corre en el Mac y no en ServidorPlaya:** los conectores de Gmail y\nCalendar están autenticados solo ahí. El servidor podría generar la parte de\nclima, indicadores y pendientes, pero no la agenda ni el correo.\n\n**Archivos:** `brain/briefing.py` · tarea en\n`~/.claude/scheduled-tasks/briefing-maximus/SKILL.md`",
+   "origen": "tarea programada creada el 20-ago-2026",
+   "grado": 4,
    "color": "#ff8c42"
   },
   {
@@ -2002,6 +2022,26 @@
    "de": "S-009",
    "a": "H-011",
    "rel": "relacionado"
+  },
+  {
+   "de": "S-010",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-010",
+   "a": "S-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-010",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-010",
+   "a": "N-001",
+   "rel": "menciona"
   },
   {
    "de": "T-001",
