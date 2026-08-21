@@ -160,6 +160,16 @@ input:focus{border-color:#f5a623}
 .a3{background:#5f4a0d;color:#ffd166}.a4{background:#5f2f0d;color:#ffa06c}
 .a5{background:#4a1420;color:#ff8fa3}
 #pie{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);font-size:11px;color:#3d4454;z-index:10}
+#barra{position:fixed;bottom:46px;left:50%;transform:translateX(-50%);z-index:15;
+ width:min(620px,72vw);display:flex;align-items:center;gap:10px}
+#chat{flex:1;background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:22px;
+ padding:12px 20px;color:#dfe3ea;font-size:13.5px;outline:none;backdrop-filter:blur(10px)}
+#chat:focus{border-color:#f5a623}
+#estado{font-size:11px;color:#f5a623;white-space:nowrap;min-width:60px}
+#rta{position:fixed;bottom:104px;left:50%;transform:translateX(-50%);z-index:15;
+ width:min(620px,72vw);background:rgba(14,17,24,.96);border:1px solid #2a4a3a;border-radius:12px;
+ padding:16px 20px;font-size:13px;line-height:1.65;color:#c3cad6;white-space:pre-wrap;
+ max-height:38vh;overflow-y:auto;display:none;backdrop-filter:blur(14px)}
 #ocultar{position:fixed;top:14px;left:14px;z-index:20;background:#171b26;border:1px solid #232838;
  color:#7d8698;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;display:none}
 body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623;color:#07080c}
@@ -193,8 +203,15 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
   </div>
 </div>
 
+<div id="barra">
+  <input id="chat" placeholder="Pregúntale a Maximus…  (Enter para enviar)" autocomplete="off">
+  <span id="estado"></span>
+</div>
+<div id="rta"></div>
+
 <div id="pie">arrastra para mover · rueda para acercar · clic en un nodo para leerlo ·
- <span onclick="ajustar()" style="color:#f5a623;cursor:pointer">⊙ ajustar (F)</span></div>
+ <span onclick="ajustar()" style="color:#f5a623;cursor:pointer">⊙ ajustar (F)</span> ·
+ <span onclick="configurar()" style="color:#4d5566;cursor:pointer">⚙ conexión</span></div>
 
 <script>
 const D = __DATOS__;
@@ -350,6 +367,88 @@ document.getElementById('buscar').oninput=e=>{
    :'<div style="color:#4d5566;font-size:12px;padding:6px">Sin resultados.</div>';
 };
 window.abrir=abrir; window.alternar=alternar;
+
+// ── chat con Maximus ──────────────────────────────────────────────
+// El token no viaja dentro del archivo: se pide una vez y queda en este
+// navegador. Así el .html se puede copiar o mandar sin llevar la llave.
+const DEFECTO = 'https://oak-cornea-marlin.ngrok-free.dev';
+const g = k => localStorage.getItem(k) || '';
+const s = (k,v) => localStorage.setItem(k,v);
+
+function configurar(){
+  const url = prompt('URL del agente de Maximus:', g('mx_url') || DEFECTO);
+  if(url === null) return;
+  s('mx_url', url.trim().replace(/\/$/,''));
+  const tok = prompt('Token de chat (MAXIMUS_CHAT_TOKEN del .env del servidor):', g('mx_tok'));
+  if(tok !== null) s('mx_tok', tok.trim());
+  estado('conexión guardada', 2500);
+}
+
+function estado(t, ms){
+  const e = document.getElementById('estado');
+  e.textContent = t;
+  if(ms) setTimeout(()=>{ if(e.textContent===t) e.textContent=''; }, ms);
+}
+
+async function preguntar(texto){
+  const url = g('mx_url') || DEFECTO;
+  if(!g('mx_tok')){ configurar(); if(!g('mx_tok')) return; }
+
+  const caja = document.getElementById('rta');
+  caja.style.display='block';
+  caja.textContent='…';
+  estado('pensando');
+
+  try{
+    const r = await fetch(url + '/maximus/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+               'x-maximus-token': g('mx_tok'),
+               'ngrok-skip-browser-warning':'1'},
+      body: JSON.stringify({mensaje: texto, sesion:'cerebro'})
+    });
+    if(r.status === 401){ caja.textContent='Token inválido. Toca ⚙ conexión abajo.'; estado(''); return; }
+    if(r.status === 503){ caja.textContent='El chat no está habilitado en el servidor: falta MAXIMUS_CHAT_TOKEN en el .env.'; estado(''); return; }
+    if(!r.ok){ caja.textContent='El agente respondió ' + r.status; estado(''); return; }
+
+    const d = await r.json();
+    caja.textContent = d.respuesta;
+    estado('');
+
+    // lo mejor del grafo: iluminar exactamente lo que Maximus usó para responder
+    const usadas = (d.notas || []).filter(n => idx[n] !== undefined);
+    if(usadas.length){
+      resaltados = new Set(usadas);
+      sel = usadas[0];
+      caja.textContent += '\n\n— usó ' + usadas.length + ' notas: ' + usadas.join(', ');
+      ajustarA(usadas);
+    }
+  }catch(e){
+    caja.textContent = 'No pude hablar con el agente.\n\n' + e.message +
+      '\n\nRevisa que el servidor esté arriba y que la URL sea la correcta (⚙ conexión).';
+    estado('');
+  }
+}
+
+function ajustarA(ids){
+  const vis = ids.map(i=>N[idx[i]]).filter(Boolean);
+  if(!vis.length) return;
+  const xs=vis.map(n=>n.x), ys=vis.map(n=>n.y);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const izq = W<900?0:345, der = W<760?0:(W<900?150:235), mg=90;
+  const dw=Math.max(W-izq-der-mg*2,220), dh=Math.max(H-mg*2-180,200);
+  cam.z=Math.max(0.15, Math.min(dw/Math.max(x1-x0,1), dh/Math.max(y1-y0,1), 1.5));
+  cam.x=izq+mg+(dw-(x1-x0)*cam.z)/2-x0*cam.z;
+  cam.y=mg+(dh-(y1-y0)*cam.z)/2-y0*cam.z;
+}
+
+document.getElementById('chat').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.target.value.trim()){
+    const t=e.target.value.trim(); e.target.value=''; preguntar(t);
+  }
+  if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
+});
+window.configurar=configurar;
 </script></body></html>"""
 
 
