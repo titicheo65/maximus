@@ -475,9 +475,9 @@
     "riesgo-operacional",
     "duplicados"
    ],
-   "cuerpo": "El log de errores del servidor de impresión de Playa repite quince veces:\n\n> `[COLA] Job <id> ya se imprimio en esta sesion (Base44 lo sigue marcando\n> pendiente) - se omite para no duplicar`\n\n**Qué significa:** el servidor imprime el trabajo, pero **DiMangoToGo (Base44)\nnunca lo marca como impreso**. La cola queda llena de trabajos fantasma que\nsiguen figurando pendientes.\n\n**Qué evita el desastre hoy:** una lista en memoria del propio servidor de\nimpresión, que recuerda qué salió \"en esta sesión\" y lo omite.\n\n**Por qué es frágil:** esa lista vive en RAM. Si el proceso se reinicia —corte de\nluz, reinicio de Windows, o el arranque automático de P-008— la lista se pierde,\nBase44 sigue diciendo \"pendiente\", y **se reimprimen de golpe todos los trabajos\nacumulados**: boletas y precuentas viejas saliendo en cadena, probablemente en\nmedio del servicio.\n\n**Agravante:** el arranque automático que se creó en P-008 hace este escenario\n*más* probable, no menos. Antes alguien levantaba el servidor a mano y estaba\nmirando; ahora arranca solo.\n\n**Dónde se arregla:** en DiMangoToGo, no en el servidor de impresión. El job debe\nmarcarse como impreso cuando el servidor confirma. Mientras eso no ocurra, cada\nreinicio es una ruleta.\n\n**Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6**\n(`C:\\dimango\\print-server\\servidor-impresion-playa-v6.js`) en estado `stopped`,\npero en el repositorio existe una **v7**. La entrada de PM2 apunta a una versión\nreemplazada. Pendiente confirmar qué proceso imprime hoy en Playa.",
+   "cuerpo": "El log de errores del servidor de impresión de Playa repite quince veces:\n\n> `[COLA] Job <id> ya se imprimio en esta sesion (Base44 lo sigue marcando\n> pendiente) - se omite para no duplicar`\n\n**Qué significa:** el servidor imprime el trabajo, pero **DiMangoToGo (Base44)\nnunca lo marca como impreso**. La cola queda llena de trabajos fantasma que\nsiguen figurando pendientes.\n\n**Qué evita el desastre hoy:** una lista en memoria del propio servidor de\nimpresión, que recuerda qué salió \"en esta sesión\" y lo omite.\n\n**Por qué es frágil:** esa lista vive en RAM. Si el proceso se reinicia —corte de\nluz, reinicio de Windows, o el arranque automático de P-008— la lista se pierde,\nBase44 sigue diciendo \"pendiente\", y **se reimprimen de golpe todos los trabajos\nacumulados**: boletas y precuentas viejas saliendo en cadena, probablemente en\nmedio del servicio.\n\n**Agravante:** el arranque automático que se creó en P-008 hace este escenario\n*más* probable, no menos. Antes alguien levantaba el servidor a mano y estaba\nmirando; ahora arranca solo.\n\n**Dónde se arregla:** en DiMangoToGo, no en el servidor de impresión. El job debe\nmarcarse como impreso cuando el servidor confirma. Mientras eso no ocurra, cada\nreinicio es una ruleta.\n\n**Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6**\n(`C:\\dimango\\print-server\\servidor-impresion-playa-v6.js`) en estado `stopped`,\npero en el repositorio existe una **v7**. La entrada de PM2 apunta a una versión\nreemplazada. Pendiente confirmar qué proceso imprime hoy en Playa.\n\n---\n\n**Agravante descubierto el 21-ago-2026:** el local del Mall tiene **su propio PC\ncon servidor de impresión local y arranque automático ya configurado** (S-012).\n\nSi corre el mismo código, **el riesgo de reimpresión masiva ya está activo ahí,\nhoy, sin que nadie lo haya introducido**: cada corte de luz en el Mall levanta el\nservidor con la lista anti-duplicados vacía mientras Base44 sigue marcando\ntrabajos como pendientes.\n\n**Evidencia a buscar:** preguntar en el Mall si alguna vez salieron boletas o\nprecuentas viejas de golpe después de un corte de luz. Si ocurrió, H-018 deja de\nser hipótesis.",
    "origen": "C:\\\\Users\\\\usuario\\\\.pm2\\\\logs\\\\impresion-playa-error.log, 21-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -1003,7 +1003,7 @@
    ],
    "cuerpo": "Plataforma propia sobre Base44: pedidos, atención, caja, pagos, autoservicio.\n**Fuente única de venta desde el 1-jul-2026.** 519 archivos.\n\n**Pantallas clave:** `/AdminVentas` (venta por local, medio de pago,\nconciliación SII) · `/Caja` · `/Checklist` · `/Kioskos` · `/CierreTurno`.\n\n**Emisión de DTE:** no emite; delega en SimpleFactura (S-003).\n\n**Deuda técnica:** el puente venta↔bodega es matching por **nombre de texto**\n(`ReglaInsumo.nombre_en_venta`). Renombrar un producto rompe la conversión en\nsilencio.",
    "origen": "repo titicheo65/dimangotogo + uso directo",
-   "grado": 14,
+   "grado": 15,
    "color": "#ff8c42"
   },
   {
@@ -1131,7 +1131,7 @@
    ],
    "cuerpo": "Windows en el local de Playa Chinchorro. Se accede por AnyDesk/Splashtop.\n\n**Tres servicios y tres túneles ngrok** (tope del plan Hobbyist):\n\n| Puerto | Servicio | Túnel |\n|---|---|---|\n| 8000 | agente WhatsApp | oak-cornea-marlin.ngrok-free.dev |\n| 8001 | `functions.main` (voiceagentkit) | voiceagentkit.ngrok.app |\n| 3003 | — | dimango.ngrok.app |\n\n**Riesgo estructural:** si se corta la luz o internet en Playa, se caen el agente\nde clientes y Maximus. Nada arranca solo.",
    "origen": "inspección directa, 20-ago-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff8c42"
   },
   {
@@ -1188,6 +1188,25 @@
     "arranque-manual"
    ],
    "cuerpo": "CRM de fidelización con notificaciones push. Corre en **ServidorPlaya**, puerto\n**3003**, expuesto por el túnel `dimango.ngrok.app`.\n\n**Se levanta a mano.** Igual que el servicio del puerto 8001 (voiceagentkit).\n\n**Riesgo (L-002):** tercer sistema que solo Ricardo sabe levantar, en el mismo\nWindows del local. Si se corta la luz en Playa Chinchorro caen los tres a la vez\n—el agente de clientes, el de voz y el CRM— y nadie se entera hasta que alguien\nreclama.\n\n**Pendiente:** incluirlo en el arranque automático de P-008. Falta conocer el\ncomando exacto y su carpeta.",
+   "origen": "informado por Ricardo, 21-ago-2026",
+   "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-012",
+   "tipo": "sistema",
+   "titulo": "Servidor de impresión del Mall",
+   "estado": "vigente",
+   "autoridad": 4,
+   "fuente": "HECHO",
+   "fecha": "2026-08-21",
+   "tags": [
+    "impresion",
+    "mall",
+    "arranque-automatico",
+    "infraestructura"
+   ],
+   "cuerpo": "El local del Mall tiene **PC propio con servidor de impresión local**, con\n**arranque automático configurado** ante reinicio o corte de luz.\n\n**Comparación incómoda con Playa Chinchorro:**\n\n| | Mall | Playa |\n|---|---|---|\n| % de la venta | 25,35% | **74,65%** |\n| Servidor de impresión | PC propio | ServidorPlaya |\n| Arranque automático | **sí** | **no — a mano** |\n\nEl local que menos vende es el que está mejor protegido. En Playa, la impresión\ncorre como `node servidor-impresion-playa-v6.js` levantado a mano, fuera de PM2\n(la entrada `impresion-playa` de PM2 apunta a la misma v6 pero está `stopped`).\n\n**Pendiente:** confirmar si el servidor del Mall corre la misma versión del\ncódigo, porque de eso depende si H-018 lo afecta.",
    "origen": "informado por Ricardo, 21-ago-2026",
    "grado": 3,
    "color": "#ff8c42"
@@ -2156,6 +2175,21 @@
   {
    "de": "S-011",
    "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-012",
+   "a": "H-018",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-012",
+   "a": "S-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-012",
+   "a": "S-008",
    "rel": "relacionado"
   },
   {
