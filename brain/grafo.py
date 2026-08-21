@@ -166,6 +166,10 @@ input:focus{border-color:#f5a623}
  padding:12px 20px;color:#dfe3ea;font-size:13.5px;outline:none;backdrop-filter:blur(10px)}
 #chat:focus{border-color:#f5a623}
 #estado{font-size:11px;color:#f5a623;white-space:nowrap;min-width:60px}
+#cfg{position:fixed;top:14px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
+ color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
+#cfg:hover{background:#f5a623;color:#07080c}
+#cfg.ok{border-color:#2a4a3a;color:#4a9e6f;font-weight:400}
 #rta{position:fixed;bottom:104px;left:50%;transform:translateX(-50%);z-index:15;
  width:min(620px,72vw);background:rgba(14,17,24,.96);border:1px solid #2a4a3a;border-radius:12px;
  padding:16px 20px;font-size:13px;line-height:1.65;color:#c3cad6;white-space:pre-wrap;
@@ -209,9 +213,9 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 </div>
 <div id="rta"></div>
 
+<button id="cfg" onclick="configurar()">⚙ conexión</button>
 <div id="pie">arrastra para mover · rueda para acercar · clic en un nodo para leerlo ·
- <span onclick="ajustar()" style="color:#f5a623;cursor:pointer">⊙ ajustar (F)</span> ·
- <span onclick="configurar()" style="color:#4d5566;cursor:pointer">⚙ conexión</span></div>
+ <span onclick="ajustar()" style="color:#f5a623;cursor:pointer">⊙ ajustar (F)</span></div>
 
 <script>
 const D = __DATOS__;
@@ -375,13 +379,33 @@ const DEFECTO = 'https://oak-cornea-marlin.ngrok-free.dev';
 const g = k => localStorage.getItem(k) || '';
 const s = (k,v) => localStorage.setItem(k,v);
 
+function marcarCfg(){
+  const b = document.getElementById('cfg');
+  if(g('mx_tok')){ b.classList.add('ok'); b.textContent = '⚙ conectado'; }
+  else { b.classList.remove('ok'); b.textContent = '⚙ conexión'; }
+}
+
 function configurar(){
-  const url = prompt('URL del agente de Maximus:', g('mx_url') || DEFECTO);
+  const url = prompt('1 de 2 — URL del agente de Maximus:', g('mx_url') || DEFECTO);
   if(url === null) return;
   s('mx_url', url.trim().replace(/\/$/,''));
-  const tok = prompt('Token de chat (MAXIMUS_CHAT_TOKEN del .env del servidor):', g('mx_tok'));
-  if(tok !== null) s('mx_tok', tok.trim());
-  estado('conexión guardada', 2500);
+
+  const tok = prompt('2 de 2 — Pega SOLO el token (28 caracteres, sin espacios ni saltos de línea):', g('mx_tok'));
+  if(tok === null) return;
+  const limpio = tok.trim();
+
+  // Un token es una sola palabra corta. Si llega un comando entero pegado por
+  // error, hay que decirlo acá y no mandarlo al servidor.
+  if(limpio.length > 120 || /\s/.test(limpio)){
+    alert('Eso no parece un token.\n\nUn token son ~28 caracteres seguidos, sin espacios ' +
+          'ni saltos de línea, como: k7Rm2xQp9nT4wZ8vB3jL6dH5sA2e\n\n' +
+          'Lo que pegaste tiene ' + limpio.length + ' caracteres. Copia solo la línea verde ' +
+          'que imprime el comando en el servidor.');
+    return;
+  }
+  s('mx_tok', limpio);
+  marcarCfg();
+  estado('conectado', 2500);
 }
 
 function estado(t, ms){
@@ -448,7 +472,7 @@ document.getElementById('chat').addEventListener('keydown', e=>{
   }
   if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
 });
-window.configurar=configurar;
+window.configurar=configurar; marcarCfg();
 </script></body></html>"""
 
 
