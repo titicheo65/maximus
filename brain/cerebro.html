@@ -44,6 +44,16 @@ input:focus{border-color:#f5a623}
  color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
 #cfg:hover{background:#f5a623;color:#07080c}
 #cfg.ok{border-color:#2a4a3a;color:#4a9e6f;font-weight:400}
+#cfgpanel{display:none;position:fixed;top:56px;right:14px;z-index:25;width:min(400px,88vw);
+ background:rgba(14,17,24,.98);border:1px solid #f5a623;border-radius:12px;padding:18px;
+ backdrop-filter:blur(14px)}
+#cfgpanel .ct{font-size:10px;letter-spacing:.13em;color:#f5a623;font-weight:600;margin-bottom:14px}
+#cfgpanel label{display:block;font-size:11px;color:#7d8698;margin-bottom:5px}
+#cfgpanel input{width:100%;margin-bottom:14px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+#cfgpanel button{background:#f5a623;color:#07080c;border:0;border-radius:7px;padding:8px 18px;
+ font-size:12.5px;font-weight:600;cursor:pointer;margin-right:8px}
+#cfgpanel button.sec{background:#232838;color:#9aa3b2;font-weight:400}
+#cfgmsg{font-size:11.5px;color:#ff8fa3;margin-bottom:12px;line-height:1.5}
 #rta{position:fixed;bottom:104px;left:50%;transform:translateX(-50%);z-index:15;
  width:min(620px,72vw);background:rgba(14,17,24,.96);border:1px solid #2a4a3a;border-radius:12px;
  padding:16px 20px;font-size:13px;line-height:1.65;color:#c3cad6;white-space:pre-wrap;
@@ -88,6 +98,16 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 <div id="rta"></div>
 
 <button id="cfg" onclick="configurar()">⚙ conexión</button>
+<div id="cfgpanel">
+  <div class="ct">CONEXIÓN CON MAXIMUS</div>
+  <label>URL del agente</label>
+  <input id="cfgurl" spellcheck="false">
+  <label>Token de chat — solo la línea verde que imprime el servidor</label>
+  <input id="cfgtok" spellcheck="false" placeholder="k7Rm2xQp9nT4wZ8vB3jL6dH5sA2e">
+  <div id="cfgmsg"></div>
+  <button onclick="guardarCfg()">Guardar</button>
+  <button class="sec" onclick="document.getElementById('cfgpanel').style.display='none'">Cancelar</button>
+</div>
 <div id="pie">arrastra para mover · rueda para acercar · clic en un nodo para leerlo ·
  <span onclick="ajustar()" style="color:#f5a623;cursor:pointer">⊙ ajustar (F)</span></div>
 
@@ -250,34 +270,49 @@ window.abrir=abrir; window.alternar=alternar;
 // El token no viaja dentro del archivo: se pide una vez y queda en este
 // navegador. Así el .html se puede copiar o mandar sin llevar la llave.
 const DEFECTO = 'https://oak-cornea-marlin.ngrok-free.dev';
-const g = k => localStorage.getItem(k) || '';
-const s = (k,v) => localStorage.setItem(k,v);
+// localStorage también está bloqueado en algunos visores embebidos. Si falla,
+// la configuración vive en memoria: sirve para esta sesión y no rompe nada.
+const _mem = {};
+const g = k => { try { return localStorage.getItem(k) || _mem[k] || ''; }
+                 catch(e){ return _mem[k] || ''; } };
+const s = (k,v) => { _mem[k]=v; try { localStorage.setItem(k,v); } catch(e){} };
 
 function marcarCfg(){
   const b = document.getElementById('cfg');
+  if(!b) return;
   if(g('mx_tok')){ b.classList.add('ok'); b.textContent = '⚙ conectado'; }
   else { b.classList.remove('ok'); b.textContent = '⚙ conexión'; }
 }
 
+// Panel dentro de la página, no prompt(): los visores embebidos y algunos
+// navegadores bloquean prompt() en file:// y el clic no hacía nada.
 function configurar(){
-  const url = prompt('1 de 2 — URL del agente de Maximus:', g('mx_url') || DEFECTO);
-  if(url === null) return;
-  s('mx_url', url.trim().replace(/\/$/,''));
+  const p = document.getElementById('cfgpanel');
+  p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+  if(p.style.display === 'block'){
+    document.getElementById('cfgurl').value = g('mx_url') || DEFECTO;
+    document.getElementById('cfgtok').value = g('mx_tok');
+    document.getElementById('cfgtok').focus();
+    document.getElementById('cfgmsg').textContent = '';
+  }
+}
 
-  const tok = prompt('2 de 2 — Pega SOLO el token (28 caracteres, sin espacios ni saltos de línea):', g('mx_tok'));
-  if(tok === null) return;
-  const limpio = tok.trim();
+function guardarCfg(){
+  const url = document.getElementById('cfgurl').value.trim().replace(/\/$/,'');
+  const tok = document.getElementById('cfgtok').value.trim();
+  const msg = document.getElementById('cfgmsg');
 
-  // Un token es una sola palabra corta. Si llega un comando entero pegado por
-  // error, hay que decirlo acá y no mandarlo al servidor.
-  if(limpio.length > 120 || /\s/.test(limpio)){
-    alert('Eso no parece un token.\n\nUn token son ~28 caracteres seguidos, sin espacios ' +
-          'ni saltos de línea, como: k7Rm2xQp9nT4wZ8vB3jL6dH5sA2e\n\n' +
-          'Lo que pegaste tiene ' + limpio.length + ' caracteres. Copia solo la línea verde ' +
-          'que imprime el comando en el servidor.');
+  // Un token es una sola palabra corta. Si llega un comando pegado entero,
+  // hay que decirlo acá y no mandarlo al servidor.
+  if(!tok){ msg.textContent = 'Falta el token.'; return; }
+  if(/\s/.test(tok) || tok.length > 120){
+    msg.textContent = 'Eso no parece un token: son ~28 caracteres seguidos, sin espacios. ' +
+                      'Lo que pegaste tiene ' + tok.length + '. Copia solo la línea verde del servidor.';
     return;
   }
-  s('mx_tok', limpio);
+  s('mx_url', url); s('mx_tok', tok);
+  msg.textContent = '';
+  document.getElementById('cfgpanel').style.display = 'none';
   marcarCfg();
   estado('conectado', 2500);
 }
@@ -346,5 +381,5 @@ document.getElementById('chat').addEventListener('keydown', e=>{
   }
   if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
 });
-window.configurar=configurar; marcarCfg();
+window.configurar=configurar; window.guardarCfg=guardarCfg; marcarCfg();
 </script></body></html>
