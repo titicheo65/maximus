@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 11,
+   "grado": 12,
    "color": "#f5a623"
   },
   {
@@ -199,7 +199,7 @@
    ],
    "cuerpo": "**Resultado del banco de pruebas, contra el criterio fijado de antemano:**\n\n| Criterio | Resultado | |\n|---|---|---|\n| Cero pérdidas de información | 0 detectadas | ✅ |\n| Primer token bajo 800 ms | 1.558 ms (mediana) | ❌ |\n| Ricardo da el visto bueno | otorgado | ✅ |\n\n| | Vieja | Nueva | |\n|---|---|---|---|\n| Tokens de entrada | 20.284 | 7.535 | **−63%** |\n| Primer token (mediana) | 1.126 ms | 1.558 ms | +38% |\n\n**La memoria nueva resultó superior en dos casos concretos, no solo equivalente:**\n\n1. **M14 — la memoria vieja miente.** Sigue diciendo que Cristian Vidal es el\n   contador externo. Es programador (N-003); la contadora es Carla Montoya\n   (N-002). Las notas atómicas tienen el dato corregido; los archivos originales\n   no.\n2. **M08 — manejo de contradicciones.** Ante \"¿es creíble el 26% de margen?\", la\n   memoria vieja respondió *\"no es creíble\"* y eligió un lado en silencio. La\n   nueva declaró el conflicto entre H-012 y H-017 con sus autoridades. Eso solo\n   es posible con notas tipadas y `estado: conflicto`.\n\n**Decisión:**\n- **Texto (WhatsApp/Telegram): migrado.** 1,5 s es imperceptible en un canal\n  donde ya se espera la respuesta.\n- **Voz: bloqueada.** El criterio de 800 ms era para conversación fluida y no se\n  cumplió.\n\n**Causa de la latencia, pendiente de resolver:** el prompt caching **no está\nacertando** (0 tokens leídos en las 25). El contexto se separó en bloque fijo\n(core + índice) y bloque variable (notas), justamente para que el prefijo se\ncachee, y aun así el cache no dio. Es un defecto de implementación, no del\ndiseño. Hasta arreglarlo, la recuperación ahorra tokens pero cuesta latencia.\n\n**Salvaguarda en producción:** `agent/maximus.py` usa la memoria atómica solo si\nencuentra `memoria/indice.json` y `core/SOUL.md`. Si falta cualquiera de los dos,\nvuelve solo a los seis archivos completos. Falla cerrado: antes memoria completa\ny lenta que memoria a medias.\n\n**Los archivos originales siguen intactos** en la raíz y congelados en `archivo/`.",
    "origen": "banco de 25 preguntas corrido el 20-ago-2026, brain/evaluacion.json",
-   "grado": 3,
+   "grado": 4,
    "color": "#f5a623"
   },
   {
@@ -1112,7 +1112,7 @@
    ],
    "cuerpo": "FastAPI en Python. Proveedor Meta (número local chileno). Transcribe notas de\nvoz con Groq Whisper. Corre en `C:\\dimango-agent`, puerto 8000.\n\n**Dos roles sobre el mismo canal:** atención al cliente (reservas, pedidos,\ntickets) y Maximus (gestión, memoria completa, solo para el número de Ricardo).\nAmbos fallan cerrado: sin variables configuradas, se comporta como siempre.\n\n**Módulos:** `maximus.py`, `telegram_maximus.py`, `voz.py` (edge-tts con voz\nchilena, ElevenLabs opcional), `colacion.py`.",
    "origen": "repo titicheo65/dimango-agent",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff8c42"
   },
   {
@@ -1208,6 +1208,25 @@
    ],
    "cuerpo": "El local del Mall tiene **PC propio con servidor de impresión local**, con\n**arranque automático configurado** ante reinicio o corte de luz.\n\n**Comparación incómoda con Playa Chinchorro:**\n\n| | Mall | Playa |\n|---|---|---|\n| % de la venta | 25,35% | **74,65%** |\n| Servidor de impresión | PC propio | ServidorPlaya |\n| Arranque automático | **sí** | **no — a mano** |\n\nEl local que menos vende es el que está mejor protegido. En Playa, la impresión\ncorre como `node servidor-impresion-playa-v6.js` levantado a mano, fuera de PM2\n(la entrada `impresion-playa` de PM2 apunta a la misma v6 pero está `stopped`).\n\n**Pendiente:** confirmar si el servidor del Mall corre la misma versión del\ncódigo, porque de eso depende si H-018 lo afecta.",
    "origen": "informado por Ricardo, 21-ago-2026",
+   "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-013",
+   "tipo": "sistema",
+   "titulo": "Cerebro visual con chat",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-21",
+   "tags": [
+    "cerebro",
+    "grafo",
+    "chat",
+    "memoria-atomica"
+   ],
+   "cuerpo": "`brain/cerebro.html` — archivo único, sin servidor ni internet. Muestra las notas\natómicas como grafo navegable, con buscador, inspector y filtros por tipo, y\ncada nota expone su **autoridad de fuente**.\n\n**Chat:** barra inferior contra `POST /maximus/chat` del agente, protegido con\n`MAXIMUS_CHAT_TOKEN`. Al responder **ilumina en el grafo las notas que Maximus\nusó**: se ve el razonamiento, no solo la conclusión. Eso es lo que un chat de\ntexto no da.\n\nEl token se guarda en el navegador, nunca dentro del archivo: el `.html` se puede\ncopiar sin llevar la llave.\n\n**Dos lecciones de implementación, aprendidas fallando:**\n- `prompt()`, `alert()` y `localStorage` están bloqueados en visores embebidos y\n  en algunos navegadores con `file://`. El botón no hacía nada y **fallaba en\n  silencio**. La configuración debe ser HTML normal dentro de la página.\n- Un campo que recibe un secreto debe validar la forma de lo que recibe. El\n  primero aceptó un comando de PowerShell completo, con saltos de línea, y lo\n  mandó al servidor como si fuera un token.",
+   "origen": "verificado funcionando el 21-ago-2026",
    "grado": 3,
    "color": "#ff8c42"
   },
@@ -2190,6 +2209,21 @@
   {
    "de": "S-012",
    "a": "S-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-013",
+   "a": "D-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-013",
+   "a": "S-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-013",
+   "a": "D-010",
    "rel": "relacionado"
   },
   {
