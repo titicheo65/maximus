@@ -272,7 +272,7 @@
    ],
    "cuerpo": "Mayo $11.874.572 · Junio $11.842.204 · **Julio $12.721.588 (+7,1%)** — sube\nmientras la venta cae 7,4%.\n\n**Resuelto por H-015:** el Mall hace el 25,35% de la venta, no la mitad. El\narriendo es el **37,4% de su venta neta**, casi el doble del umbral viable.\n\n**Pendiente:** leer el contrato — reajuste, componente variable, vencimiento y\nmulta por salida anticipada.",
    "origen": "RCV del SII",
-   "grado": 6,
+   "grado": 7,
    "color": "#4a9eff"
   },
   {
@@ -421,7 +421,7 @@
    ],
    "cuerpo": "| | Playa | Mall | Total |\n|---|---|---|---|\n| Venta bruta | $119.455.935 | $40.464.040 | $159.919.975 |\n| Venta c/IVA | $119.044.684 | $40.433.220 | $159.477.904 |\n| **Venta neta** | **$100.037.550** | **$33.977.496** | $134.015.045 |\n| Propinas (aparte) | $7.260.449 | $3.455.478 | $10.715.927 |\n| **% del total** | **74,65%** | **25,35%** | 100% |\n\n**Estado de resultados por local (ARITMÉTICA; supone mercadería 28,7% pareja):**\n\n| | Mall | Playa |\n|---|---|---|\n| Arriendo | **37,4%** | 0% (propio) |\n| Mercadería | 28,7% | 28,7% |\n| Laboral directo | 19,4% | 21,4% |\n| Medios de pago | 2,6% | 2,6% |\n| **Queda** | **11,8%** | **47,3%** |\n\n**El arriendo del Mall es 37,4% de su venta neta. El umbral de viabilidad es 20%.**\n\nY ese 11,8% no descuenta todavía: la mano de obra de Playa que produce para el\nMall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni\nadministración. **El Mall está en el borde o bajo el agua.**\n\n**Playa subsidia al Mall.** Ya no es hipótesis.\n\n**Para llegar a un arriendo del 20%:** vender $63,6M netos (crecer **87%**) o\nrenegociar el arriendo a $6,8M (**bajar 47%**). La tercera opción es cerrar.\n\n**Antes de decidir:** leer el contrato de Plaza Oeste — reajuste, componente\nvariable, vencimiento y multa por salida anticipada.",
    "origen": "DiMangoToGo /AdminVentas, resumen contable julio filtrado por local",
-   "grado": 14,
+   "grado": 15,
    "color": "#4a9eff"
   },
   {
@@ -599,7 +599,7 @@
    ],
    "cuerpo": "**Definición:** arriendo mensual / venta neta del local.\n**Umbral de la industria: 20%.** Sobre eso, el local no se sostiene.\n\n| Local | Julio 2026 |\n|---|---|\n| Mall | **37,4%** |\n| Playa | 0% (propio) |",
    "origen": "",
-   "grado": 5,
+   "grado": 6,
    "color": "#50e3c2"
   },
   {
@@ -911,6 +911,26 @@
    "color": "#ff5f56"
   },
   {
+   "id": "P-010",
+   "tipo": "pendiente",
+   "titulo": "Filtración de aguas lluvias en el local del Mall",
+   "estado": "abierto",
+   "autoridad": 3,
+   "fuente": "HECHO",
+   "fecha": "2026-08-20",
+   "tags": [
+    "mall",
+    "siniestro",
+    "seguro",
+    "mallplaza",
+    "infraestructura"
+   ],
+   "cuerpo": "Mallplaza informa por escrito una **filtración de aguas lluvias en el local\nDiMango del mall** y adjunta carta de activación de seguro. Copia a dos personas\nmás de Mallplaza: la comunicación es formal.\n\nRicardo reenvió la carta a TRABAJOARICACHILE@gmail.com la misma noche.\n\n**Pendiente de verificar:**\n- Alguien en terreno que constate el daño real y lo fotografíe\n- Si hubo pérdida de mercadería o de horas de operación\n- Qué cubre el seguro y quién lo tramita\n\n**Lectura de Maximus — esto no es solo un siniestro:** el arriendo del Mall es el\n**37,4% de su venta neta** (H-015), casi el doble del umbral viable, y hay que\nrenegociarlo o salir. Un defecto de infraestructura documentado **por el propio\narrendador** es material para esa conversación: el mall tiene obligación de\nentregar el local en condiciones.\n\n**Guardar todo por escrito** — cartas, fotos, fechas, pérdidas. Hoy es un\nsiniestro; en la renegociación es un argumento.",
+   "origen": "correo de yanira.tara@mallplaza.com, 20-ago-2026, cc marcela.cerda y diego.silva",
+   "grado": 4,
+   "color": "#ff5f56"
+  },
+  {
    "id": "R-001",
    "tipo": "regla",
    "titulo": "Caja chica por local — propuesta",
@@ -1091,7 +1111,7 @@
    ],
    "cuerpo": "Windows en el local de Playa Chinchorro. Se accede por AnyDesk/Splashtop.\n\n**Tres servicios y tres túneles ngrok** (tope del plan Hobbyist):\n\n| Puerto | Servicio | Túnel |\n|---|---|---|\n| 8000 | agente WhatsApp | oak-cornea-marlin.ngrok-free.dev |\n| 8001 | `functions.main` (voiceagentkit) | voiceagentkit.ngrok.app |\n| 3003 | — | dimango.ngrok.app |\n\n**Riesgo estructural:** si se corta la luz o internet en Playa, se caen el agente\nde clientes y Maximus. Nada arranca solo.",
    "origen": "inspección directa, 20-ago-2026",
-   "grado": 5,
+   "grado": 6,
    "color": "#ff8c42"
   },
   {
@@ -1881,6 +1901,26 @@
   {
    "de": "P-009",
    "a": "S-003",
+   "rel": "menciona"
+  },
+  {
+   "de": "P-010",
+   "a": "H-015",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-010",
+   "a": "H-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-010",
+   "a": "M-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-010",
+   "a": "S-008",
    "rel": "menciona"
   },
   {

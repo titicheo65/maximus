@@ -95,11 +95,14 @@ def pendientes(maximo: int = 8) -> str:
     hoy = datetime.now(TZ).date()
     lineas = []
     for n in abiertos[:maximo]:
+        # La antigüedad solo se menciona cuando dice algo. Un pendiente de ayer
+        # no necesita fecha, y darle el número invita a redondearlo mal.
         edad = ""
         if n.get("fecha"):
             try:
                 dias = (hoy - datetime.fromisoformat(n["fecha"]).date()).days
-                edad = f", abierto hace {dias} día{'s' if dias != 1 else ''}"
+                if dias >= 7:
+                    edad = f", lleva {dias} días abierto"
             except ValueError:
                 edad = ""
         lineas.append(f"- {n['id']}: {n['titulo']} [{n['estado']}{edad}]")
@@ -136,6 +139,15 @@ PENDIENTES ABIERTOS EN TU MEMORIA:
 - Máximo 8 líneas. Se escucha en voz alta mientras se viste o maneja.
 - Primera línea: saludo corto y LO MÁS IMPORTANTE del día. Nada de "espero que
   tengas un buen día".
+
+ORDEN DE PRIORIDAD, no negociable. Lo de afuera le gana a lo de adentro:
+  1. Daño físico, siniestro, seguro, accidente o algo que afecte la operación HOY
+  2. Plazo legal o tributario que vence, o dinero que se pierde si nadie actúa
+  3. Un tercero formal esperando respuesta (mall, banco, SII, proveedor grande)
+  4. Recién ahí: los pendientes internos de la memoria
+Un pendiente de la memoria NUNCA va antes que un problema real en un local. Si
+un correo menciona filtración, daño, corte, inspección, multa o siniestro, eso
+abre el briefing.
 - Clima e indicadores en UNA línea, juntos, sin ceremonia.
 - De los pendientes elige a lo más TRES: los que de verdad mueven la aguja hoy.
   No leas la lista completa.
