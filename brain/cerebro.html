@@ -5,8 +5,36 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#07080c;color:#dfe3ea;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
 #lienzo{position:fixed;inset:0;cursor:grab}#lienzo:active{cursor:grabbing}
-.panel{position:fixed;top:0;bottom:0;width:330px;background:rgba(12,14,20,.93);backdrop-filter:blur(14px);
+.panel{position:fixed;top:64px;bottom:0;width:330px;background:rgba(12,14,20,.93);backdrop-filter:blur(14px);
  border-right:1px solid #1c2030;padding:20px;overflow-y:auto;z-index:10}
+
+/* ── HUD superior ── */
+#hud{position:fixed;top:0;left:0;right:0;height:64px;z-index:22;display:flex;align-items:stretch;
+ background:linear-gradient(180deg,rgba(10,12,18,.98),rgba(10,12,18,.92));
+ border-bottom:1px solid #1c2030;backdrop-filter:blur(16px);font-variant-numeric:tabular-nums}
+.reloj{flex:0 0 auto;padding:9px 20px;border-right:1px solid #14171f;display:flex;flex-direction:column;
+ justify-content:center;min-width:132px}
+.reloj .ciu{font-size:9px;letter-spacing:.16em;color:#4d5566;font-weight:600;margin-bottom:1px}
+.reloj .hr{font-size:19px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.15}
+.reloj .hr .seg{font-size:11px;color:#4d5566}
+.reloj .tmp{font-size:10.5px;color:#7d8698;margin-top:1px}
+.reloj.local{background:rgba(245,166,35,.05)}
+.reloj.local .ciu{color:#f5a623}
+.reloj.noche .hr{color:#8b93a3}
+#ind{flex:1;padding:9px 22px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0}
+#ind .fila1,#ind .fila2{display:flex;gap:20px;flex-wrap:wrap;font-size:11px;white-space:nowrap}
+#ind b{color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;font-weight:500}
+#ind .k{color:#4d5566}
+#ind .alerta{color:#ff8fa3}
+#ind .ok{color:#4a9e6f}
+#hud{overflow-x:auto;scrollbar-width:none}
+#hud::-webkit-scrollbar{display:none}
+@media(max-width:1250px){
+  .reloj{min-width:108px;padding:9px 13px}
+  .reloj .hr{font-size:17px} .reloj .hr .seg{display:none}
+  #ind{padding:9px 14px;min-width:280px}
+  #ind .fila1,#ind .fila2{gap:13px;font-size:10.5px}
+}
 .panel.der{right:0;left:auto;border-right:0;border-left:1px solid #1c2030;width:220px}
 h1{font-size:15px;letter-spacing:.14em;color:#f5a623;margin-bottom:2px;font-weight:600}
 .sub{font-size:11px;color:#5c6478;margin-bottom:18px}
@@ -40,7 +68,7 @@ input:focus{border-color:#f5a623}
  padding:12px 20px;color:#dfe3ea;font-size:13.5px;outline:none;backdrop-filter:blur(10px)}
 #chat:focus{border-color:#f5a623}
 #estado{font-size:11px;color:#f5a623;white-space:nowrap;min-width:60px}
-#cfg{position:fixed;top:14px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
+#cfg{position:fixed;top:78px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
  color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
 #cfg:hover{background:#f5a623;color:#07080c}
 #cfg.ok{border-color:#2a4a3a;color:#4a9e6f;font-weight:400}
@@ -64,6 +92,17 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 @media(max-width:900px){.panel{width:260px;padding:14px} .panel.der{display:none} #ocultar{display:block}}
 @media(max-width:760px){.panel{width:100%;height:52vh;bottom:auto;top:auto;bottom:0;border-top:1px solid #1c2030}}
 </style></head><body>
+<div id="hud">
+  <div class="reloj local" data-tz="America/Santiago"><div class="ciu">ARICA</div><div class="hr">—</div><div class="tmp">—</div></div>
+  <div class="reloj" data-tz="America/New_York"><div class="ciu">WASHINGTON</div><div class="hr">—</div><div class="tmp">—</div></div>
+  <div class="reloj" data-tz="Europe/Madrid"><div class="ciu">MADRID</div><div class="hr">—</div><div class="tmp">—</div></div>
+  <div class="reloj" data-tz="Europe/Rome"><div class="ciu">MILANO</div><div class="hr">—</div><div class="tmp">—</div></div>
+  <div id="ind">
+    <div class="fila1"><span class="k">cargando indicadores…</span></div>
+    <div class="fila2"></div>
+  </div>
+</div>
+
 <canvas id="lienzo"></canvas>
 <button id="ocultar" onclick="document.body.classList.toggle('sinpaneles');setTimeout(ajustar,60)">☰ paneles</button>
 
@@ -184,11 +223,11 @@ function ajustar(){
   const xs=vis.map(n=>n.x), ys=vis.map(n=>n.y);
   const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
   // los paneles se encogen en ventanas angostas; el área libre nunca es negativa
-  const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50;
-  const dispW=Math.max(W-izq-der-mg*2, 220), dispH=Math.max(H-mg*2, 220);
+  const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50, hud=64;
+  const dispW=Math.max(W-izq-der-mg*2, 220), dispH=Math.max(H-hud-mg*2-110, 220);
   cam.z=Math.max(0.12, Math.min(dispW/Math.max(x1-x0,1), dispH/Math.max(y1-y0,1), 1.7));
   cam.x=izq+mg+(dispW-(x1-x0)*cam.z)/2-x0*cam.z;
-  cam.y=mg+(dispH-(y1-y0)*cam.z)/2-y0*cam.z;
+  cam.y=hud+mg+(dispH-(y1-y0)*cam.z)/2-y0*cam.z;
 }
 
 for(let i=0;i<400;i++) paso();   // estabilizar antes de mostrar
@@ -382,4 +421,82 @@ document.getElementById('chat').addEventListener('keydown', e=>{
   if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
 });
 window.configurar=configurar; window.guardarCfg=guardarCfg; marcarCfg();
+
+// ── HUD: relojes, clima e indicadores ─────────────────────────────
+const CIUDADES = [
+  {tz:'America/Santiago', lat:-18.4783, lon:-70.3126},
+  {tz:'America/New_York', lat: 38.9072, lon:-77.0369},
+  {tz:'Europe/Madrid',    lat: 40.4168, lon: -3.7038},
+  {tz:'Europe/Rome',      lat: 45.4642, lon:  9.1900},
+];
+
+// códigos WMO de open-meteo → un símbolo que se entienda de un vistazo
+const CIELO = c =>
+  c===0?'☀' : c<=2?'⛅' : c===3?'☁' : c<=48?'🌫' :
+  c<=57?'🌦' : c<=67?'🌧' : c<=77?'❄' : c<=82?'🌧' : c<=86?'❄' : '⛈';
+
+function tictac(){
+  document.querySelectorAll('.reloj').forEach(el=>{
+    const tz = el.dataset.tz;
+    const p = new Intl.DateTimeFormat('es-CL',{timeZone:tz,hour:'2-digit',minute:'2-digit',
+      second:'2-digit',hour12:false}).formatToParts(new Date());
+    const v = Object.fromEntries(p.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+    el.querySelector('.hr').innerHTML = `${v.hour}:${v.minute}<span class="seg">:${v.second}</span>`;
+    const h = parseInt(v.hour,10);
+    el.classList.toggle('noche', h < 7 || h >= 21);   // ciudades dormidas, más apagadas
+  });
+}
+tictac(); setInterval(tictac, 1000);
+
+async function traerClima(){
+  const lats = CIUDADES.map(c=>c.lat).join(','), lons = CIUDADES.map(c=>c.lon).join(',');
+  try{
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}`+
+      `&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`);
+    const d = await r.json();
+    const arr = Array.isArray(d) ? d : [d];
+    document.querySelectorAll('.reloj').forEach((el,i)=>{
+      const c = arr[i]; if(!c) return;
+      const t = Math.round(c.current.temperature_2m);
+      const mn = Math.round(c.daily.temperature_2m_min[0]), mx = Math.round(c.daily.temperature_2m_max[0]);
+      el.querySelector('.tmp').textContent = `${CIELO(c.current.weather_code)} ${t}°  ${mn}/${mx}`;
+    });
+  }catch(e){
+    document.querySelectorAll('.reloj .tmp').forEach(t=>t.textContent='clima n/d');
+  }
+}
+
+async function traerIndicadores(){
+  const f1 = document.querySelector('#ind .fila1');
+  const f2 = document.querySelector('#ind .fila2');
+
+  // lo que sale del propio cerebro no depende de internet: se pinta primero
+  const abiertos = N.filter(n=>['abierto','propuesto','conflicto'].includes(n.estado)).length;
+  const conf = N.filter(n=>n.estado==='conflicto');
+  f2.innerHTML =
+    `<span><span class="k">notas</span> <b>${N.length}</b></span>`+
+    `<span><span class="k">conexiones</span> <b>${A.length}</b></span>`+
+    `<span><span class="k">abiertos</span> <b>${abiertos}</b></span>`+
+    (conf.length
+      ? `<span class="alerta">▲ ${conf.length} en conflicto: ${conf.map(c=>c.id).join(' ')}</span>`
+      : `<span class="ok">sin conflictos</span>`);
+
+  try{
+    const d = await (await fetch('https://mindicador.cl/api')).json();
+    const n = v => v.toLocaleString('es-CL',{maximumFractionDigits:2});
+    f1.innerHTML =
+      `<span><span class="k">dólar</span> <b>$${n(d.dolar.valor)}</b></span>`+
+      `<span><span class="k">euro</span> <b>$${n(d.euro.valor)}</b></span>`+
+      `<span><span class="k">UF</span> <b>$${n(d.uf.valor)}</b></span>`+
+      `<span><span class="k">UTM</span> <b>$${n(d.utm.valor)}</b></span>`+
+      `<span class="k">al ${d.dolar.fecha.slice(0,10)}</span>`;
+  }catch(e){
+    f1.innerHTML = '<span class="k">indicadores no disponibles (sin conexión)</span>';
+  }
+}
+
+traerClima(); traerIndicadores();
+setInterval(traerClima, 15*60*1000);        // el clima no cambia cada minuto
+setInterval(traerIndicadores, 60*60*1000);
+
 </script></body></html>
