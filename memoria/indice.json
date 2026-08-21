@@ -461,6 +461,26 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-018",
+   "tipo": "hallazgo",
+   "titulo": "Los trabajos de impresión no se marcan como impresos en Base44",
+   "estado": "abierto",
+   "autoridad": 2,
+   "fuente": "OBSERVADO",
+   "fecha": "2026-08-21",
+   "tags": [
+    "impresion",
+    "base44",
+    "cola",
+    "riesgo-operacional",
+    "duplicados"
+   ],
+   "cuerpo": "El log de errores del servidor de impresión de Playa repite quince veces:\n\n> `[COLA] Job <id> ya se imprimio en esta sesion (Base44 lo sigue marcando\n> pendiente) - se omite para no duplicar`\n\n**Qué significa:** el servidor imprime el trabajo, pero **DiMangoToGo (Base44)\nnunca lo marca como impreso**. La cola queda llena de trabajos fantasma que\nsiguen figurando pendientes.\n\n**Qué evita el desastre hoy:** una lista en memoria del propio servidor de\nimpresión, que recuerda qué salió \"en esta sesión\" y lo omite.\n\n**Por qué es frágil:** esa lista vive en RAM. Si el proceso se reinicia —corte de\nluz, reinicio de Windows, o el arranque automático de P-008— la lista se pierde,\nBase44 sigue diciendo \"pendiente\", y **se reimprimen de golpe todos los trabajos\nacumulados**: boletas y precuentas viejas saliendo en cadena, probablemente en\nmedio del servicio.\n\n**Agravante:** el arranque automático que se creó en P-008 hace este escenario\n*más* probable, no menos. Antes alguien levantaba el servidor a mano y estaba\nmirando; ahora arranca solo.\n\n**Dónde se arregla:** en DiMangoToGo, no en el servidor de impresión. El job debe\nmarcarse como impreso cuando el servidor confirma. Mientras eso no ocurra, cada\nreinicio es una ruleta.\n\n**Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6**\n(`C:\\dimango\\print-server\\servidor-impresion-playa-v6.js`) en estado `stopped`,\npero en el repositorio existe una **v7**. La entrada de PM2 apunta a una versión\nreemplazada. Pendiente confirmar qué proceso imprime hoy en Playa.",
+   "origen": "C:\\\\Users\\\\usuario\\\\.pm2\\\\logs\\\\impresion-playa-error.log, 21-ago-2026",
+   "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -493,7 +513,7 @@
    ],
    "cuerpo": "Cada componente que Ricardo agrega —Base44, DiMangoToGo, DiMangoWorking,\nservidor de impresión, tótem, cuatro medios de pago— es una pieza más que\n**solo él entiende**. Está reemplazando dependencia de personas por dependencia\nde sistemas que dependen de una sola persona.\n\n**Regla derivada:** automatización que solo Ricardo puede mantener no es\nautomatización, es una dependencia nueva con mejor interfaz. Toda iniciativa\ntécnica debe pasar el test de D-002.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 15,
+   "grado": 16,
    "color": "#27c93f"
   },
   {
@@ -889,7 +909,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff5f56"
   },
   {
@@ -983,7 +1003,7 @@
    ],
    "cuerpo": "Plataforma propia sobre Base44: pedidos, atención, caja, pagos, autoservicio.\n**Fuente única de venta desde el 1-jul-2026.** 519 archivos.\n\n**Pantallas clave:** `/AdminVentas` (venta por local, medio de pago,\nconciliación SII) · `/Caja` · `/Checklist` · `/Kioskos` · `/CierreTurno`.\n\n**Emisión de DTE:** no emite; delega en SimpleFactura (S-003).\n\n**Deuda técnica:** el puente venta↔bodega es matching por **nombre de texto**\n(`ReglaInsumo.nombre_en_venta`). Renombrar un producto rompe la conversión en\nsilencio.",
    "origen": "repo titicheo65/dimangotogo + uso directo",
-   "grado": 13,
+   "grado": 14,
    "color": "#ff8c42"
   },
   {
@@ -1111,7 +1131,7 @@
    ],
    "cuerpo": "Windows en el local de Playa Chinchorro. Se accede por AnyDesk/Splashtop.\n\n**Tres servicios y tres túneles ngrok** (tope del plan Hobbyist):\n\n| Puerto | Servicio | Túnel |\n|---|---|---|\n| 8000 | agente WhatsApp | oak-cornea-marlin.ngrok-free.dev |\n| 8001 | `functions.main` (voiceagentkit) | voiceagentkit.ngrok.app |\n| 3003 | — | dimango.ngrok.app |\n\n**Riesgo estructural:** si se corta la luz o internet en Playa, se caen el agente\nde clientes y Maximus. Nada arranca solo.",
    "origen": "inspección directa, 20-ago-2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff8c42"
   },
   {
@@ -1592,6 +1612,26 @@
    "de": "H-017",
    "a": "M-005",
    "rel": "se_resuelve_con"
+  },
+  {
+   "de": "H-018",
+   "a": "S-001",
+   "rel": "menciona"
+  },
+  {
+   "de": "H-018",
+   "a": "S-008",
+   "rel": "menciona"
+  },
+  {
+   "de": "H-018",
+   "a": "P-008",
+   "rel": "agravado_por"
+  },
+  {
+   "de": "H-018",
+   "a": "L-002",
+   "rel": "relacionado"
   },
   {
    "de": "L-001",
