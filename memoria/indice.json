@@ -493,7 +493,7 @@
    ],
    "cuerpo": "Cada componente que Ricardo agrega —Base44, DiMangoToGo, DiMangoWorking,\nservidor de impresión, tótem, cuatro medios de pago— es una pieza más que\n**solo él entiende**. Está reemplazando dependencia de personas por dependencia\nde sistemas que dependen de una sola persona.\n\n**Regla derivada:** automatización que solo Ricardo puede mantener no es\nautomatización, es una dependencia nueva con mejor interfaz. Toda iniciativa\ntécnica debe pasar el test de D-002.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 14,
+   "grado": 15,
    "color": "#27c93f"
   },
   {
@@ -889,7 +889,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff5f56"
   },
   {
@@ -1111,7 +1111,7 @@
    ],
    "cuerpo": "Windows en el local de Playa Chinchorro. Se accede por AnyDesk/Splashtop.\n\n**Tres servicios y tres túneles ngrok** (tope del plan Hobbyist):\n\n| Puerto | Servicio | Túnel |\n|---|---|---|\n| 8000 | agente WhatsApp | oak-cornea-marlin.ngrok-free.dev |\n| 8001 | `functions.main` (voiceagentkit) | voiceagentkit.ngrok.app |\n| 3003 | — | dimango.ngrok.app |\n\n**Riesgo estructural:** si se corta la luz o internet en Playa, se caen el agente\nde clientes y Maximus. Nada arranca solo.",
    "origen": "inspección directa, 20-ago-2026",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff8c42"
   },
   {
@@ -1150,6 +1150,26 @@
    "cuerpo": "Corre todos los días a las **07:36** en el Mac de Ricardo. Si el equipo está\napagado a esa hora, se ejecuta al encenderlo.\n\n**Qué junta:**\n- Clima de Arica (open-meteo) y dólar/euro/UF (mindicador.cl) — sin autenticación\n- Correos no leídos de las últimas 24 h: **solo cantidad y remitentes**, nunca el\n  contenido\n- Eventos del día del calendario principal\n- Pendientes abiertos y conflictos sin resolver de la memoria atómica\n\n**Cómo sale:** lo redacta Maximus con el criterio de SOUL.md y lo dice en voz\nalta (edge-tts, voz chilena). Máximo 8 líneas, cierra proponiendo una cosa\nconcreta.\n\n**Por qué corre en el Mac y no en ServidorPlaya:** los conectores de Gmail y\nCalendar están autenticados solo ahí. El servidor podría generar la parte de\nclima, indicadores y pendientes, pero no la agenda ni el correo.\n\n**Archivos:** `brain/briefing.py` · tarea en\n`~/.claude/scheduled-tasks/briefing-maximus/SKILL.md`",
    "origen": "tarea programada creada el 20-ago-2026",
    "grado": 4,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-011",
+   "tipo": "sistema",
+   "titulo": "ClubDiMango — CRM y notificaciones push",
+   "estado": "vigente",
+   "autoridad": 4,
+   "fuente": "HECHO",
+   "fecha": "2026-08-21",
+   "tags": [
+    "crm",
+    "fidelizacion",
+    "push",
+    "clubdimango",
+    "arranque-manual"
+   ],
+   "cuerpo": "CRM de fidelización con notificaciones push. Corre en **ServidorPlaya**, puerto\n**3003**, expuesto por el túnel `dimango.ngrok.app`.\n\n**Se levanta a mano.** Igual que el servicio del puerto 8001 (voiceagentkit).\n\n**Riesgo (L-002):** tercer sistema que solo Ricardo sabe levantar, en el mismo\nWindows del local. Si se corta la luz en Playa Chinchorro caen los tres a la vez\n—el agente de clientes, el de voz y el CRM— y nadie se entera hasta que alguien\nreclama.\n\n**Pendiente:** incluirlo en el arranque automático de P-008. Falta conocer el\ncomando exacto y su carpeta.",
+   "origen": "informado por Ricardo, 21-ago-2026",
+   "grado": 3,
    "color": "#ff8c42"
   },
   {
@@ -2082,6 +2102,21 @@
    "de": "S-010",
    "a": "N-001",
    "rel": "menciona"
+  },
+  {
+   "de": "S-011",
+   "a": "S-008",
+   "rel": "corre_en"
+  },
+  {
+   "de": "S-011",
+   "a": "L-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-011",
+   "a": "P-008",
+   "rel": "relacionado"
   },
   {
    "de": "T-001",
