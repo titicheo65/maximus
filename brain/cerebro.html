@@ -68,6 +68,9 @@ input:focus{border-color:#f5a623}
  padding:12px 20px;color:#dfe3ea;font-size:13.5px;outline:none;backdrop-filter:blur(10px)}
 #chat:focus{border-color:#f5a623}
 #estado{font-size:11px;color:#f5a623;white-space:nowrap;min-width:60px}
+#btnvoz{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
+ font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
+#btnvoz.on{border-color:#f5a623;color:#f5a623;opacity:1}
 #cfg{position:fixed;top:78px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
  color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
 #cfg:hover{background:#f5a623;color:#07080c}
@@ -132,6 +135,7 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 
 <div id="barra">
   <input id="chat" placeholder="Pregúntale a Maximus…  (Enter para enviar)" autocomplete="off">
+  <button id="btnvoz" onclick="alternarVoz()" title="Que Maximus conteste hablando">🔊</button>
   <span id="estado"></span>
 </div>
 <div id="rta"></div>
@@ -377,7 +381,7 @@ async function preguntar(texto){
       headers:{'Content-Type':'application/json',
                'x-maximus-token': g('mx_tok'),
                'ngrok-skip-browser-warning':'1'},
-      body: JSON.stringify({mensaje: texto, sesion:'cerebro'})
+      body: JSON.stringify({mensaje: texto, sesion:'cerebro', voz: g('mx_voz')==='1'})
     });
     if(r.status === 401){ caja.textContent='Token inválido. Toca ⚙ conexión abajo.'; estado(''); return; }
     if(r.status === 503){ caja.textContent='El chat no está habilitado en el servidor: falta MAXIMUS_CHAT_TOKEN en el .env.'; estado(''); return; }
@@ -386,6 +390,13 @@ async function preguntar(texto){
     const d = await r.json();
     caja.textContent = d.respuesta;
     estado('');
+
+    if(d.audio){
+      try{
+        const a = new Audio('data:audio/mpeg;base64,' + d.audio);
+        a.volume = 0.9; a.play();
+      }catch(e){ /* si el navegador bloquea el autoplay, el texto ya está */ }
+    }
 
     // lo mejor del grafo: iluminar exactamente lo que Maximus usó para responder
     const usadas = (d.notas || []).filter(n => idx[n] !== undefined);
@@ -420,7 +431,19 @@ document.getElementById('chat').addEventListener('keydown', e=>{
   }
   if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
 });
-window.configurar=configurar; window.guardarCfg=guardarCfg; marcarCfg();
+function alternarVoz(){
+  const on = g('mx_voz') === '1';
+  s('mx_voz', on ? '0' : '1');
+  marcarVoz();
+  estado(on ? 'voz apagada' : 'voz encendida', 2000);
+}
+function marcarVoz(){
+  const b = document.getElementById('btnvoz');
+  if(b) b.classList.toggle('on', g('mx_voz') === '1');
+}
+window.alternarVoz = alternarVoz;
+
+window.configurar=configurar; window.guardarCfg=guardarCfg; marcarCfg(); marcarVoz();
 
 // ── HUD: relojes, clima e indicadores ─────────────────────────────
 const CIUDADES = [
