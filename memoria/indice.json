@@ -235,7 +235,7 @@
    ],
    "cuerpo": "Promedio 3 meses: **$39,5M/mes** en alimentos y bebidas = **28,7% de la venta\nneta**. Dentro del rango normal de la industria (28-35%). **Ricardo compra bien.**\n\nSe usa el promedio a propósito: el RCV va por fecha de recepción y el mes a mes\noscila artificialmente. Mayo aparece anómalamente bajo.\n\n**Limitación (P-005):** es costo de **compra**, no de **consumo**. Sin inventario\nla merma es inmedible, así que el costo real puede ser peor.",
    "origen": "RCV de compras del SII, may-jul 2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#4a9eff"
   },
   {
@@ -344,7 +344,7 @@
    ],
    "cuerpo": "**Julio 2026: $30.271.531 líquido · 45 personas.**\n\n| Local | Personas | Líquido | % |\n|---|---|---|---|\n| Playa Chinchorro | 30 | $21.411.531 | 70,7% |\n| Mall | 11 | $6.600.000 | 21,8% |\n| Ambos | 3 | $2.260.000 | 7,5% |\n\nPor puesto: garzones $7,62M · cocina $6,80M · heladeros $4,69M ·\nadministración $3,75M · aseo $3,21M · producción $1,95M.\n\n**Verificación:** `quincena + extras + fin de mes = TOTAL2` cuadra en el 100%\nde las filas de los tres meses revisados.\n\n**Serie:** junio $25,93M (37) → julio $30,27M (45) → agosto $28,91M (43).\n\n**Alerta:** de junio a julio entraron 8 personas (+21,6%), el costo subió 16,8%\ny la venta solo 7,5%. Como % de la venta: 17,0% → **18,5%**.\n\n**Cargado:** Ricardo informó **$37M con imposiciones** (autoridad 4), dentro de\nla banda estimada de $36-42M.\n\n**No asignable por local (H-008):** Playa tiene 30 de 45 porque produce para los\ndos locales.",
    "origen": "suelgo_working.xlsx, hojas mar-26 a ago-26, entregado por Ricardo",
-   "grado": 13,
+   "grado": 14,
    "color": "#4a9eff"
   },
   {
@@ -697,19 +697,20 @@
   {
    "id": "N-002",
    "tipo": "persona",
-   "titulo": "Carla Montoya — contadora externa",
-   "estado": "conflicto",
+   "titulo": "Carla Montoya — contratos, liquidaciones y trámites",
+   "estado": "vigente",
    "autoridad": 4,
    "fuente": "HECHO",
    "fecha": "2026-08-20",
    "tags": [
     "contabilidad",
-    "sii",
+    "laboral",
+    "contratos",
     "externo"
    ],
-   "cuerpo": "Lleva la contabilidad de DiMango. Servicio externo, se le paga.\n\n**Corrección del 20-ago:** Maximus tenía registrado a Cristian Vidal como el\ncontador. Era falso — Cristian es programador (N-003). El error contaminó el\nanálisis durante un día completo.\n\n**Pendiente:** si Ricardo tiene acceso de consulta, y si la contabilidad va\nseparada por local o consolidada.\n\n---\n\n**CONFLICTO ABIERTO (21-ago-2026).** Quien cobra honorarios contables de julio es\n**Carlos Jirón V.**, de *Soc. Ardiles & Jirón Cía Ltda — Servicios Contables\nArica* (`cjvcontab@gmail.com`), no Carla Montoya.\n\n| Fuente | Dice | Autoridad |\n|---|---|---|\n| Ricardo, 20-ago | la contadora es Carla Montoya | 4 |\n| Correo de honorarios, 21-ago | cobra Carlos Jirón, Ardiles & Jirón | **2** |\n\nPuede ser la misma oficina —Carla trabajando en Ardiles & Jirón— o un dato mal\ntomado. **No se resuelve solo: hay que preguntarle a Ricardo.**\n\nEs la segunda corrección sobre esta nota: antes figuraba Cristian Vidal como\ncontador, y resultó ser programador (N-003). **Quién lleva la contabilidad de\nDiMango ha sido registrado mal dos veces.**\n\n**Pendiente inmediato:** los honorarios de julio están sin pagar.",
-   "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 1,
+   "cuerpo": "Servicio externo. Se ocupa de **contratos, liquidaciones y trámites varios** —\ntodo lo laboral y administrativo.\n\n**No lleva el IVA:** eso es de Carlos Jirón (N-006). Son dos contadores con\nfunciones separadas.\n\n**Historial de correcciones de esta nota — vale la pena conservarlo:**\n1. El 20-ago figuraba **Cristian Vidal** como contador. Falso: es programador (N-003).\n2. El 21-ago el briefing detectó que quien cobra honorarios contables es **Carlos\n   Jirón**, y lo declaró como conflicto en vez de inventar una explicación.\n3. Resuelto el 21-ago: **no había error, faltaba información.** Son dos contadores.\n\n**Lección:** cuando dos fuentes se contradicen, la explicación más probable no es\nque una mienta, sino que el modelo del negocio esté incompleto.",
+   "origen": "informado por Ricardo, 20 y 21-ago-2026",
+   "grado": 4,
    "color": "#ffffff"
   },
   {
@@ -764,6 +765,26 @@
    ],
    "cuerpo": "- **Vivianda** — lunes a viernes\n- **Alejandra** o **Angélica** — sábado y domingo\n- **Cocinero a cargo del turno AM** — siempre\n\n**Cuatro personas recibiendo, una sola despachando.** La recepción cambia según\nel día, lo que dificulta fijar responsabilidad sobre faltantes.",
    "origen": "informado por Ricardo, 20-ago-2026",
+   "grado": 4,
+   "color": "#ffffff"
+  },
+  {
+   "id": "N-006",
+   "tipo": "persona",
+   "titulo": "Carlos Jirón V. — contador de IVA",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-21",
+   "tags": [
+    "contabilidad",
+    "iva",
+    "sii",
+    "externo",
+    "honorarios"
+   ],
+   "cuerpo": "Contador **exclusivo para IVA**. Soc. Ardiles & Jirón Cía Ltda, Servicios\nContables Arica. Contacto: `cjvcontab@gmail.com`.\n\nEs quien trabaja sobre el RCV del SII — la fuente de H-001 a H-006.\n\n**PENDIENTE (21-ago-2026):** honorarios de **julio 2026 sin pagar**. Envió el\ncobro por correo y sigue sin leer.\n\n**Lo que sigue sin existir:** contabilidad **de gestión**. Carlos lleva el IVA,\nCarla lo laboral. Ninguno entrega margen por local ni prime cost semanal — eso\nhay que construirlo desde DiMangoToGo y DiMangoWorking.",
+   "origen": "correo cjvcontab@gmail.com, 21-ago-2026, e informado por Ricardo",
    "grado": 4,
    "color": "#ffffff"
   },
@@ -854,7 +875,7 @@
    ],
    "cuerpo": "**No existe sistema central de inventario.** Consecuencia directa: compras ≠\nconsumo, la merma es inmedible, y el 28,7% de H-001 es costo de *compra*, no de\n*consumo*.\n\n**Alternativa más barata (H-016):** cargar `Product.cost` en DiMangoToGo da\nmargen bruto por producto sin instalar inventario. No mide merma, pero responde\nla pregunta más útil primero.",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff5f56"
   },
   {
@@ -1823,8 +1844,18 @@
   },
   {
    "de": "N-002",
+   "a": "N-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-002",
    "a": "P-005",
-   "rel": "responsable_de"
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-002",
+   "a": "H-011",
+   "rel": "relacionado"
   },
   {
    "de": "N-003",
@@ -1854,6 +1885,21 @@
   {
    "de": "N-005",
    "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-006",
+   "a": "N-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-006",
+   "a": "P-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-006",
+   "a": "H-001",
    "rel": "relacionado"
   },
   {
