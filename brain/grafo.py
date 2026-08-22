@@ -200,8 +200,10 @@ input:focus{border-color:#f5a623}
 #btnvoz{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
 #btnvoz.on{border-color:#f5a623;color:#f5a623;opacity:1}
-#btnmic{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
+#btnmic,#btnojo{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
+#btnojo:hover{border-color:#50e3c2;color:#50e3c2;opacity:1}
+#btnojo.on{border-color:#50e3c2;color:#50e3c2;opacity:1}
 #btnmic.on{border-color:#ff5f56;color:#ff5f56;opacity:1;animation:lat 1.4s ease-in-out infinite}
 @keyframes lat{0%,100%{box-shadow:0 0 0 0 rgba(255,95,86,.5)}50%{box-shadow:0 0 0 9px rgba(255,95,86,0)}}
 #cfg{position:fixed;top:78px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
@@ -268,6 +270,7 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 
 <div id="barra">
   <input id="chat" placeholder="Pregúntale a Maximus…  (Enter para enviar)" autocomplete="off">
+  <button id="btnojo" onclick="mirarPantalla()" title="Que Maximus mire tu pantalla">👁</button>
   <button id="btnmic" onclick="alternarMic()" title="Hablarle a Maximus">🎤</button>
   <button id="btnvoz" onclick="alternarVoz()" title="Que Maximus conteste hablando">🔊</button>
   <span id="estado"></span>
@@ -567,6 +570,86 @@ document.getElementById('chat').addEventListener('keydown', e=>{
   }
   if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
 });
+// ── que Maximus mire la pantalla ──────────────────────────────────
+// Con esto lee DiMangoToGo o DiMangoWorking sin integrar nada: le muestras
+// /AdminVentas y saca los números. La imagen no se guarda en ninguna parte.
+async function mirarPantalla(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+    mostrarRta('Este navegador no puede compartir pantalla. Ábrelo en Chrome.');
+    return;
+  }
+  if(!g('mx_tok')){ configurar(); return; }
+
+  const btn = document.getElementById('btnojo');
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:1}, audio:false});
+  }catch(e){
+    mostrarRta('No compartiste ninguna pantalla.'); return;
+  }
+
+  btn.classList.add('on'); estado('mirando');
+  try{
+    const track = stream.getVideoTracks()[0];
+    // Un instante para que la imagen llegue completa antes de capturarla
+    await new Promise(r=>setTimeout(r, 400));
+
+    const video = document.createElement('video');
+    video.srcObject = stream; video.muted = true;
+    await video.play();
+    await new Promise(r=>setTimeout(r, 250));
+
+    const c = document.createElement('canvas');
+    c.width = video.videoWidth; c.height = video.videoHeight;
+    c.getContext('2d').drawImage(video, 0, 0);
+    track.stop(); stream.getTracks().forEach(t=>t.stop());
+
+    // JPEG al 82%: una captura en PNG puede pesar varios MB y no aporta nitidez
+    const dataUrl = c.toDataURL('image/jpeg', 0.82);
+
+    const pregunta = document.getElementById('chat').value.trim();
+    document.getElementById('chat').value = '';
+    mostrarRta('mirando…');
+    estado('analizando');
+
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/ver', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-maximus-token':g('mx_tok'),
+               'ngrok-skip-browser-warning':'1'},
+      body: JSON.stringify({imagen:dataUrl, mime:'image/jpeg', pregunta})
+    });
+    if(!r.ok){ mostrarRta('El agente respondió ' + r.status); estado(''); btn.classList.remove('on'); return; }
+    const d = await r.json();
+    mostrarRta(d.respuesta);
+    estado('');
+    if(g('mx_voz')==='1') hablarRespuesta(d.respuesta);
+  }catch(e){
+    mostrarRta('No pude capturar la pantalla: ' + e.message);
+    estado('');
+  }
+  btn.classList.remove('on');
+}
+
+// Pide solo el audio de un texto ya generado (para lo que ve, no para el chat)
+async function hablarRespuesta(texto){
+  try{
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-maximus-token':g('mx_tok'),
+               'ngrok-skip-browser-warning':'1'},
+      body: JSON.stringify({mensaje:'Repite exactamente esto, sin agregar nada: ' + texto,
+                            sesion:'voz-solo', voz:true})
+    });
+    const d = await r.json();
+    if(d.audio){
+      if(audioActual) audioActual.pause();
+      audioActual = new Audio('data:audio/mpeg;base64,' + d.audio);
+      audioActual.play();
+    }
+  }catch(e){}
+}
+window.mirarPantalla = mirarPantalla;
+
 // ── hablarle a Maximus ────────────────────────────────────────────
 // Reconocimiento del propio navegador: gratis, sin servidor, sin API key.
 // Solo Chrome y Edge lo implementan; Safari no.
