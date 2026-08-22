@@ -912,7 +912,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 11,
+   "grado": 12,
    "color": "#ff5f56"
   },
   {
@@ -1024,7 +1024,7 @@
    ],
    "cuerpo": "Plataforma propia sobre Base44: pedidos, atención, caja, pagos, autoservicio.\n**Fuente única de venta desde el 1-jul-2026.** 519 archivos.\n\n**Pantallas clave:** `/AdminVentas` (venta por local, medio de pago,\nconciliación SII) · `/Caja` · `/Checklist` · `/Kioskos` · `/CierreTurno`.\n\n**Emisión de DTE:** no emite; delega en SimpleFactura (S-003).\n\n**Deuda técnica:** el puente venta↔bodega es matching por **nombre de texto**\n(`ReglaInsumo.nombre_en_venta`). Renombrar un producto rompe la conversión en\nsilencio.",
    "origen": "repo titicheo65/dimangotogo + uso directo",
-   "grado": 15,
+   "grado": 16,
    "color": "#ff8c42"
   },
   {
@@ -1043,7 +1043,7 @@
    ],
    "cuerpo": "Base44, de Ricardo. 283 archivos. Cuadratura de caja, bodega, remuneraciones,\nutilidad.\n\n**Pantallas clave:** `/ChecklistInsumos` (pedido diario, insumos por venta,\nvincular bodega, reglas) · `/PlanillaSueldos` · `/GestionFinanciera` (pagos a\nproveedores) · `/PedidoProveedor` (stock de proveedores) · `/Inventario`.\n\n**Entidades relevantes:** `ChecklistPedido` (solicitado vs entregado por local y\nárea), `MermaChecklist` (merma valorizada), `MovimientoStock`, `PlanillaSueldo`\n(con campo local: playa/mall/ambos).",
    "origen": "repo titicheo65/dimangoworking",
-   "grado": 5,
+   "grado": 6,
    "color": "#ff8c42"
   },
   {
@@ -1248,7 +1248,26 @@
    ],
    "cuerpo": "`brain/cerebro.html` — archivo único, sin servidor ni internet. Muestra las notas\natómicas como grafo navegable, con buscador, inspector y filtros por tipo, y\ncada nota expone su **autoridad de fuente**.\n\n**Chat:** barra inferior contra `POST /maximus/chat` del agente, protegido con\n`MAXIMUS_CHAT_TOKEN`. Al responder **ilumina en el grafo las notas que Maximus\nusó**: se ve el razonamiento, no solo la conclusión. Eso es lo que un chat de\ntexto no da.\n\nEl token se guarda en el navegador, nunca dentro del archivo: el `.html` se puede\ncopiar sin llevar la llave.\n\n**Dos lecciones de implementación, aprendidas fallando:**\n- `prompt()`, `alert()` y `localStorage` están bloqueados en visores embebidos y\n  en algunos navegadores con `file://`. El botón no hacía nada y **fallaba en\n  silencio**. La configuración debe ser HTML normal dentro de la página.\n- Un campo que recibe un secreto debe validar la forma de lo que recibe. El\n  primero aceptó un comando de PowerShell completo, con saltos de línea, y lo\n  mandó al servidor como si fuera un token.",
    "origen": "verificado funcionando el 21-ago-2026",
-   "grado": 3,
+   "grado": 4,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-014",
+   "tipo": "sistema",
+   "titulo": "Visión — Maximus lee pantallas",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-22",
+   "tags": [
+    "vision",
+    "ocr",
+    "checklist",
+    "reposicion"
+   ],
+   "cuerpo": "`POST /maximus/ver` + botón 👁 en el cerebro. Comparte pantalla, Maximus la mira\ncon la memoria atómica cargada y responde. La imagen no se guarda.\n\n**Verificado:** lee correctamente las pantallas de DiMangoWorking y DiMangoToGo,\nincluidos los montos.\n\n**Por qué importa más de lo que parece:** permite consultar los sistemas **sin\nintegrarlos**. Nada de API, nada de arreglar el matching por nombre de producto\n(el hueco #1 de H-010).\n\n**Su límite:** ve **una pantalla a la vez**. Para cruzar el pedido con la venta\n—que es P-007— hay que tener ambas fuentes visibles en la misma captura.\n\n**Corrección aplicada el 22-ago:** leía los montos en formato estadounidense y\n`$40.464.040` lo interpretaba como cuarenta dólares. En Chile el punto separa\nmiles. Corregido en el encabezado de Maximus y en el prompt de visión.\n\n**Camino que abre para P-007:** la versión asistida —Ricardo muestra, Maximus\ncruza— cuesta cero desarrollo y entrega el 80% del valor. Sirve además para\ndecidir si vale la pena construir la versión automática con alertas.",
+   "origen": "probado el 22-ago-2026 sobre /ChecklistInsumos y una captura de escritorio",
+   "grado": 4,
    "color": "#ff8c42"
   },
   {
@@ -2270,6 +2289,26 @@
   {
    "de": "S-013",
    "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-014",
+   "a": "S-013",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-014",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-014",
+   "a": "S-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-014",
+   "a": "S-002",
    "rel": "relacionado"
   },
   {
