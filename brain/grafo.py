@@ -10,6 +10,7 @@ Los datos van embebidos en el HTML, así que el archivo no sale de tu disco.
 
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
@@ -105,8 +106,10 @@ def main():
                 if dst not in notas:
                     rotos.append(f"{nid} --{rel}--> {dst}")
 
+    # La fecha se toma del reloj: escrita a mano miente en cuanto alguien
+    # regenera el índice sin acordarse de cambiarla.
     indice = {"nodos": nodos, "aristas": aristas,
-              "generado": "2026-08-20",
+              "generado": date.today().isoformat(),
               "huerfanos": huerfanos, "enlaces_rotos": rotos}
     (MEM / "indice.json").write_text(json.dumps(indice, ensure_ascii=False, indent=1), encoding="utf-8")
 

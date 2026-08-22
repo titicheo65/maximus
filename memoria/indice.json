@@ -698,7 +698,7 @@
    "id": "N-002",
    "tipo": "persona",
    "titulo": "Carla Montoya — contadora externa",
-   "estado": "vigente",
+   "estado": "conflicto",
    "autoridad": 4,
    "fuente": "HECHO",
    "fecha": "2026-08-20",
@@ -707,7 +707,7 @@
     "sii",
     "externo"
    ],
-   "cuerpo": "Lleva la contabilidad de DiMango. Servicio externo, se le paga.\n\n**Corrección del 20-ago:** Maximus tenía registrado a Cristian Vidal como el\ncontador. Era falso — Cristian es programador (N-003). El error contaminó el\nanálisis durante un día completo.\n\n**Pendiente:** si Ricardo tiene acceso de consulta, y si la contabilidad va\nseparada por local o consolidada.",
+   "cuerpo": "Lleva la contabilidad de DiMango. Servicio externo, se le paga.\n\n**Corrección del 20-ago:** Maximus tenía registrado a Cristian Vidal como el\ncontador. Era falso — Cristian es programador (N-003). El error contaminó el\nanálisis durante un día completo.\n\n**Pendiente:** si Ricardo tiene acceso de consulta, y si la contabilidad va\nseparada por local o consolidada.\n\n---\n\n**CONFLICTO ABIERTO (21-ago-2026).** Quien cobra honorarios contables de julio es\n**Carlos Jirón V.**, de *Soc. Ardiles & Jirón Cía Ltda — Servicios Contables\nArica* (`cjvcontab@gmail.com`), no Carla Montoya.\n\n| Fuente | Dice | Autoridad |\n|---|---|---|\n| Ricardo, 20-ago | la contadora es Carla Montoya | 4 |\n| Correo de honorarios, 21-ago | cobra Carlos Jirón, Ardiles & Jirón | **2** |\n\nPuede ser la misma oficina —Carla trabajando en Ardiles & Jirón— o un dato mal\ntomado. **No se resuelve solo: hay que preguntarle a Ricardo.**\n\nEs la segunda corrección sobre esta nota: antes figuraba Cristian Vidal como\ncontador, y resultó ser programador (N-003). **Quién lleva la contabilidad de\nDiMango ha sido registrado mal dos veces.**\n\n**Pendiente inmediato:** los honorarios de julio están sin pagar.",
    "origen": "informado por Ricardo, 20-ago-2026",
    "grado": 1,
    "color": "#ffffff"
@@ -2242,7 +2242,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-08-20",
+ "generado": "2026-08-22",
  "huerfanos": [],
  "enlaces_rotos": []
 }
