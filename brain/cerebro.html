@@ -71,6 +71,10 @@ input:focus{border-color:#f5a623}
 #btnvoz{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
 #btnvoz.on{border-color:#f5a623;color:#f5a623;opacity:1}
+#btnmic{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
+ font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
+#btnmic.on{border-color:#ff5f56;color:#ff5f56;opacity:1;animation:lat 1.4s ease-in-out infinite}
+@keyframes lat{0%,100%{box-shadow:0 0 0 0 rgba(255,95,86,.5)}50%{box-shadow:0 0 0 9px rgba(255,95,86,0)}}
 #cfg{position:fixed;top:78px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
  color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
 #cfg:hover{background:#f5a623;color:#07080c}
@@ -135,6 +139,7 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 
 <div id="barra">
   <input id="chat" placeholder="Pregúntale a Maximus…  (Enter para enviar)" autocomplete="off">
+  <button id="btnmic" onclick="alternarMic()" title="Hablarle a Maximus">🎤</button>
   <button id="btnvoz" onclick="alternarVoz()" title="Que Maximus conteste hablando">🔊</button>
   <span id="estado"></span>
 </div>
@@ -393,8 +398,10 @@ async function preguntar(texto){
 
     if(d.audio){
       try{
-        const a = new Audio('data:audio/mpeg;base64,' + d.audio);
-        a.volume = 0.9; a.play();
+        if(audioActual){ audioActual.pause(); }
+        audioActual = new Audio('data:audio/mpeg;base64,' + d.audio);
+        audioActual.volume = 0.9;
+        audioActual.play();
       }catch(e){ /* si el navegador bloquea el autoplay, el texto ya está */ }
     }
 
@@ -431,6 +438,77 @@ document.getElementById('chat').addEventListener('keydown', e=>{
   }
   if(e.key==='Escape'){ document.getElementById('rta').style.display='none'; }
 });
+// ── hablarle a Maximus ────────────────────────────────────────────
+// Reconocimiento del propio navegador: gratis, sin servidor, sin API key.
+// Solo Chrome y Edge lo implementan; Safari no.
+let rec = null, escuchando = false, audioActual = null;
+
+function alternarMic(){
+  if(escuchando){ pararMic(); return; }
+
+  // Si estaba hablando, se calla: le estás interrumpiendo.
+  if(audioActual){ try{ audioActual.pause(); }catch(e){} audioActual = null; }
+
+  // Quien habla espera que le contesten hablando: la voz se enciende sola.
+  if(g('mx_voz') !== '1'){ s('mx_voz','1'); marcarVoz(); }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    mostrarRta('Este navegador no reconoce voz.\n\nÁbrelo en Chrome: Safari no implementa el reconocimiento de voz.');
+    return;
+  }
+
+  rec = new SR();
+  rec.lang = 'es-CL';
+  rec.continuous = false;      // un turno cada vez: hablas, contesta, hablas
+  rec.interimResults = true;
+
+  const caja = document.getElementById('chat');
+  let final = '';
+
+  rec.onstart = () => { escuchando = true; marcarMic(); estado('escuchando'); };
+
+  rec.onresult = e => {
+    let interino = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) final += t; else interino += t;
+    }
+    caja.value = (final + interino).trim();     // se ve lo que va entendiendo
+  };
+
+  rec.onerror = ev => {
+    escuchando = false; marcarMic(); estado('');
+    const causa = {
+      'not-allowed':'Falta permiso del micrófono. Dáselo en el candado de la barra de direcciones.',
+      'service-not-allowed':'El navegador bloqueó el micrófono. Prueba abriendo el archivo en Chrome.',
+      'no-speech':'No escuché nada.',
+      'audio-capture':'No encuentro micrófono.'
+    }[ev.error] || ('Error de reconocimiento: ' + ev.error);
+    mostrarRta(causa);
+  };
+
+  rec.onend = () => {
+    escuchando = false; marcarMic(); estado('');
+    const t = caja.value.trim();
+    if(t){ caja.value=''; preguntar(t); }        // al callarte, se envía solo
+  };
+
+  try { rec.start(); }
+  catch(e){ mostrarRta('No pude abrir el micrófono: ' + e.message); }
+}
+
+function pararMic(){ try{ rec && rec.stop(); }catch(e){} }
+function marcarMic(){
+  const b = document.getElementById('btnmic');
+  if(b) b.classList.toggle('on', escuchando);
+}
+function mostrarRta(t){
+  const c = document.getElementById('rta');
+  c.style.display='block'; c.textContent = t;
+}
+window.alternarMic = alternarMic;
+
 function alternarVoz(){
   const on = g('mx_voz') === '1';
   s('mx_voz', on ? '0' : '1');
@@ -443,7 +521,7 @@ function marcarVoz(){
 }
 window.alternarVoz = alternarVoz;
 
-window.configurar=configurar; window.guardarCfg=guardarCfg; marcarCfg(); marcarVoz();
+window.configurar=configurar; window.guardarCfg=guardarCfg; marcarCfg(); marcarVoz(); marcarMic();
 
 // ── HUD: relojes, clima e indicadores ─────────────────────────────
 const CIUDADES = [
