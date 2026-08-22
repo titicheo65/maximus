@@ -17,6 +17,7 @@ son derechos de terceros y no corresponde versionarlos.
 """
 
 import asyncio
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -76,6 +77,30 @@ def sonar_riff(segundos=SEGUNDOS_INTRO, volumen=VOLUMEN_RIFF, bloquear=True):
     return p
 
 
+# Palabras que el sintetizador lee en español pero se pronuncian de otra forma.
+# El orden importa: lo más largo primero, o "Mallplaza" quedaría como "Mollplaza".
+PRONUNCIACION = [
+    (r"\bMall\s*[Pp]laza\b", "Mol Plasa"),
+    (r"\bMallplaza\b", "Mol Plasa"),
+    (r"\bmallplaza\b", "mol plasa"),
+    (r"\bMall\b", "Moll"),
+    (r"\bmall\b", "moll"),
+    (r"\bWhatsApp\b", "Guatsáp"),
+    (r"\bwhatsapp\b", "guatsáp"),
+    (r"\bSII\b", "S I I"),
+    (r"\bDiMangoToGo\b", "DiMango Tu Gou"),
+    (r"\bDiMangoWorking\b", "DiMango Wérking"),
+    (r"\bToGo\b", "Tu Gou"),
+    (r"\bPlaza Oeste\b", "Plasa Oeste"),
+]
+
+
+def pronunciar(texto: str) -> str:
+    for patron, reemplazo in PRONUNCIACION:
+        texto = re.sub(patron, reemplazo, texto)
+    return texto
+
+
 async def _sintetizar(texto: str):
     """Devuelve la ruta del mp3 de la voz, o None si edge-tts no está."""
     try:
@@ -84,7 +109,7 @@ async def _sintetizar(texto: str):
         print("edge-tts no instalado:  pip3 install edge-tts")
         return None
     salida = BASE / "audio" / ".saludo.mp3"
-    await edge_tts.Communicate(texto, VOZ).save(str(salida))
+    await edge_tts.Communicate(pronunciar(texto), VOZ).save(str(salida))
     return salida if salida.exists() else None
 
 
