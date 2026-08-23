@@ -1194,7 +1194,7 @@
    ],
    "cuerpo": "Corre todos los días a las **07:36** en el Mac de Ricardo. Si el equipo está\napagado a esa hora, se ejecuta al encenderlo.\n\n**Qué junta:**\n- Clima de Arica (open-meteo) y dólar/euro/UF (mindicador.cl) — sin autenticación\n- Correos no leídos de las últimas 24 h: **solo cantidad y remitentes**, nunca el\n  contenido\n- Eventos del día del calendario principal\n- Pendientes abiertos y conflictos sin resolver de la memoria atómica\n\n**Cómo sale:** lo redacta Maximus con el criterio de SOUL.md y lo dice en voz\nalta (edge-tts, voz chilena). Máximo 8 líneas, cierra proponiendo una cosa\nconcreta.\n\n**Por qué corre en el Mac y no en ServidorPlaya:** los conectores de Gmail y\nCalendar están autenticados solo ahí. El servidor podría generar la parte de\nclima, indicadores y pendientes, pero no la agenda ni el correo.\n\n**Archivos:** `brain/briefing.py` · tarea en\n`~/.claude/scheduled-tasks/briefing-maximus/SKILL.md`",
    "origen": "tarea programada creada el 20-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#ff8c42"
   },
   {
@@ -1252,7 +1252,7 @@
    ],
    "cuerpo": "`brain/cerebro.html` — archivo único, sin servidor ni internet. Muestra las notas\natómicas como grafo navegable, con buscador, inspector y filtros por tipo, y\ncada nota expone su **autoridad de fuente**.\n\n**Chat:** barra inferior contra `POST /maximus/chat` del agente, protegido con\n`MAXIMUS_CHAT_TOKEN`. Al responder **ilumina en el grafo las notas que Maximus\nusó**: se ve el razonamiento, no solo la conclusión. Eso es lo que un chat de\ntexto no da.\n\nEl token se guarda en el navegador, nunca dentro del archivo: el `.html` se puede\ncopiar sin llevar la llave.\n\n**Dos lecciones de implementación, aprendidas fallando:**\n- `prompt()`, `alert()` y `localStorage` están bloqueados en visores embebidos y\n  en algunos navegadores con `file://`. El botón no hacía nada y **fallaba en\n  silencio**. La configuración debe ser HTML normal dentro de la página.\n- Un campo que recibe un secreto debe validar la forma de lo que recibe. El\n  primero aceptó un comando de PowerShell completo, con saltos de línea, y lo\n  mandó al servidor como si fuera un token.",
    "origen": "verificado funcionando el 21-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#ff8c42"
   },
   {
@@ -1271,7 +1271,26 @@
    ],
    "cuerpo": "`POST /maximus/ver` + botón 👁 en el cerebro. Comparte pantalla, Maximus la mira\ncon la memoria atómica cargada y responde. La imagen no se guarda.\n\n**Verificado:** lee correctamente las pantallas de DiMangoWorking y DiMangoToGo,\nincluidos los montos.\n\n**Por qué importa más de lo que parece:** permite consultar los sistemas **sin\nintegrarlos**. Nada de API, nada de arreglar el matching por nombre de producto\n(el hueco #1 de H-010).\n\n**Su límite:** ve **una pantalla a la vez**. Para cruzar el pedido con la venta\n—que es P-007— hay que tener ambas fuentes visibles en la misma captura.\n\n**Corrección aplicada el 22-ago, en dos intentos:** leía los montos en formato\nestadounidense y `$40.464.040` lo interpretaba como cuarenta dólares.\n\nEl primer arreglo —agregar la regla al prompt— **no funcionó**, porque la\ninstrucción iba *después* de la imagen: cuando llegaba, el modelo ya había leído\nlos montos. El segundo la puso **antes** de la imagen y agregó un control de\nmagnitud (venta mensual ~$160M, almuerzo $8.000-20.000: si un número no encaja\nen ese orden, se leyó mal).\n\n**Lección de diseño:** en un mensaje con imagen, las instrucciones que\ncondicionan *cómo interpretarla* van antes de la imagen. Después, corrigen tarde.\n\n**Camino que abre para P-007:** la versión asistida —Ricardo muestra, Maximus\ncruza— cuesta cero desarrollo y entrega el 80% del valor. Sirve además para\ndecidir si vale la pena construir la versión automática con alertas.",
    "origen": "probado el 22-ago-2026 sobre /ChecklistInsumos y una captura de escritorio",
-   "grado": 4,
+   "grado": 5,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-015",
+   "tipo": "sistema",
+   "titulo": "Despertar por aplausos",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-22",
+   "tags": [
+    "aplauso",
+    "microfono",
+    "arranque",
+    "jarvis"
+   ],
+   "cuerpo": "`brain/escuchar.py`. Dos aplausos disparan `Maximus.command`: música, saludo\nhablado y cerebro visual.\n\n**Cómo distingue un aplauso:** pico de energía muy corto que supera el ruido de\nfondo por un factor, y **dos** dentro de una ventana breve con bajada entre\nmedio. Descarta portazos y voces; no descarta todo, por eso existen `--umbral`\ny `--calibrar`.\n\nAmbiente de Ricardo medido: ruido de fondo 0,0001 — muy silencioso. Umbral 0,15.\n\n**Verificado funcionando.**\n\n**Origen:** la idea salió de una guía de Hector García que Ricardo encontró. Su\nscript abre Spotify y Cursor en Windows; de esas nueve páginas solo servía el\nconcepto. El código se escribió de cero para macOS.",
+   "origen": "probado por Ricardo el 22-ago-2026",
+   "grado": 3,
    "color": "#ff8c42"
   },
   {
@@ -2331,6 +2350,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "S-015",
+   "a": "S-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-015",
+   "a": "S-013",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-015",
+   "a": "S-014",
+   "rel": "relacionado"
+  },
+  {
    "de": "T-001",
    "a": "E-001",
    "rel": "se_resuelve_con"
@@ -2346,7 +2380,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-08-22",
+ "generado": "2026-08-23",
  "huerfanos": [],
  "enlaces_rotos": []
 }
