@@ -320,7 +320,14 @@ window.abrir=abrir; window.alternar=alternar;
 // ── chat con Maximus ──────────────────────────────────────────────
 // El token no viaja dentro del archivo: se pide una vez y queda en este
 // navegador. Así el .html se puede copiar o mandar sin llevar la llave.
-const DEFECTO = 'https://oak-cornea-marlin.ngrok-free.dev';
+// Si el cerebro se sirve por http (servidor.py en localhost), se le habla al
+// agente por el MISMO origen: ese servidor hace de puente. Así no hay CORS, y
+// sobre todo Chrome recuerda el permiso del micrófono — en file:// lo pide en
+// cada turno y no se puede conversar de corrido. Abierto como archivo, se va
+// directo al túnel, como siempre.
+const DEFECTO = location.protocol.startsWith('http')
+  ? location.origin
+  : 'https://oak-cornea-marlin.ngrok-free.dev';
 // localStorage también está bloqueado en algunos visores embebidos. Si falla,
 // la configuración vive en memoria: sirve para esta sesión y no rompe nada.
 const _mem = {};
@@ -399,14 +406,7 @@ async function preguntar(texto){
     caja.textContent = d.respuesta;
     estado('');
 
-    if(d.audio){
-      try{
-        if(audioActual){ audioActual.pause(); }
-        audioActual = new Audio('data:audio/mpeg;base64,' + d.audio);
-        audioActual.volume = 0.9;
-        audioActual.play();
-      }catch(e){ /* si el navegador bloquea el autoplay, el texto ya está */ }
-    }
+    if(d.audio) sonar(d.audio, 0.9);   // cierra el mic mientras habla: ver sonar()
 
     // lo mejor del grafo: iluminar exactamente lo que Maximus usó para responder
     const usadas = (d.notas || []).filter(n => idx[n] !== undefined);
@@ -512,11 +512,7 @@ async function hablarRespuesta(texto){
                             sesion:'voz-solo', voz:true})
     });
     const d = await r.json();
-    if(d.audio){
-      if(audioActual) audioActual.pause();
-      audioActual = new Audio('data:audio/mpeg;base64,' + d.audio);
-      audioActual.play();
-    }
+    if(d.audio) sonar(d.audio, 1.0);   // cierra el mic mientras habla: ver sonar()
   }catch(e){}
 }
 window.mirarPantalla = mirarPantalla;
@@ -526,8 +522,31 @@ window.mirarPantalla = mirarPantalla;
 // Solo Chrome y Edge lo implementan; Safari no.
 let rec = null, escuchando = false, audioActual = null;
 
+// El micrófono tiene DOS estados y confundirlos era el bug:
+//   micAbierto  → el pestillo. Lo pones tú y solo tú lo sacas.
+//   escuchando  → si el motor del navegador está activo en este instante.
+// Chrome corta el reconocimiento cada vez que te callas. Eso baja 'escuchando',
+// no el pestillo — y mientras el pestillo esté puesto, se vuelve a levantar solo.
+let micAbierto = false, fallosSeguidos = 0;
+
+// ¿Está sonando la respuesta? Mientras habla no se escucha: por los parlantes se
+// oiría a sí mismo, se transcribiría y se contestaría solo, en bucle.
+function hablando(){
+  return !!(audioActual && !audioActual.paused && !audioActual.ended);
+}
+
+function sonar(b64, volumen){
+  try{
+    if(audioActual){ audioActual.pause(); }
+    if(escuchando){ try{ rec && rec.abort(); }catch(e){} }   // cierra el mic antes de hablar
+    audioActual = new Audio('data:audio/mpeg;base64,' + b64);
+    audioActual.volume = volumen;
+    audioActual.play().catch(()=>{});
+  }catch(e){ /* si el navegador bloquea el autoplay, el texto ya está */ }
+}
+
 function alternarMic(){
-  if(escuchando){ pararMic(); return; }
+  if(micAbierto){ pararMic(); return; }        // apagar es explícito: lo pediste tú
 
   // Si estaba hablando, se calla: le estás interrumpiendo.
   if(audioActual){ try{ audioActual.pause(); }catch(e){} audioActual = null; }
@@ -541,15 +560,25 @@ function alternarMic(){
     return;
   }
 
+  micAbierto = true; fallosSeguidos = 0;
+  marcarMic(); estado('escuchando');
+  arrancarMic();
+}
+
+function arrancarMic(){
+  if(!micAbierto || escuchando || hablando()) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return;
+
   rec = new SR();
   rec.lang = 'es-CL';
-  rec.continuous = false;      // un turno cada vez: hablas, contesta, hablas
+  rec.continuous = false;      // el turno lo corta el navegador; el pestillo lo reabre
   rec.interimResults = true;
 
   const caja = document.getElementById('chat');
-  let final = '';
+  let final = '';              // local a cada turno: no arrastra lo ya enviado
 
-  rec.onstart = () => { escuchando = true; marcarMic(); estado('escuchando'); };
+  rec.onstart = () => { escuchando = true; fallosSeguidos = 0; marcarMic(); estado('escuchando'); };
 
   rec.onresult = e => {
     let interino = '';
@@ -561,30 +590,56 @@ function alternarMic(){
   };
 
   rec.onerror = ev => {
-    escuchando = false; marcarMic(); estado('');
-    const causa = {
+    escuchando = false;
+    // Con el pestillo puesto estos dos son normales, no fallas: te quedaste
+    // callado, o el turno se cortó para reabrirse. No deben apagar el micrófono.
+    if(ev.error === 'no-speech' || ev.error === 'aborted') return;
+
+    // Sin permiso o sin micrófono no sirve reintentar: se suelta el pestillo.
+    micAbierto = false; marcarMic(); estado('');
+    mostrarRta({
       'not-allowed':'Falta permiso del micrófono. Dáselo en el candado de la barra de direcciones.',
       'service-not-allowed':'El navegador bloqueó el micrófono. Prueba abriendo el archivo en Chrome.',
-      'no-speech':'No escuché nada.',
       'audio-capture':'No encuentro micrófono.'
-    }[ev.error] || ('Error de reconocimiento: ' + ev.error);
-    mostrarRta(causa);
+    }[ev.error] || ('Error de reconocimiento: ' + ev.error));
   };
 
   rec.onend = () => {
-    escuchando = false; marcarMic(); estado('');
+    escuchando = false;
     const t = caja.value.trim();
     if(t){ caja.value=''; preguntar(t); }        // al callarte, se envía solo
+    if(micAbierto){ estado('escuchando'); setTimeout(arrancarMic, 300); }
+    else { marcarMic(); estado(''); }
   };
 
   try { rec.start(); }
-  catch(e){ mostrarRta('No pude abrir el micrófono: ' + e.message); }
+  catch(e){
+    escuchando = false;
+    if(++fallosSeguidos >= 3){
+      micAbierto = false; marcarMic(); estado('');
+      mostrarRta('No pude abrir el micrófono: ' + e.message);
+    }else{
+      setTimeout(arrancarMic, 500);
+    }
+  }
 }
 
-function pararMic(){ try{ rec && rec.stop(); }catch(e){} }
+// Red de seguridad. Si el pestillo está puesto y el reconocimiento quedó abajo
+// por cualquier camino —un error de red, una salida temprana, el navegador en
+// segundo plano— esto lo levanta. Vale más un vigilante de tres líneas que
+// perseguir cada punto de salida a mano.
+setInterval(() => {
+  if(micAbierto && !escuchando && !hablando()) arrancarMic();
+}, 1500);
+
+function pararMic(){
+  micAbierto = false;                      // primero suelta el pestillo…
+  try{ rec && rec.stop(); }catch(e){}      // …o el onend lo volvería a abrir
+  marcarMic(); estado('');
+}
 function marcarMic(){
   const b = document.getElementById('btnmic');
-  if(b) b.classList.toggle('on', escuchando);
+  if(b) b.classList.toggle('on', micAbierto);   // el botón muestra TU decisión
 }
 function mostrarRta(t){
   const c = document.getElementById('rta');
