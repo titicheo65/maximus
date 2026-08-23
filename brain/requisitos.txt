@@ -1,0 +1,5 @@
+
+# Dependencias del cerebro (opcionales, cada una degrada sin romper)
+sounddevice   # deteccion de aplausos (brain/escuchar.py)
+edge-tts      # voz chilena gratis
+pyobjc-framework-AVFoundation  # bajar el volumen de la musica al hablar

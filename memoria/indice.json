@@ -697,7 +697,7 @@
   {
    "id": "N-002",
    "tipo": "persona",
-   "titulo": "Carla Montoya — contratos, liquidaciones y trámites",
+   "titulo": "Carla Montoya — remuneraciones y liquidaciones",
    "estado": "vigente",
    "autoridad": 4,
    "fuente": "HECHO",
@@ -705,30 +705,33 @@
    "tags": [
     "contabilidad",
     "laboral",
+    "remuneraciones",
     "contratos",
     "externo"
    ],
-   "cuerpo": "Servicio externo. Se ocupa de **contratos, liquidaciones y trámites varios** —\ntodo lo laboral y administrativo.\n\n**No lleva el IVA:** eso es de Carlos Jirón (N-006). Son dos contadores con\nfunciones separadas.\n\n**Historial de correcciones de esta nota — vale la pena conservarlo:**\n1. El 20-ago figuraba **Cristian Vidal** como contador. Falso: es programador (N-003).\n2. El 21-ago el briefing detectó que quien cobra honorarios contables es **Carlos\n   Jirón**, y lo declaró como conflicto en vez de inventar una explicación.\n3. Resuelto el 21-ago: **no había error, faltaba información.** Son dos contadores.\n\n**Lección:** cuando dos fuentes se contradicen, la explicación más probable no es\nque una mienta, sino que el modelo del negocio esté incompleto.",
-   "origen": "informado por Ricardo, 20 y 21-ago-2026",
-   "grado": 4,
+   "cuerpo": "Servicio externo. Hace **las remuneraciones**: liquidaciones de sueldo,\ncontratos y trámites laborales. Precisado por Ricardo el 22-ago-2026.\n\n**No lleva el IVA ni la renta:** eso es de Carlos Jirón (N-006). Y **no es\ndueña del software** con que se generan las liquidaciones: esa licencia la\nvende Cristian Vidal una vez al año (N-003). Tres personas, tres funciones\ndistintas.\n\nEs la fuente humana detrás de la planilla que cerró H-011 (costo laboral de\njulio).\n\n**Historial de correcciones de esta nota — vale la pena conservarlo:**\n1. El 20-ago figuraba **Cristian Vidal** como contador. Falso: solo vende la\n   licencia del software de liquidaciones (N-003).\n2. El 21-ago el briefing detectó que quien cobra honorarios contables es **Carlos\n   Jirón**, y lo declaró como conflicto en vez de inventar una explicación.\n3. Resuelto el 21-ago: **no había error, faltaba información.** Son dos contadores.\n4. El 22-ago Ricardo separó los tres roles con precisión: Carla → remuneraciones,\n   Carlos → IVA y renta, Cristian → licencia anual del software.\n\n**Lección:** cuando dos fuentes se contradicen, la explicación más probable no es\nque una mienta, sino que el modelo del negocio esté incompleto.",
+   "origen": "informado por Ricardo, 20, 21 y 22-ago-2026",
+   "grado": 6,
    "color": "#ffffff"
   },
   {
    "id": "N-003",
    "tipo": "persona",
-   "titulo": "Cristian Vidal — programador",
+   "titulo": "Cristian Vidal — vende la licencia anual del software de liquidaciones",
    "estado": "vigente",
    "autoridad": 4,
    "fuente": "HECHO",
    "fecha": "2026-08-20",
    "tags": [
-    "programador",
+    "proveedor",
+    "software",
     "remuneraciones",
+    "licencia",
     "externo"
    ],
-   "cuerpo": "Creó el software contable que genera las remuneraciones.\n\nRicardo planteó reemplazarlo con desarrollo propio. **Clasificado como idea, no\nprioridad:** sería otro sistema que solo él mantiene (L-002), para reemplazar\nalgo que funciona, con cuatro frentes abiertos.",
-   "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 2,
+   "cuerpo": "**No es contador y no es el programador de planta de DiMango.** Vende **una\nlicencia, una vez al año**, del software con que se crean las liquidaciones de\nsueldo. Nada más. Precisado por Ricardo el 22-ago-2026.\n\nQuien usa ese software para hacer las remuneraciones es **Carla Montoya**\n(N-002).\n\n**Ricardo planteó reemplazarlo con desarrollo propio. Sigue clasificado como\nidea, no prioridad — y ahora con menos caso que antes:** el gasto es una\nlicencia anual, no un servicio mensual, y el software es de nómina, el dominio\nmás regulado y peor lugar para estrenar código propio. Cambiar eso por un\nsistema que solo Ricardo mantiene es L-002 en su versión más cara: máximo riesgo\nregulatorio, mínimo ahorro.\n\n**Dato que falta para siquiera discutirlo:** cuánto cuesta la licencia al año.\nSin ese número no hay comparación posible.",
+   "origen": "informado por Ricardo, 20-ago-2026; precisado el 22-ago-2026",
+   "grado": 5,
    "color": "#ffffff"
   },
   {
@@ -771,7 +774,7 @@
   {
    "id": "N-006",
    "tipo": "persona",
-   "titulo": "Carlos Jirón V. — contador de IVA",
+   "titulo": "Carlos Jirón V. — contador de IVA y renta",
    "estado": "vigente",
    "autoridad": 2,
    "fuente": "HECHO",
@@ -779,13 +782,14 @@
    "tags": [
     "contabilidad",
     "iva",
+    "renta",
     "sii",
     "externo",
     "honorarios"
    ],
-   "cuerpo": "Contador **exclusivo para IVA**. Soc. Ardiles & Jirón Cía Ltda, Servicios\nContables Arica. Contacto: `cjvcontab@gmail.com`.\n\nEs quien trabaja sobre el RCV del SII — la fuente de H-001 a H-006.\n\n**PENDIENTE (21-ago-2026):** honorarios de **julio 2026 sin pagar**. Envió el\ncobro por correo y sigue sin leer.\n\n**Lo que sigue sin existir:** contabilidad **de gestión**. Carlos lleva el IVA,\nCarla lo laboral. Ninguno entrega margen por local ni prime cost semanal — eso\nhay que construirlo desde DiMangoToGo y DiMangoWorking.",
-   "origen": "correo cjvcontab@gmail.com, 21-ago-2026, e informado por Ricardo",
-   "grado": 4,
+   "cuerpo": "Contador de **IVA y renta** del local. Soc. Ardiles & Jirón Cía Ltda, Servicios\nContables Arica. Contacto: `cjvcontab@gmail.com`. Alcance ampliado el\n22-ago-2026: el 21-ago figuraba como \"exclusivo IVA\"; también lleva la renta.\n\nEs quien trabaja sobre el RCV del SII — la fuente de H-001 a H-006.\n\n**PENDIENTE (al 22-ago-2026):** honorarios de **julio 2026 sin pagar**. Cobró\npor correo el 21-ago y el correo sigue sin leer.\n\n**Lo que sigue sin existir: contabilidad de gestión.** Carlos lleva IVA y renta\n—obligación tributaria—, Carla lleva remuneraciones, Cristian solo vende la\nlicencia del software de liquidaciones (N-003). **Ninguno de los tres entrega\nmargen por local ni prime cost semanal.** Nadie está mirando el negocio: los tres\nestán cumpliendo trámites. Eso hay que construirlo desde DiMangoToGo y\nDiMangoWorking, y explica por qué H-012 sigue con ~$36M/mes sin explicar.",
+   "origen": "correo cjvcontab@gmail.com, 21-ago-2026; alcance precisado por Ricardo el 22-ago-2026",
+   "grado": 5,
    "color": "#ffffff"
   },
   {
@@ -1863,6 +1867,11 @@
   },
   {
    "de": "N-002",
+   "a": "N-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-002",
    "a": "N-006",
    "rel": "relacionado"
   },
@@ -1874,6 +1883,11 @@
   {
    "de": "N-002",
    "a": "H-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-003",
+   "a": "N-002",
    "rel": "relacionado"
   },
   {
@@ -1909,6 +1923,11 @@
   {
    "de": "N-006",
    "a": "N-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "N-006",
+   "a": "N-003",
    "rel": "relacionado"
   },
   {

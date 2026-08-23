@@ -83,7 +83,12 @@ Fuentes de clientes, cualitativas, sin atribución: tránsito y ubicación · re
 - dimango.cl · dimangotogo.com · Base44 SignBoard TV (**con fallas pendientes de corrección**)
 
 **Los tres sistemas de gestión — resueltos el 20-ago-2026 (ver `MEMORY.md` P-005):**
-- **Contable → no existe software.** Es una persona: **Cristian Vidal** (HECHO), que trabaja sobre el **RCV del SII**. Contabilidad tributaria, no de gestión. Pendiente: acceso de consulta para Ricardo, y si va separada por local o consolidada.
+- **Contable → no existe software. Son tres personas con tres funciones separadas** (HECHO, informado por Ricardo el 22-ago-2026):
+  - **Carlos Jirón V.** (Soc. Ardiles & Jirón, Arica) — **IVA y renta**, N-006. Es quien trabaja sobre el **RCV del SII**, la fuente de H-001 a H-006.
+  - **Carla Montoya** — **remuneraciones y liquidaciones**, N-002. Fuente humana de la planilla que cerró H-011.
+  - **Cristian Vidal** — **no es contador**: vende una licencia, una vez al año, del software con que se generan las liquidaciones, N-003.
+
+  **Los tres hacen contabilidad tributaria y laboral. Ninguno hace contabilidad de gestión:** nadie entrega margen por local ni prime cost semanal. Pendiente: acceso de consulta para Ricardo, y si la contabilidad va separada por local o consolidada. *(Corregido dos veces: el 20-ago decía que Cristian Vidal era el contador; el 21-ago que Carla llevaba el RCV. Las dos eran falsas.)*
 - **RRHH / control de gestión → DiMangoWorking** (Base44, de Ricardo). Cae bajo L-002.
 - **Inventario → NO EXISTE.** Consecuencia directa: compras ≠ consumo, **la merma es inmedible**, y el 28,7% de H-001 es costo de compra, no de consumo. El margen bruto real puede ser peor.
 

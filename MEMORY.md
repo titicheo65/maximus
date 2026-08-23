@@ -1,12 +1,41 @@
 # MEMORY.md — Memoria de largo plazo
 
-*Se actualiza cada vez que aprendemos algo importante. Lo más reciente arriba. Este archivo manda sobre los demás cuando hay conflicto.*
+*Se actualiza cada vez que aprendemos algo importante. Lo más reciente arriba. Este archivo manda sobre `IDENTITY/SOUL/USER/BRAIN/MENTORS` cuando hay conflicto.*
 
-> **Fuente única:** este archivo, en `~/harvey/`, versionado en git. Consolidado el 20-ago-2026 desde una versión paralela que vivía en `~/Downloads/`. Si aparece otra copia en otra carpeta, está obsoleta por definición. Ver L-004.
+> **Fuente única: `memoria/`, no este archivo.** Desde D-011 (20-ago-2026) la memoria vive en notas atómicas —`memoria/*.md` más `memoria/indice.json`— que llevan tipo, estado, autoridad y enlaces. **Este archivo es la vista narrativa de esas notas.** Si los dos difieren, manda la nota atómica, porque es la que consultan el agente y el briefing.
+>
+> Sincronizado con `memoria/` el **22-ago-2026**: entraron D-011, H-017, H-018, L-005, P-007 a P-010, R-001 y R-002, y quedaron separados los tres roles contables (N-002 Carla Montoya → remuneraciones; N-006 Carlos Jirón → IVA y renta, es quien lleva el RCV; N-003 Cristian Vidal → solo vende la licencia anual del software de liquidaciones).
+>
+> Antecedente: consolidado el 20-ago-2026 desde una versión paralela que vivía en `~/Downloads/`. Si aparece otra copia en otra carpeta, está obsoleta por definición. Ver L-004.
+
+**Cómo regenerar el índice después de editar `memoria/`:**
+
+```bash
+python3 ~/harvey/brain/grafo.py
+```
 
 ---
 
 ## Decisiones
+
+### D-011 · Migración a memoria atómica: aprobada para texto, bloqueada para voz — 20-ago-2026
+Banco de 25 preguntas contra las dos memorias, mismo modelo y mismas instrucciones (`brain/evaluacion.json`), con el criterio fijado de antemano (D-007):
+
+| Criterio | Resultado | |
+|---|---|---|
+| Cero pérdidas de información | 0 detectadas | ✅ |
+| Primer token bajo 800 ms | 1.558 ms (mediana) | ❌ |
+| Visto bueno de Ricardo | otorgado | ✅ |
+
+Tokens de entrada: 20.284 → **7.535 (−63%)**. Primer token: 1.126 ms → 1.558 ms (+38%).
+
+**La memoria nueva no empató, ganó en dos casos concretos:**
+1. **La memoria vieja miente.** Seguía diciendo que Cristian Vidal era el contador. Es programador (N-003); la contadora es **Carla Montoya** (N-002).
+2. **Manejo de contradicciones.** Ante "¿es creíble el 26% de margen?", la vieja eligió un lado en silencio; la nueva declaró el conflicto entre H-012 y H-017 con sus autoridades. Eso solo es posible con notas tipadas y `estado: conflicto`.
+
+**Decisión:** texto (WhatsApp/Telegram) **migrado**; voz **bloqueada** hasta bajar la latencia. Causa pendiente: el prompt caching no está acertando (0 tokens leídos en las 25 pruebas) — defecto de implementación, no de diseño.
+
+**Salvaguarda:** `agent/maximus.py` usa la memoria atómica solo si encuentra `memoria/indice.json` y `core/SOUL.md`. Si falta cualquiera, vuelve a los seis archivos completos. Falla cerrado.
 
 ### D-010 · Maximus se construye sobre el agente de WhatsApp que ya existe — 20-ago-2026
 Ricardo decide priorizar el "gerente virtual" (antes punto B, parqueado por Maximus el 20-ago). **Objeción original planteada dos veces y retirada** al descubrir que el canal ya está construido: no abre un proyecto nuevo, cierra uno a medias, y en WhatsApp sí pasa el filtro obligatorio porque permite capturar la bitácora de escalamientos sin que Ricardo anote nada.
@@ -274,6 +303,32 @@ Ninguna de las dos es menor. La tercera opción es cerrar.
 - **`COSTO NETO: $0`.** El campo existe en la pantalla y `Product.cost` existe en el esquema ("costo neto unitario para cálculo de margen"). **Está construido y nadie lo llenó.** Cargar los costos daría margen bruto por producto y por categoría sin necesidad de inventario ni contador. Máximo valor por mínimo esfuerzo.
 - **Propinas $10,7M/mes (6,7% de la venta).** Pendiente confirmar si están dentro o fuera de la venta bruta: si están dentro, todos los porcentajes calculados sobre venta están sobreestimados.
 
+### H-017 · Ricardo afirma que el margen de 26% es real — CONFLICTO ABIERTO (20-ago-2026)
+Ante la pregunta de si el residual de 26% (H-012) era creíble, Ricardo respondió: *"sí es creíble, es un poco lo que estamos manejando de ganancia"*.
+
+**Autoridad 4** (informado por persona) contra la estimación de Maximus (**autoridad 5**). Por la regla de prioridad de fuentes, esta nota gana.
+
+**Pero no cierra el conflicto:** hace falta **autoridad 1 — movimiento bancario de julio**. Mientras tanto H-012, H-017 y la métrica M-005 (margen neto) quedan en `conflicto`, y Maximus debe declararlo cada vez que el tema aparezca, en vez de elegir un lado en silencio.
+
+### H-018 · Los trabajos de impresión no se marcan como impresos — riesgo de reimpresión masiva (21-ago-2026)
+Fuente: `C:\Users\usuario\.pm2\logs\impresion-playa-error.log`. El log repite quince veces:
+
+> `[COLA] Job <id> ya se imprimio en esta sesion (Base44 lo sigue marcando pendiente) - se omite para no duplicar`
+
+**Qué pasa:** el servidor imprime, pero **DiMangoToGo nunca marca el trabajo como impreso**. La cola queda llena de trabajos fantasma en estado pendiente.
+
+**Qué evita el desastre hoy:** una lista anti-duplicados que vive **en la RAM** del servidor de impresión.
+
+**Por qué es frágil:** si el proceso se reinicia —corte de luz, reinicio de Windows, o el arranque automático de P-008— esa lista se pierde, Base44 sigue diciendo "pendiente" y **se reimprimen de golpe todos los trabajos acumulados**: boletas y precuentas viejas saliendo en cadena, probablemente en medio del servicio.
+
+**Agravante:** el arranque automático que resuelve P-008 hace este escenario *más* probable, no menos. Antes alguien levantaba el servidor a mano y estaba mirando; ahora arranca solo. **Y el Mall tiene su propio PC con servidor local y arranque automático ya configurado (S-012): si corre el mismo código, el riesgo ya está activo allá, hoy.**
+
+**Dónde se arregla:** en DiMangoToGo, no en el servidor de impresión. El job debe marcarse como impreso cuando el servidor confirma.
+
+**Evidencia a buscar, barata:** preguntar en el Mall si alguna vez salieron boletas o precuentas viejas de golpe después de un corte de luz. Si ocurrió, esto deja de ser hipótesis.
+
+**Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6** del servidor de impresión en estado `stopped`, pero en el repositorio existe una **v7**. Pendiente confirmar qué proceso imprime hoy en Playa.
+
 ---
 
 ## Bitácora de escalamientos — entradas
@@ -322,9 +377,45 @@ Remuneraciones + imposiciones. El último número del estado de resultados. Cier
 
 ### P-005 · Contabilidad, inventario y RRHH — resuelto parcialmente
 *(Antes P-001.)*
-- **Contable:** no existe software. Es una persona — **Cristian Vidal** (HECHO, 20-ago-2026) — que trabaja sobre el **RCV del SII**. Consecuencia: contabilidad tributaria, no de gestión. No entrega margen por local ni prime cost semanal sin trabajo adicional. **Pendiente:** si Ricardo tiene acceso de consulta y si la contabilidad va separada por local o consolidada — eso último define si el margen por local sale de contabilidad o hay que construirlo desde DiMangoToGo.
+- **Contable:** no existe software. **Son tres personas con tres funciones separadas** (HECHO, informado por Ricardo el 22-ago-2026):
+  - **Carlos Jirón V.** — Soc. Ardiles & Jirón Cía Ltda, Arica. Lleva **IVA y renta** (N-006). Es quien trabaja sobre el **RCV del SII**, la fuente de H-001 a H-006. Honorarios de julio 2026 **sin pagar** al 22-ago.
+  - **Carla Montoya** — **remuneraciones y liquidaciones** (N-002). Fuente humana de la planilla que cerró H-011.
+  - **Cristian Vidal** — **no es contador ni programador de DiMango**: vende una licencia, **una vez al año**, del software con que se generan las liquidaciones (N-003).
+
+  Consecuencia: contabilidad tributaria y laboral, **no de gestión**. Ninguno de los tres entrega margen por local ni prime cost semanal. **Pendiente:** si Ricardo tiene acceso de consulta y si la contabilidad va separada por local o consolidada — eso último define si el margen por local sale de contabilidad o hay que construirlo desde DiMangoToGo.
+  **Historial de correcciones — dos errores encadenados, ambos por modelo incompleto:** el 20-ago figuraba **Cristian Vidal** como contador (falso, y contaminó el análisis un día completo). El 21-ago, corregido a **Carla Montoya llevando el RCV** — también falso: el RCV es de Carlos Jirón. La lección de N-002 se confirma: cuando dos fuentes se contradicen, lo más probable no es que una mienta, sino que falte una pieza del modelo.
+- **Alternativa barata al inventario (H-016):** cargar `Product.cost` en DiMangoToGo entrega margen bruto por producto sin instalar nada. No mide merma, pero responde la pregunta más útil primero.
 - **RRHH / control de gestión:** **DiMangoWorking** (Base44, de Ricardo). Cae bajo L-002: otro sistema que solo Ricardo mantiene.
 - **Inventario:** **NO EXISTE sistema central.** Por eso compras ≠ consumo y **la merma es inmedible**. Es la causa raíz de que H-001 (28,7%) sea un costo de *compra*, no de *consumo* — el margen bruto real puede ser peor.
+
+### P-007 · Control de reposiciones: cruzar pedido con venta — PEDIDO EXPLÍCITO DE RICARDO
+**El caso que planteó:** se venden 10 Coca-Colas, reponen 12 → alerta.
+
+**Lo que ya existe (H-010):** la venta del día anterior llega por correo automático a la 1:30 AM · `ChecklistPedido` tiene cantidad solicitada vs entregada por local y área · `ReglaInsumo` convierte producto vendido → insumo.
+
+**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió. Los dos datos están sobre la mesa a la misma hora y nadie los junta.
+
+**Riesgo previo a medir, no negociable:** el puente venta↔bodega es matching por **nombre de texto**. Antes de construir la alerta hay que medir **qué % de los productos vendidos tiene una `ReglaInsumo` que los cubra**. Si es 60%, la alerta miente en el 40% restante y se ignora en dos semanas.
+
+**Control de personas (N-004):** **Verónica pide y despacha** — pide la reposición del Mall (10:00-11:45 diario) y despacha en Playa. La misma persona que decide cuánto se manda confirma cuánto salió. Recibiendo en el Mall hay cuatro personas según el día (N-005: Vivianda de lunes a viernes; Alejandra o Angélica el fin de semana; siempre el cocinero del turno AM). **Sin separación de funciones, el control técnico no cambia nada.** No es acusación: es el punto de fuga clásico en operaciones de dos locales.
+
+### P-008 · Infraestructura de Maximus en ServidorPlaya
+1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok vuelven. Tarea programada al inicio (hay precedente: `subir_venta_mall`). **Ojo: resolver esto agrava H-018** — ver ahí antes de activarlo.
+2. **La memoria del servidor no se actualiza sola.** `C:\maximus` es un clon: sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde datos viejos con seguridad — peor que no tenerlo.
+3. **Telegram sin token válido.** El webhook devolvió 404.
+4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.
+5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja de recibir mensajes de clientes **y nadie se entera**.
+
+### P-009 · Riesgo residual de emisión: internet
+El punto único ya no es DiMangoToGo: son **SimpleFactura e internet**. Las dos vías —la app y la web del proveedor— requieren conexión, y en Chile la boleta es 100% electrónica: el talonario timbrado ya no existe como contingencia.
+**Pregunta para el proveedor, sin urgencia:** ¿SimpleFactura **encola** las boletas si cae internet y las timbra al recuperar conexión? El SII contempla ese modo; falta confirmar si el software lo implementa o simplemente falla.
+
+### P-010 · Filtración de aguas lluvias en el local del Mall — 20-ago-2026
+Mallplaza informa **por escrito** una filtración de aguas lluvias en el local del mall y adjunta **carta de activación de seguro**. Firma Yanira Tara, con copia a Marcela Cerda y Diego Silva: la comunicación es formal. Ricardo la reenvió a TRABAJOARICACHILE@gmail.com esa misma noche.
+
+**Pendiente de verificar:** alguien en terreno que constate el daño y lo fotografíe · si hubo pérdida de mercadería u horas de operación · qué cubre el seguro y quién lo tramita.
+
+**Lectura de Maximus — esto no es solo un siniestro:** el arriendo del Mall es el **37,4% de su venta neta** (H-015), casi el doble del umbral viable, y hay que renegociarlo o salir. Un defecto de infraestructura documentado **por el propio arrendador** es material para esa conversación. **Guardar todo por escrito** —cartas, fotos, fechas, pérdidas—: hoy es un siniestro, en la renegociación es un argumento.
 
 ### D-005 · El objetivo de 90 días no es un objetivo todavía
 "Reducir la dependencia operativa" con ocho subcomponentes es un programa, no un objetivo. No tiene métrica ni fecha de verificación.
@@ -337,10 +428,37 @@ Remuneraciones + imposiciones. El último número del estado de resultados. Cier
 Un observador competente diría que el problema de Ricardo no es falta de estructura sino exceso de iniciativas simultáneas — él mismo escribió "probablemente tengo más proyectos de los que debería ejecutar".
 Un #2 cuesta $2-3M/mes y tarda 6 meses en ser útil. Cortar la cartera de proyectos a la mitad es gratis y funciona el lunes siguiente.
 **Estado: sin resolver. Criterio de veredicto fijado el 19-ago-2026:** si en la bitácora "Proyecto iniciado por Ricardo" supera el **40% de los minutos**, gana la tesis rival y la prioridad pasa a cerrar proyectos antes que a buscar un #2. La hoja Resumen calcula ese porcentaje solo.
+**Cómo se ejecuta la medición (22-ago-2026):** skill `viernes` en `.claude/skills/viernes/SKILL.md`. Registra cada escalamiento como nodo `E-00X`, recalcula el porcentaje acumulado y propone reglas cuando un tipo se repite. Una semana sin datos se reporta como *"sin registro"*, nunca como *"cero escalamientos"*.
+
+---
+
+## Reglas propuestas — pendientes de aprobación de Ricardo
+
+### R-001 · Caja chica por local
+El encargado autoriza egresos hasta **$50.000 por egreso** y **$200.000 diarios acumulados**, registra con su usuario y adjunta respaldo. Sobre $50.000, consulta. Rendición semanal.
+**Origen:** E-001 — un egreso de **$10.550** escaló hasta Ricardo. Eso es 1,4 minutos de venta de DiMango.
+
+### R-002 · Niveles de autoridad para delegar
+Cuatro niveles, por área y por monto (marco M5 de `MENTORS.md`):
+
+1. **Decide y actúa** — no informa
+2. **Decide e informa** — actúa y deja registro
+3. **Consulta antes** — no actúa sin respuesta
+4. **Escala siempre** — nunca decide
+
+**El problema de Ricardo no es que nadie decida: es que nadie sabe hasta dónde puede decidir.** Cada entrada de la bitácora se clasifica en un nivel y se asigna a un responsable. Esa clasificación acumulada **es** el procedimiento de delegación — no hay que escribirlo aparte.
 
 ---
 
 ## Lecciones
+
+### L-005 · Un riesgo estimado sin verificar la arquitectura vale tan poco como un número inventado — 20-ago-2026
+Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**, por encima de todo lo demás, y lo repitió cinco veces.
+
+El número era una construcción propia: asumía que DiMangoToGo emitía por sí misma y que no había alternativa. La realidad —proveedor certificado, emisión manual que los encargados saben usar, folios al día, cero fallas en julio— lo desmintió.
+
+**La estimación tenía autoridad 5 y se presentó con el peso de un hecho.**
+**Regla derivada:** todo riesgo cuantificado debe declarar **de qué arquitectura depende**, y esa arquitectura se verifica antes de priorizar sobre ella.
 
 ### L-004 · La memoria de Maximus tuvo dos fuentes de verdad — 20-ago-2026
 Existían dos `MEMORY.md` divergentes: uno en `~/harvey/` (versión del 19-ago, con D-001 a D-005) y otro en `~/Downloads/` (más avanzado: D-006 a D-008, hallazgos H-001 a H-006, bitácora E-001). Trabajar sobre el equivocado habría significado repetir decisiones ya tomadas y perder los hallazgos financieros.
@@ -361,24 +479,32 @@ Cinco de seis preguntas financieras fundamentales sobre un negocio de ~$2.000 mi
 
 ---
 
-## Prioridades vigentes (actualizadas 20-ago-2026 → 17-nov-2026)
+## Prioridades vigentes (actualizadas 22-ago-2026 → 17-nov-2026)
 
-Reordenadas por **valor en riesgo**, no por orden de aparición.
+Ordenadas por **valor en riesgo**, no por orden de aparición.
 
 | # | Qué | Por qué acá | Plazo |
 |---|---|---|---|
-| ~~1~~ | ~~P-001 — contingencia de emisión DTE~~ | **CERRADO 20-ago.** SimpleFactura + emisión manual que los encargados saben usar. El riesgo estaba sobreestimado por Maximus | ✓ |
-| 1 | **P-003 — venta de julio por local** | El que más desbloquea: H-012 (los $36M), H-003 (viabilidad del Mall), ticket y transacciones por local | **Esta semana** |
-| ~~2~~ | ~~P-004 — costo laboral de julio~~ | **CERRADO 20-ago (H-011).** $30,27M líquido, 45 personas | ✓ |
-| 2 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012) | Días |
-| 3 | **P-003 — venta de julio por local** | Decide si el Mall es viable (H-003) y resuelve H-012 | Días |
-| 4 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
-| 5 | **Bitácora de escalamientos** | En marcha. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
-| 6 | **Verificar tótems bajo carga (D-006)** | Comprometido para el sábado 22-ago | 22-ago |
-| 7 | **Tablero de gestión** | Ya no arranca de cero: H-001…H-005 son la primera fila | 3-4 semanas |
-| 8 | **Inventario — decidir si se instala (P-005)** | Sin esto la merma es inmedible y H-001 es costo de compra, no de consumo | 4-6 semanas |
-| 9 | **Segundo al mando** | Lead time largo, pero condicionado al veredicto de T-001 | Meses |
-| 10 | **Congelar proyectos nuevos** | Hasta que 1-4 estén cerrados | Permanente |
+| 1 | **P-010 — filtración del Mall: activar el seguro y documentar** | Un tercero formal esperando respuesta por escrito, con daño físico de por medio. Y es munición para renegociar el arriendo del 37,4% (H-015) | **Hoy** |
+| 2 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012) | **Días** |
+| 3 | **Verificar tótems bajo carga (D-006)** | Comprometido para hoy sábado 22-ago. "Sin errores" no es verificación (D-007) | **Hoy** |
+| 4 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012). Una pregunta, no un proyecto | Días |
+| 5 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
+| 6 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
+| 7 | **Bitácora de escalamientos (skill `viernes`)** | Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
+| 8 | **P-008 — infraestructura de Maximus** | Sin `git pull` programado, Maximus responde datos viejos con seguridad. Ojo con el punto 1: agrava H-018 | 1-2 semanas |
+| 9 | **Tablero de gestión** | Ya no arranca de cero: H-001…H-005 y H-015 son la primera fila | 3-4 semanas |
+| 10 | **Inventario — decidir si se instala (P-005)** | Sin esto la merma es inmedible. Antes probar la vía barata: cargar `Product.cost` (H-016) | 4-6 semanas |
+| 11 | **Segundo al mando** | Lead time largo, condicionado al veredicto de T-001 | Meses |
+| 12 | **Congelar proyectos nuevos** | Hasta que 1-6 estén cerrados | Permanente |
+
+**Cerrados, se conservan por trazabilidad:**
+
+| | Qué | Cómo cerró |
+|---|---|---|
+| ~~P-001~~ | contingencia de emisión DTE | 20-ago. SimpleFactura + emisión manual que los encargados saben usar. **El riesgo estaba sobreestimado por Maximus** (L-005). Queda el residual P-009 |
+| ~~P-003~~ | venta de julio por local | 20-ago por **H-015**: Playa $100,04M / Mall $33,98M netos. Reveló que el arriendo del Mall es el 37,4% de su venta |
+| ~~P-004~~ | costo laboral de julio | 20-ago por **H-011**: $30,27M líquido, 45 personas, $36-42M cargado |
 
 **Fuera de la lista (resuelto):** "decidir arquitectura Toteat vs DiMangoToGo" — cerrado por D-008 el 30-jun-2026.
 
