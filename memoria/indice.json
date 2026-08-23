@@ -199,7 +199,7 @@
    ],
    "cuerpo": "**Resultado del banco de pruebas, contra el criterio fijado de antemano:**\n\n| Criterio | Resultado | |\n|---|---|---|\n| Cero pérdidas de información | 0 detectadas | ✅ |\n| Primer token bajo 800 ms | 1.558 ms (mediana) | ❌ |\n| Ricardo da el visto bueno | otorgado | ✅ |\n\n| | Vieja | Nueva | |\n|---|---|---|---|\n| Tokens de entrada | 20.284 | 7.535 | **−63%** |\n| Primer token (mediana) | 1.126 ms | 1.558 ms | +38% |\n\n**La memoria nueva resultó superior en dos casos concretos, no solo equivalente:**\n\n1. **M14 — la memoria vieja miente.** Sigue diciendo que Cristian Vidal es el\n   contador externo. Es programador (N-003); la contadora es Carla Montoya\n   (N-002). Las notas atómicas tienen el dato corregido; los archivos originales\n   no.\n2. **M08 — manejo de contradicciones.** Ante \"¿es creíble el 26% de margen?\", la\n   memoria vieja respondió *\"no es creíble\"* y eligió un lado en silencio. La\n   nueva declaró el conflicto entre H-012 y H-017 con sus autoridades. Eso solo\n   es posible con notas tipadas y `estado: conflicto`.\n\n**Decisión:**\n- **Texto (WhatsApp/Telegram): migrado.** 1,5 s es imperceptible en un canal\n  donde ya se espera la respuesta.\n- **Voz: bloqueada.** El criterio de 800 ms era para conversación fluida y no se\n  cumplió.\n\n**Causa de la latencia, pendiente de resolver:** el prompt caching **no está\nacertando** (0 tokens leídos en las 25). El contexto se separó en bloque fijo\n(core + índice) y bloque variable (notas), justamente para que el prefijo se\ncachee, y aun así el cache no dio. Es un defecto de implementación, no del\ndiseño. Hasta arreglarlo, la recuperación ahorra tokens pero cuesta latencia.\n\n**Salvaguarda en producción:** `agent/maximus.py` usa la memoria atómica solo si\nencuentra `memoria/indice.json` y `core/SOUL.md`. Si falta cualquiera de los dos,\nvuelve solo a los seis archivos completos. Falla cerrado: antes memoria completa\ny lenta que memoria a medias.\n\n**Los archivos originales siguen intactos** en la raíz y congelados en `archivo/`.",
    "origen": "banco de 25 preguntas corrido el 20-ago-2026, brain/evaluacion.json",
-   "grado": 4,
+   "grado": 5,
    "color": "#f5a623"
   },
   {
@@ -1137,7 +1137,7 @@
    ],
    "cuerpo": "FastAPI en Python. Proveedor Meta (número local chileno). Transcribe notas de\nvoz con Groq Whisper. Corre en `C:\\dimango-agent`, puerto 8000.\n\n**Dos roles sobre el mismo canal:** atención al cliente (reservas, pedidos,\ntickets) y Maximus (gestión, memoria completa, solo para el número de Ricardo).\nAmbos fallan cerrado: sin variables configuradas, se comporta como siempre.\n\n**Módulos:** `maximus.py`, `telegram_maximus.py`, `voz.py` (edge-tts con voz\nchilena, ElevenLabs opcional), `colacion.py`.",
    "origen": "repo titicheo65/dimango-agent",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff8c42"
   },
   {
@@ -1271,7 +1271,7 @@
    ],
    "cuerpo": "`POST /maximus/ver` + botón 👁 en el cerebro. Comparte pantalla, Maximus la mira\ncon la memoria atómica cargada y responde. La imagen no se guarda.\n\n**Verificado:** lee correctamente las pantallas de DiMangoWorking y DiMangoToGo,\nincluidos los montos.\n\n**Por qué importa más de lo que parece:** permite consultar los sistemas **sin\nintegrarlos**. Nada de API, nada de arreglar el matching por nombre de producto\n(el hueco #1 de H-010).\n\n**Su límite:** ve **una pantalla a la vez**. Para cruzar el pedido con la venta\n—que es P-007— hay que tener ambas fuentes visibles en la misma captura.\n\n**Corrección aplicada el 22-ago, en dos intentos:** leía los montos en formato\nestadounidense y `$40.464.040` lo interpretaba como cuarenta dólares.\n\nEl primer arreglo —agregar la regla al prompt— **no funcionó**, porque la\ninstrucción iba *después* de la imagen: cuando llegaba, el modelo ya había leído\nlos montos. El segundo la puso **antes** de la imagen y agregó un control de\nmagnitud (venta mensual ~$160M, almuerzo $8.000-20.000: si un número no encaja\nen ese orden, se leyó mal).\n\n**Lección de diseño:** en un mensaje con imagen, las instrucciones que\ncondicionan *cómo interpretarla* van antes de la imagen. Después, corrigen tarde.\n\n**Camino que abre para P-007:** la versión asistida —Ricardo muestra, Maximus\ncruza— cuesta cero desarrollo y entrega el 80% del valor. Sirve además para\ndecidir si vale la pena construir la versión automática con alertas.",
    "origen": "probado el 22-ago-2026 sobre /ChecklistInsumos y una captura de escritorio",
-   "grado": 5,
+   "grado": 6,
    "color": "#ff8c42"
   },
   {
@@ -1290,6 +1290,26 @@
    ],
    "cuerpo": "`brain/escuchar.py`. Dos aplausos disparan `Maximus.command`: música, saludo\nhablado y cerebro visual.\n\n**Cómo distingue un aplauso:** pico de energía muy corto que supera el ruido de\nfondo por un factor, y **dos** dentro de una ventana breve con bajada entre\nmedio. Descarta portazos y voces; no descarta todo, por eso existen `--umbral`\ny `--calibrar`.\n\nAmbiente de Ricardo medido: ruido de fondo 0,0001 — muy silencioso. Umbral 0,15.\n\n**Verificado funcionando.**\n\n**Origen:** la idea salió de una guía de Hector García que Ricardo encontró. Su\nscript abre Spotify y Cursor en Windows; de esas nueve páginas solo servía el\nconcepto. El código se escribió de cero para macOS.",
    "origen": "probado por Ricardo el 22-ago-2026",
+   "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-016",
+   "tipo": "sistema",
+   "titulo": "Herramientas de datos vivos (capa 3)",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-22",
+   "tags": [
+    "herramientas",
+    "datos-vivos",
+    "indicadores",
+    "clima",
+    "capa-3"
+   ],
+   "cuerpo": "Maximus puede **consultar** datos que cambian, en vez de guardarlos como memoria.\n\n| Herramienta | Fuente | Sin autenticación |\n|---|---|---|\n| `indicadores_chile` | mindicador.cl (Banco Central): dólar, euro, UF, UTM, IPC | sí |\n| `clima` | open-meteo: Arica, Santiago, Madrid, Milano, Washington | sí |\n\n**Verificado:** ante \"¿a cuánto está el dólar?\" consulta; ante \"¿cuánto fue el\ncosto laboral de julio?\" responde de memoria sin consultar nada. Distingue solo\nentre dato histórico cerrado y dato vivo — la regla de la capa 3.\n\n**Costo:** dos vueltas al modelo cuando usa herramienta (5-8 s contra 2-3 s).\nSolo ocurre si la pregunta lo pide.\n\n**Lo que todavía no puede consultar:** DiMangoToGo, DiMangoWorking, Gmail y\nCalendar. Todos necesitan credenciales que viven fuera del servidor. Para esos,\nMaximus sabe **dónde está el dato** y lo dice, o se le muestra la pantalla con\nvisión (S-014).",
+   "origen": "implementado y probado el 22-ago-2026",
    "grado": 3,
    "color": "#ff8c42"
   },
@@ -2361,6 +2381,21 @@
   },
   {
    "de": "S-015",
+   "a": "S-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-016",
+   "a": "D-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-016",
+   "a": "S-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-016",
    "a": "S-014",
    "rel": "relacionado"
   },
