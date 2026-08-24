@@ -4,7 +4,9 @@
 
 > **Fuente única: `memoria/`, no este archivo.** Desde D-011 (20-ago-2026) la memoria vive en notas atómicas —`memoria/*.md` más `memoria/indice.json`— que llevan tipo, estado, autoridad y enlaces. **Este archivo es la vista narrativa de esas notas.** Si los dos difieren, manda la nota atómica, porque es la que consultan el agente y el briefing.
 >
-> Sincronizado con `memoria/` el **22-ago-2026**: entraron D-011, H-017, H-018, L-005, P-007 a P-010, R-001 y R-002, y quedaron separados los tres roles contables (N-002 Carla Montoya → remuneraciones; N-006 Carlos Jirón → IVA y renta, es quien lleva el RCV; N-003 Cristian Vidal → solo vende la licencia anual del software de liquidaciones).
+> Sincronizado con `memoria/` el **23-ago-2026**: entraron H-019 (dos credenciales expuestas, ambas rotadas), H-020 (el micrófono fijo del cerebro bloquea el despertar por aplausos), L-006 (la primera línea del error manda), S-017 (cerebro servido por localhost con puente), S-018 (el panel deja de mostrar las conversaciones de Ricardo) y P-011 (separar físicamente el historial privado). P-008 dejó de ser teórico: se cobró dos horas de webhook caído.
+>
+> Antes, el **22-ago-2026**: entraron D-011, H-017, H-018, L-005, P-007 a P-010, R-001 y R-002, y quedaron separados los tres roles contables (N-002 Carla Montoya → remuneraciones; N-006 Carlos Jirón → IVA y renta, es quien lleva el RCV; N-003 Cristian Vidal → solo vende la licencia anual del software de liquidaciones).
 >
 > Antecedente: consolidado el 20-ago-2026 desde una versión paralela que vivía en `~/Downloads/`. Si aparece otra copia en otra carpeta, está obsoleta por definición. Ver L-004.
 
@@ -329,6 +331,24 @@ Fuente: `C:\Users\usuario\.pm2\logs\impresion-playa-error.log`. El log repite qu
 
 **Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6** del servidor de impresión en estado `stopped`, pero en el repositorio existe una **v7**. Pendiente confirmar qué proceso imprime hoy en Playa.
 
+### H-019 · Dos credenciales expuestas en producción — ambas rotadas el 23-ago-2026
+El panel `/admin` —que lista **todas** las conversaciones y se publica por ngrok— corría con la contraseña escrita en el código: `admin` / `dimango2026`, valores por defecto que el `.env` no sobreescribía. Cualquiera con la URL y esa clave, publicada en el repositorio, leía los chats de clientes y las conversaciones de Ricardo con Maximus.
+
+El mismo día, el **token de `/maximus/chat`** quedó visible en una captura de pantalla mandada para diagnosticar otra cosa.
+
+**Ambas rotadas y verificadas**, no dadas por buenas: clave vieja → **401**, token viejo → **401**, agente operativo → 200.
+
+**Es el tercer caso del mismo patrón** tras H-014 (Twilio). La constante no es el descuido: es que **el sistema trae valores por defecto que funcionan**, y un default que funciona nunca se cambia. **Regla derivada:** ningún componente debe arrancar con credencial por defecto — si falta la variable, que no arranque.
+
+**Sigue abierto:** el panel no debería estar expuesto a internet. La contraseña tapa el agujero; sacarlo del túnel lo cierra.
+
+### H-020 · El micrófono fijo del cerebro y el despertar por aplausos no conviven — 23-ago-2026
+Solo un proceso a la vez escucha bien el micrófono del Mac. Con el cerebro abierto y el micrófono en modo fijo, `escuchar.py` mide **0.0000**. Es consecuencia directa del arreglo del mismo día (S-017): antes el micrófono se apagaba entre turnos y dejaba huecos; ahora el pestillo queda puesto y el conflicto es permanente.
+
+**`escuchar.py` quedó detenido.** Corría con `--umbral 0.15` —la mitad del que trae por defecto— y por eso cualquier par de ruidos secos despertaba a Maximus solo. Para relanzarlo hay que calibrar, y para calibrar hay que soltar el micrófono.
+
+**Duda de fondo:** el aplauso es frágil por diseño — umbral fijo sobre una entrada que macOS amplifica sola, compitiendo por el micrófono con el propio cerebro. Un atajo de teclado hace lo mismo y es determinista.
+
 ---
 
 ## Bitácora de escalamientos — entradas
@@ -417,6 +437,15 @@ Mallplaza informa **por escrito** una filtración de aguas lluvias en el local d
 
 **Lectura de Maximus — esto no es solo un siniestro:** el arriendo del Mall es el **37,4% de su venta neta** (H-015), casi el doble del umbral viable, y hay que renegociarlo o salir. Un defecto de infraestructura documentado **por el propio arrendador** es material para esa conversación. **Guardar todo por escrito** —cartas, fotos, fechas, pérdidas—: hoy es un siniestro, en la renegociación es un argumento.
 
+### P-011 · Separar físicamente el historial privado de Maximus — 23-ago-2026
+Hoy las conversaciones de Ricardo con Maximus están **ocultas** del panel, no separadas (S-018): siguen en el mismo archivo de base de datos que los chats de clientes. Quien tenga acceso al `.db` del servidor las lee.
+
+**La versión buena ya está escrita** —base aparte, imposible de exponer por olvido— en el commit `4eea4a1` de `titicheo65/dimango-agent`. Se descartó porque el agente no levantó tras desplegarla, y **después se comprobó que la caída era por un puerto tomado (L-006), no por ese código.**
+
+**Cómo retomarlo:** un día de semana, probando el arranque en el servidor (Windows, Python 3.14) antes de dejarlo corriendo, con el puerto verificado libre, y recuperando `migrar_privado.py` del mismo commit para mover lo ya guardado.
+
+**Prioridad honesta: baja.** El riesgo real —panel abierto a internet con contraseña por defecto— ya se cerró con H-019.
+
 ### D-005 · El objetivo de 90 días no es un objetivo todavía
 "Reducir la dependencia operativa" con ocho subcomponentes es un programa, no un objetivo. No tiene métrica ni fecha de verificación.
 **Propuesta de Maximus:** convertirlo en un compromiso fechado y falsable —
@@ -452,6 +481,17 @@ Cuatro niveles, por área y por monto (marco M5 de `MENTORS.md`):
 
 ## Lecciones
 
+### L-006 · Cuando un proceso no arranca, manda la primera línea del error — 23-ago-2026
+El agente no levantaba. El traceback visible mostraba `SystemExit: 1`, un `CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó que la causa era un cambio propio —una segunda base de datos— e hizo revertir el despliegue.
+
+No era eso. La causa estaba en la primera línea, cortada por el scroll: `OSError [Errno 10048]: solo se permite un uso de cada dirección de socket`. **El puerto 8000 estaba tomado por un proceso zombi.** Todo lo demás era la cascada de apagado.
+
+**Costo: cerca de dos horas con el webhook de WhatsApp caído, un domingo con los dos locales operando**, más un rollback innecesario.
+
+**Regla derivada, que se lee al revés de como aparece:** la primera línea es la causa y el resto es consecuencia · si el error llega cortado, capturarlo entero **antes** de teorizar · verificar que el puerto está libre antes de arrancar, y que quedó libre después de matar — no asumirlo · nunca lanzar un segundo intento sobre uno que parece colgado, que es como se crea el zombi.
+
+**Misma familia que L-005:** allá se cuantificó un riesgo sin verificar la arquitectura, acá se atribuyó una falla sin leer el error completo. En los dos casos la hipótesis se presentó con el peso de un hecho.
+
 ### L-005 · Un riesgo estimado sin verificar la arquitectura vale tan poco como un número inventado — 20-ago-2026
 Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**, por encima de todo lo demás, y lo repitió cinco veces.
 
@@ -483,20 +523,25 @@ Cinco de seis preguntas financieras fundamentales sobre un negocio de ~$2.000 mi
 
 Ordenadas por **valor en riesgo**, no por orden de aparición.
 
+*Reordenadas el 23-ago-2026.*
+
 | # | Qué | Por qué acá | Plazo |
 |---|---|---|---|
-| 1 | **P-010 — filtración del Mall: activar el seguro y documentar** | Un tercero formal esperando respuesta por escrito, con daño físico de por medio. Y es munición para renegociar el arriendo del 37,4% (H-015) | **Hoy** |
-| 2 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012) | **Días** |
-| 3 | **Verificar tótems bajo carga (D-006)** | Comprometido para hoy sábado 22-ago. "Sin errores" no es verificación (D-007) | **Hoy** |
-| 4 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012). Una pregunta, no un proyecto | Días |
-| 5 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
-| 6 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
-| 7 | **Bitácora de escalamientos (skill `viernes`)** | Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
-| 8 | **P-008 — infraestructura de Maximus** | Sin `git pull` programado, Maximus responde datos viejos con seguridad. Ojo con el punto 1: agrava H-018 | 1-2 semanas |
+| 1 | **P-010 — filtración del Mall: activar el seguro y documentar** | Un tercero formal esperando respuesta por escrito, con daño físico de por medio. Y es munición para renegociar el arriendo del 37,4% (H-015). **Era prioridad 1 el 22-ago y sigue sin tocarse** | **Atrasado** |
+| 2 | **P-008 — que el agente y ngrok arranquen solos** | Sube desde el puesto 8: **el 23-ago se cobró dos horas de webhook caído, un domingo con los locales operando**, y nadie se habría enterado si Ricardo no estaba mirando. Ya existe el precedente propio: `subir_venta_mall` | **Esta semana** |
+| 3 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012). **Resolver antes que el punto 2, o se agrava** | **Días** |
+| 4 | **Verificar tótems bajo carga (D-006)** | Comprometido para el sábado 22-ago. No se hizo. "Sin errores" no es verificación (D-007) | **Atrasado** |
+| 5 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012). Una pregunta, no un proyecto | Días |
+| 6 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
+| 7 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
+| 8 | **Bitácora de escalamientos (skill `viernes`)** | Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
 | 9 | **Tablero de gestión** | Ya no arranca de cero: H-001…H-005 y H-015 son la primera fila | 3-4 semanas |
 | 10 | **Inventario — decidir si se instala (P-005)** | Sin esto la merma es inmedible. Antes probar la vía barata: cargar `Product.cost` (H-016) | 4-6 semanas |
-| 11 | **Segundo al mando** | Lead time largo, condicionado al veredicto de T-001 | Meses |
-| 12 | **Congelar proyectos nuevos** | Hasta que 1-6 estén cerrados | Permanente |
+| 11 | **P-011 — separar físicamente el historial privado** | El riesgo real ya se cerró con H-019. Esto endurece algo que hoy funciona. **Nunca un domingo con los locales abiertos** | Baja |
+| 12 | **Segundo al mando** | Lead time largo, condicionado al veredicto de T-001 | Meses |
+| 13 | **Congelar proyectos nuevos** | Hasta que 1-7 estén cerrados | Permanente |
+
+**Observación de Maximus sobre el 23-ago (domingo):** el día completo se fue en infraestructura del propio Maximus — despertar duplicado, micrófono, privacidad del panel, dos credenciales rotadas, dos horas de webhook caído. Se resolvieron cosas reales, incluidas dos exposiciones de credenciales. **Pero ninguna movió venta, margen ni dependencia**, y las tres prioridades de arriba de la lista siguen exactamente donde estaban el sábado. Es el patrón de T-001 —proyecto iniciado por Ricardo desplazando la prioridad declarada— y queda registrado para el veredicto del 14-sep.
 
 **Cerrados, se conservan por trazabilidad:**
 

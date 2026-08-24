@@ -124,7 +124,7 @@
    ],
    "cuerpo": "\"No tuvimos errores\" no cuenta como verificación.\n\nTodo cambio en producción necesita una prueba explícita con **criterio de\naprobación fijado de antemano** y una fecha de verificación bajo carga real.\nMaximus no cierra un pendiente sin eso.",
    "origen": "acordada con Ricardo, 19-ago-2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#f5a623"
   },
   {
@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 12,
+   "grado": 14,
    "color": "#f5a623"
   },
   {
@@ -401,7 +401,7 @@
    ],
    "cuerpo": "GitHub bloqueó un push: Account SID y API Key de Twilio en texto plano dentro\nde `.claude/settings.local.json`.\n\n**No llegaron al repositorio.** El archivo quedó en `.gitignore`.\n\n**Pendiente:** las credenciales **siguen en el disco del Mac**. Riesgo bajo hoy\nporque el agente migró a Meta y Twilio ya no se usa, pero deben **rotarse o\neliminarse en el panel de Twilio** — borrarlas del archivo no las desactiva.",
    "origen": "push protection de GitHub",
-   "grado": 2,
+   "grado": 3,
    "color": "#4a9eff"
   },
   {
@@ -481,6 +481,45 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-019",
+   "tipo": "hallazgo",
+   "titulo": "Dos credenciales expuestas en producción — ambas rotadas el 23-ago-2026",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "HECHO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "seguridad",
+    "credenciales",
+    "panel",
+    "ngrok",
+    "produccion"
+   ],
+   "cuerpo": "El panel `/admin` del agente —que lista **todas** las conversaciones— se publica\npor el túnel de ngrok, o sea que es alcanzable desde internet. Estaba protegido\ncon la contraseña que venía **escrita en el código**:\n\n```python\nADMIN_USER = os.getenv(\"ADMIN_USER\", \"admin\")\nADMIN_PASSWORD = os.getenv(\"ADMIN_PASSWORD\", \"dimango2026\")\n```\n\nEl `.env` no la sobreescribía. Cualquiera con la URL y esa clave —publicada en\nel repositorio— leía los chats de clientes y las conversaciones de Ricardo con\nMaximus: sueldos, márgenes, la inviabilidad del Mall.\n\n**Segunda credencial, el mismo día:** el token de `/maximus/chat` quedó visible\nen una captura de pantalla que Ricardo mandó para diagnosticar otra cosa. Ese\ntoken da acceso al chat con toda la memoria del negocio.\n\n**Ambas rotadas y verificadas el 23-ago-2026**, no dadas por buenas:\n\n| Verificación | Resultado |\n|---|---|\n| Clave vieja del panel (`admin`/`dimango2026`) | **401** |\n| Token viejo del chat | **401** |\n| Agente operativo después de rotar | 200 |\n\n**Es el tercer caso del mismo patrón** — después de H-014 (credenciales de Twilio\nen `.claude/settings.local.json`). La constante no es el descuido: es que el\nsistema **trae valores por defecto que funcionan**. Un default que funciona nunca\nse cambia, porque nada obliga a hacerlo.\n\n**Regla derivada:** ningún componente de DiMango debe arrancar con una credencial\npor defecto. Si falta la variable, que **no arranque** — falla ruidosa en vez de\nseguridad falsa.\n\n**Lo que sigue abierto:** el panel `/admin` no debería estar expuesto a internet.\nLa contraseña buena tapa el agujero; sacarlo del túnel lo cierra.",
+   "origen": "leído del código y verificado contra el servidor el 23-ago-2026",
+   "grado": 7,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-020",
+   "tipo": "hallazgo",
+   "titulo": "El micrófono fijo del cerebro y el despertar por aplausos no pueden convivir",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "HECHO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "microfono",
+    "aplausos",
+    "cerebro",
+    "conflicto"
+   ],
+   "cuerpo": "**Solo un proceso a la vez escucha bien el micrófono del Mac.** Con el cerebro\nabierto y el micrófono en modo fijo, `escuchar.py` mide **0.0000** — literalmente\nnada, ni ruido de fondo.\n\nEs una consecuencia directa del arreglo del mismo día (S-017): antes el\nmicrófono se apagaba solo entre turnos y dejaba huecos por donde el detector\nalcanzaba a oír. Ahora que el pestillo queda puesto hasta que Ricardo lo saque,\nel conflicto es permanente.\n\n**Consecuencia práctica:** mientras el cerebro esté escuchando, aplaudir no hace\nnada. Hay que apagar el micrófono del cerebro para que el despertar funcione.\n\n**Esto arruinó tres intentos de calibración** antes de entenderlo, y produjo un\nveredicto falso — \"el aplauso no sirve como disparador\"— que salía de un\ninstrumento sordo, no de una medición. Por eso `brain/calibrar.py` ahora arranca\ncomprobando que el micrófono llegue y **se detiene** si no.\n\n**Duda de fondo, sin resolver:** el aplauso como disparador es frágil por diseño.\nDepende de un umbral fijo sobre una entrada que macOS amplifica sola, compite por\nel micrófono con el propio cerebro, y `escuchar.py` no valida la duración del\npico pese a que su documentación dice que sí. Un atajo de teclado global o el\nícono del Dock hacen lo mismo, son deterministas y no dependen de que nadie deje\ncaer una taza.\n\n**Estado:** `escuchar.py` quedó **detenido** el 23-ago. Corría con `--umbral 0.15`\n—la mitad del que trae por defecto— y por eso cualquier par de ruidos secos\ndespertaba a Maximus solo. Antes de relanzarlo hay que calibrar, y para calibrar\nhay que soltar el micrófono.",
+   "origen": "medido en el Mac el 23-ago-2026: 0.0000 con Chrome escuchando",
+   "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -513,7 +552,7 @@
    ],
    "cuerpo": "Cada componente que Ricardo agrega —Base44, DiMangoToGo, DiMangoWorking,\nservidor de impresión, tótem, cuatro medios de pago— es una pieza más que\n**solo él entiende**. Está reemplazando dependencia de personas por dependencia\nde sistemas que dependen de una sola persona.\n\n**Regla derivada:** automatización que solo Ricardo puede mantener no es\nautomatización, es una dependencia nueva con mejor interfaz. Toda iniciativa\ntécnica debe pasar el test de D-002.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 16,
+   "grado": 17,
    "color": "#27c93f"
   },
   {
@@ -567,7 +606,26 @@
    ],
    "cuerpo": "Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**,\npor encima de todo lo demás, y lo repitió cinco veces.\n\nEl número era una construcción propia: asumía que DiMangoToGo emitía por sí\nmisma y que no había alternativa. La realidad —proveedor certificado, emisión\nmanual que los encargados saben usar, folios al día, cero fallas en julio— lo\ndesmintió.\n\n**La estimación tenía autoridad 5 y se presentó con el peso de un hecho.**\nRegla: todo riesgo cuantificado debe declarar de qué arquitectura depende, y\nverificarla antes de priorizar sobre ella.",
    "origen": "error propio de Maximus, corregido el 20-ago-2026",
-   "grado": 4,
+   "grado": 5,
+   "color": "#27c93f"
+  },
+  {
+   "id": "L-006",
+   "tipo": "leccion",
+   "titulo": "Cuando un proceso no arranca, manda la primera línea del error",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "HECHO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "diagnostico",
+    "despliegue",
+    "produccion",
+    "metodo"
+   ],
+   "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
+   "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
+   "grado": 6,
    "color": "#27c93f"
   },
   {
@@ -932,9 +990,9 @@
     "servidorplaya",
     "riesgo"
    ],
-   "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.",
+   "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 9,
+   "grado": 12,
    "color": "#ff5f56"
   },
   {
@@ -973,6 +1031,25 @@
    "cuerpo": "Mallplaza informa por escrito una **filtración de aguas lluvias en el local\nDiMango del mall** y adjunta carta de activación de seguro. Copia a dos personas\nmás de Mallplaza: la comunicación es formal.\n\nRicardo reenvió la carta a TRABAJOARICACHILE@gmail.com la misma noche.\n\n**Pendiente de verificar:**\n- Alguien en terreno que constate el daño real y lo fotografíe\n- Si hubo pérdida de mercadería o de horas de operación\n- Qué cubre el seguro y quién lo tramita\n\n**Lectura de Maximus — esto no es solo un siniestro:** el arriendo del Mall es el\n**37,4% de su venta neta** (H-015), casi el doble del umbral viable, y hay que\nrenegociarlo o salir. Un defecto de infraestructura documentado **por el propio\narrendador** es material para esa conversación: el mall tiene obligación de\nentregar el local en condiciones.\n\n**Guardar todo por escrito** — cartas, fotos, fechas, pérdidas. Hoy es un\nsiniestro; en la renegociación es un argumento.",
    "origen": "correo de yanira.tara@mallplaza.com, 20-ago-2026, cc marcela.cerda y diego.silva",
    "grado": 4,
+   "color": "#ff5f56"
+  },
+  {
+   "id": "P-011",
+   "tipo": "pendiente",
+   "titulo": "Separar físicamente el historial privado de Maximus",
+   "estado": "abierto",
+   "autoridad": 2,
+   "fuente": "OBSERVADO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "privacidad",
+    "base-de-datos",
+    "agente",
+    "deuda-tecnica"
+   ],
+   "cuerpo": "Hoy las conversaciones de Ricardo con Maximus están **ocultas** del panel, no\nseparadas: siguen en el mismo archivo de base de datos que los chats de clientes\n(S-018). Quien tenga acceso al `.db` del servidor las lee.\n\n**La versión buena ya está escrita** — guardaba el historial privado en una base\naparte, imposible de exponer aunque mañana alguien agregue una consulta y olvide\nfiltrar. Está en el commit `4eea4a1` de `titicheo65/dimango-agent`, y se puede\nrecuperar de ahí.\n\n**Por qué no está desplegada:** se subió un domingo con los locales operando, el\nagente no levantó y se atribuyó la caída a ese código. **Después se comprobó que\nla causa era un puerto tomado por un proceso zombi (L-006), no la segunda base.**\nO sea que probablemente funcionaba y se descartó por un diagnóstico errado.\n\n**Cómo retomarlo, y esta vez en orden:**\n1. Un día de semana, **nunca un domingo con los locales abiertos**.\n2. Probar el arranque en el servidor **antes** de dejarlo corriendo: en Windows,\n   con Python 3.14, que es donde no se probó.\n3. Verificar que el puerto 8000 está libre antes de arrancar (L-006).\n4. Recuperar `migrar_privado.py` del mismo commit para mover lo ya guardado. El\n   script simula por defecto y solo mueve con `--aplicar`; copia primero y borra\n   después.\n\n**Prioridad honesta: baja.** El riesgo real —el panel abierto a internet con\ncontraseña por defecto— ya se cerró con H-019. Esto es endurecer algo que hoy\nfunciona, no tapar un agujero abierto.",
+   "origen": "despliegue del 23-ago-2026, revertido por un diagnóstico errado",
+   "grado": 5,
    "color": "#ff5f56"
   },
   {
@@ -1137,7 +1214,7 @@
    ],
    "cuerpo": "FastAPI en Python. Proveedor Meta (número local chileno). Transcribe notas de\nvoz con Groq Whisper. Corre en `C:\\dimango-agent`, puerto 8000.\n\n**Dos roles sobre el mismo canal:** atención al cliente (reservas, pedidos,\ntickets) y Maximus (gestión, memoria completa, solo para el número de Ricardo).\nAmbos fallan cerrado: sin variables configuradas, se comporta como siempre.\n\n**Módulos:** `maximus.py`, `telegram_maximus.py`, `voz.py` (edge-tts con voz\nchilena, ElevenLabs opcional), `colacion.py`.",
    "origen": "repo titicheo65/dimango-agent",
-   "grado": 9,
+   "grado": 10,
    "color": "#ff8c42"
   },
   {
@@ -1271,7 +1348,7 @@
    ],
    "cuerpo": "`POST /maximus/ver` + botón 👁 en el cerebro. Comparte pantalla, Maximus la mira\ncon la memoria atómica cargada y responde. La imagen no se guarda.\n\n**Verificado:** lee correctamente las pantallas de DiMangoWorking y DiMangoToGo,\nincluidos los montos.\n\n**Por qué importa más de lo que parece:** permite consultar los sistemas **sin\nintegrarlos**. Nada de API, nada de arreglar el matching por nombre de producto\n(el hueco #1 de H-010).\n\n**Su límite:** ve **una pantalla a la vez**. Para cruzar el pedido con la venta\n—que es P-007— hay que tener ambas fuentes visibles en la misma captura.\n\n**Corrección aplicada el 22-ago, en dos intentos:** leía los montos en formato\nestadounidense y `$40.464.040` lo interpretaba como cuarenta dólares.\n\nEl primer arreglo —agregar la regla al prompt— **no funcionó**, porque la\ninstrucción iba *después* de la imagen: cuando llegaba, el modelo ya había leído\nlos montos. El segundo la puso **antes** de la imagen y agregó un control de\nmagnitud (venta mensual ~$160M, almuerzo $8.000-20.000: si un número no encaja\nen ese orden, se leyó mal).\n\n**Lección de diseño:** en un mensaje con imagen, las instrucciones que\ncondicionan *cómo interpretarla* van antes de la imagen. Después, corrigen tarde.\n\n**Camino que abre para P-007:** la versión asistida —Ricardo muestra, Maximus\ncruza— cuesta cero desarrollo y entrega el 80% del valor. Sirve además para\ndecidir si vale la pena construir la versión automática con alertas.",
    "origen": "probado el 22-ago-2026 sobre /ChecklistInsumos y una captura de escritorio",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff8c42"
   },
   {
@@ -1290,7 +1367,7 @@
    ],
    "cuerpo": "`brain/escuchar.py`. Dos aplausos disparan `Maximus.command`: música, saludo\nhablado y cerebro visual.\n\n**Cómo distingue un aplauso:** pico de energía muy corto que supera el ruido de\nfondo por un factor, y **dos** dentro de una ventana breve con bajada entre\nmedio. Descarta portazos y voces; no descarta todo, por eso existen `--umbral`\ny `--calibrar`.\n\nAmbiente de Ricardo medido: ruido de fondo 0,0001 — muy silencioso. Umbral 0,15.\n\n**Verificado funcionando.**\n\n**Origen:** la idea salió de una guía de Hector García que Ricardo encontró. Su\nscript abre Spotify y Cursor en Windows; de esas nueve páginas solo servía el\nconcepto. El código se escribió de cero para macOS.",
    "origen": "probado por Ricardo el 22-ago-2026",
-   "grado": 3,
+   "grado": 5,
    "color": "#ff8c42"
   },
   {
@@ -1311,6 +1388,45 @@
    "cuerpo": "Maximus puede **consultar** datos que cambian, en vez de guardarlos como memoria.\n\n| Herramienta | Fuente | Sin autenticación |\n|---|---|---|\n| `indicadores_chile` | mindicador.cl (Banco Central): dólar, euro, UF, UTM, IPC | sí |\n| `clima` | open-meteo: Arica, Santiago, Madrid, Milano, Washington | sí |\n\n**Verificado:** ante \"¿a cuánto está el dólar?\" consulta; ante \"¿cuánto fue el\ncosto laboral de julio?\" responde de memoria sin consultar nada. Distingue solo\nentre dato histórico cerrado y dato vivo — la regla de la capa 3.\n\n**Costo:** dos vueltas al modelo cuando usa herramienta (5-8 s contra 2-3 s).\nSolo ocurre si la pregunta lo pide.\n\n**Lo que todavía no puede consultar:** DiMangoToGo, DiMangoWorking, Gmail y\nCalendar. Todos necesitan credenciales que viven fuera del servidor. Para esos,\nMaximus sabe **dónde está el dato** y lo dice, o se le muestra la pantalla con\nvisión (S-014).",
    "origen": "implementado y probado el 22-ago-2026",
    "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-017",
+   "tipo": "sistema",
+   "titulo": "El cerebro se sirve por localhost con puente al agente",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "HECHO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "cerebro",
+    "voz",
+    "microfono",
+    "cors",
+    "arquitectura"
+   ],
+   "cuerpo": "El cerebro visual ya no se abre como archivo. Se sirve desde\n**`http://localhost:8899/cerebro.html`** con `brain/servidor.py`, que además hace\nde **puente** hacia el agente.\n\n**Por qué, y no es cosmético:** en `file://` Chrome trata la página como origen\nopaco y **no puede recordar el permiso del micrófono**. Lo volvía a pedir en cada\nturno, así que no se podía conversar de corrido. Servirlo por http lo resuelve —\npero al cambiar de origen, el agente rechazaba la llamada por CORS. El puente\nresuelve las dos cosas: la página y el agente quedan en el mismo origen.\n\n```\nnavegador → localhost:8899 (sirve la página y reenvía) → ngrok → agente\n```\n\n**Detalles que importan:**\n- Solo reenvía `/maximus/chat` y `/maximus/ver`. El panel y el webhook **no** se\n  exponen por ahí. Escucha únicamente en `127.0.0.1`.\n- Usa los certificados de `certifi`: el Python de python.org viene sin raíces y\n  toda llamada https fallaba con `CERTIFICATE_VERIFY_FAILED`.\n- `Maximus.command` lo levanta solo, con `USAR_LOCALHOST=1`.\n- El token de ⚙ conexión vive en `localStorage`, que es **por origen**: al\n  cambiar de `file://` a localhost hubo que volver a configurarlo una vez.\n\n**El mismo día se arreglaron dos cosas más de `Maximus.command`:** lock de\ninstancia única (no se solapan música ni saludo) y detección de pestaña ya\nabierta comparando la URL exacta, para que el cerebro no se duplique.\n\n**Y la voz quedó fija (pestillo).** El micrófono tenía un solo estado, y Chrome\ndispara `onend` cada vez que uno se calla — no cuando el usuario lo apaga. Ahora\nhay dos: `micAbierto` (lo pone y lo saca Ricardo) y `escuchando` (el motor, que\nse cae entre frases). Mientras habla Maximus el micrófono se cierra, o se oye a\nsí mismo y se contesta solo.",
+   "origen": "implementado y verificado punta a punta el 23-ago-2026",
+   "grado": 7,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-018",
+   "tipo": "sistema",
+   "titulo": "El panel /admin ya no muestra las conversaciones de Ricardo con Maximus",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "HECHO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "privacidad",
+    "panel",
+    "agente",
+    "produccion"
+   ],
+   "cuerpo": "Lo que Ricardo hablaba con Maximus aparecía en el panel `/admin` **en la misma\nlista que los chats de clientes**: sueldos, márgenes, la inviabilidad del Mall.\nNo se enviaba a nadie —el cerebro nunca escribió a WhatsApp— pero se guardaba en\nla misma tabla, y el panel no filtraba nada.\n\n**Cómo quedó** (commit `ce69568` en `titicheo65/dimango-agent`):\n- `es_privada()` marca en un solo lugar qué es de Ricardo: las sesiones `web:*`\n  del cerebro **y su propio WhatsApp**, reutilizando `es_maximus`.\n- `listar_conversaciones` lo excluye. El filtro va en Python y no en la consulta,\n  para que aplique también a lo ya guardado, sin migrar nada.\n- `/api/conversaciones/{id}` responde **404** aunque se pida el id a mano.\n  Ocultarlo de la lista no basta si la ruta directa lo entrega.\n\n**Verificado en producción**, con el propio log del servidor mostrando\n`GET /admin/api/conversaciones/web%3Acerebro → 404 Not Found`.\n\n**Lo que NO hace, y hay que saberlo:** los mensajes siguen en el **mismo archivo**\nde base de datos que los de clientes. Están ocultos del panel, no separados.\nQuien tenga acceso al `.db` del servidor los lee.\n\n**Hubo una versión mejor que se descartó.** Guardaba el historial privado en una\nbase aparte —imposible de exponer por olvido— pero abría un segundo motor SQLite\nal arrancar. Se desplegó un domingo con los locales operando y se sospechó que\nhabía tumbado el agente. **Después se comprobó que la caída era por un puerto\ntomado (L-006), no por ese código.** O sea que la versión con base separada\nprobablemente funcionaba y se descartó por un diagnóstico errado.\n\n**Pendiente:** retomar la separación física un día de semana, probando en el\nservidor antes de desplegar.",
+   "origen": "desplegado y verificado en producción el 23-ago-2026",
+   "grado": 6,
    "color": "#ff8c42"
   },
   {
@@ -1755,6 +1871,41 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-019",
+   "a": "H-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-019",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-019",
+   "a": "L-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-019",
+   "a": "S-018",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-020",
+   "a": "S-015",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-020",
+   "a": "S-017",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-020",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -1817,6 +1968,26 @@
   {
    "de": "L-005",
    "a": "D-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-006",
+   "a": "L-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-006",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-006",
+   "a": "D-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-006",
+   "a": "H-019",
    "rel": "relacionado"
   },
   {
@@ -2145,6 +2316,26 @@
    "rel": "menciona"
   },
   {
+   "de": "P-011",
+   "a": "S-018",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "P-011",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-011",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-011",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
    "de": "R-001",
    "a": "E-001",
    "rel": "deriva_de"
@@ -2397,6 +2588,51 @@
   {
    "de": "S-016",
    "a": "S-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-017",
+   "a": "S-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-017",
+   "a": "S-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-017",
+   "a": "S-015",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-017",
+   "a": "H-020",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-017",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-018",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-018",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-018",
+   "a": "S-017",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-018",
+   "a": "P-011",
    "rel": "relacionado"
   },
   {
