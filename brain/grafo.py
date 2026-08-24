@@ -8,6 +8,7 @@ No depende de nada externo: ni librerías, ni CDN, ni internet.
 Los datos van embebidos en el HTML, así que el archivo no sale de tu disco.
 """
 
+import base64
 import json
 import re
 from datetime import date
@@ -15,6 +16,7 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
 MEM = BASE / "memoria"
+CARA = BASE / "brain" / "cara.jpg"
 
 COLORES = {
     "decision": "#f5a623",   # ámbar
@@ -113,7 +115,14 @@ def main():
               "huerfanos": huerfanos, "enlaces_rotos": rotos}
     (MEM / "indice.json").write_text(json.dumps(indice, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    html = PLANTILLA.replace("__DATOS__", json.dumps(indice, ensure_ascii=False))
+    # La cara va embebida como el resto: el HTML tiene que seguir abriéndose
+    # con doble clic, sin servidor y sin archivos sueltos al lado.
+    # Si no está el archivo, el avatar simplemente no aparece.
+    cara = base64.b64encode(CARA.read_bytes()).decode() if CARA.exists() else ""
+
+    html = (PLANTILLA
+            .replace("__DATOS__", json.dumps(indice, ensure_ascii=False))
+            .replace("__CARA__", cara))
     (BASE / "brain" / "cerebro.html").write_text(html, encoding="utf-8")
 
     print(f"{len(nodos)} nodos · {len(aristas)} conexiones")
@@ -220,7 +229,16 @@ input:focus{border-color:#f5a623}
  font-size:12.5px;font-weight:600;cursor:pointer;margin-right:8px}
 #cfgpanel button.sec{background:#232838;color:#9aa3b2;font-weight:400}
 #cfgmsg{font-size:11.5px;color:#ff8fa3;margin-bottom:12px;line-height:1.5}
-#rta{position:fixed;bottom:104px;left:50%;transform:translateX(-50%);z-index:15;
+/* ── el perro ── */
+#cara{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:17;
+ width:136px;height:136px;cursor:pointer;filter:drop-shadow(0 10px 26px rgba(0,0,0,.65))}
+#cara canvas{display:block;width:136px;height:136px}
+#cara:hover{filter:drop-shadow(0 10px 26px rgba(245,166,35,.4))}
+@media(max-width:900px){#cara{width:104px;height:104px;bottom:96px}
+ #cara canvas{width:104px;height:104px}}
+@media(max-width:760px){#cara{display:none}}
+
+#rta{position:fixed;bottom:250px;left:50%;transform:translateX(-50%);z-index:15;
  width:min(620px,72vw);background:rgba(14,17,24,.96);border:1px solid #2a4a3a;border-radius:12px;
  padding:16px 20px;font-size:13px;line-height:1.65;color:#c3cad6;white-space:pre-wrap;
  max-height:38vh;overflow-y:auto;display:none;backdrop-filter:blur(14px)}
@@ -276,6 +294,7 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
   <span id="estado"></span>
 </div>
 <div id="rta"></div>
+<div id="cara" title="Háblale a Maximus"><canvas id="caralienzo"></canvas></div>
 
 <button id="cfg" onclick="configurar()">⚙ conexión</button>
 <div id="cfgpanel">
@@ -365,7 +384,8 @@ function ajustar(){
   const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
   // los paneles se encogen en ventanas angostas; el área libre nunca es negativa
   const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50, hud=64;
-  const dispW=Math.max(W-izq-der-mg*2, 220), dispH=Math.max(H-hud-mg*2-110, 220);
+  // 250 abajo: barra de chat + la cara del perro. Los nodos no se esconden detrás.
+  const dispW=Math.max(W-izq-der-mg*2, 220), dispH=Math.max(H-hud-mg*2-250, 200);
   cam.z=Math.max(0.12, Math.min(dispW/Math.max(x1-x0,1), dispH/Math.max(y1-y0,1), 1.7));
   cam.x=izq+mg+(dispW-(x1-x0)*cam.z)/2-x0*cam.z;
   cam.y=hud+mg+(dispH-(y1-y0)*cam.z)/2-y0*cam.z;
@@ -374,7 +394,10 @@ function ajustar(){
 for(let i=0;i<400;i++) paso();   // estabilizar antes de mostrar
 ajustar();
 
-function bucle(){ paso(); pintar(); requestAnimationFrame(bucle) } bucle();
+// El bucle se ARRANCA al final del archivo, no aquí: pintarCara() usa
+// constantes declaradas más abajo, y tocarlas antes de tiempo lanza una
+// excepción que corta el requestAnimationFrame y congela el grafo entero.
+function bucle(){ paso(); pintar(); pintarCara(); requestAnimationFrame(bucle) }
 
 // ── interacción ──
 let arrastre=false, px=0, py=0, movido=0;
@@ -670,8 +693,132 @@ function sonar(b64, volumen){
     if(escuchando){ try{ rec && rec.abort(); }catch(e){} }   // cierra el mic antes de hablar
     audioActual = new Audio('data:audio/mpeg;base64,' + b64);
     audioActual.volume = volumen;
+    engancharAudio(audioActual);      // para que la cara se mueva con la voz
     audioActual.play().catch(()=>{});
   }catch(e){ /* si el navegador bloquea el autoplay, el texto ya está */ }
+}
+
+// ── la cara ───────────────────────────────────────────────────────
+// El avatar se mueve con la ONDA REAL de la voz, no con un temporizador:
+// si la respuesta dura 3 s el hocico se mueve 3 s, y calla cuando calla.
+//
+// Un perro de una foto no tiene boca animable. El truco es estirar hacia
+// abajo la franja inferior de la imagen —hocico, mandíbula y lengua— en
+// proporción al volumen. Como el recorte está en un círculo, lo que sobra
+// se corta solo y el ojo lo lee como la boca abriéndose.
+const CORTE = 0.70;   // dónde empieza la mandíbula, medido en la foto
+
+const cara = document.getElementById('cara');
+const cl = document.getElementById('caralienzo');
+const cx = cl ? cl.getContext('2d') : null;
+const fotoCara = new Image();
+let caraLista = false;
+fotoCara.onload = ()=>{ caraLista = true; };
+fotoCara.onerror = ()=>{ if(cara) cara.style.display='none'; };
+fotoCara.src = 'data:image/jpeg;base64,__CARA__';
+// sin foto el src queda en el prefijo pelado: se esconde y no estorba
+if(cara && fotoCara.src.length < 40) cara.style.display = 'none';
+if(cara) cara.onclick = ()=>alternarMic();
+
+// Audio → número. Se intenta el analizador real; si el navegador lo niega
+// se cae a una onda sintética. Nunca se toca la reproducción: si algo falla
+// aquí, el sonido sigue saliendo igual y solo se pierde la sincronía fina.
+let ac=null, analiz=null, muestras=null, modoSint=false, mudos=0, vioSenal=false;
+
+function engancharAudio(el){
+  if(modoSint) return;
+  try{
+    if(!ac) ac = new (window.AudioContext||window.webkitAudioContext)();
+    const src = ac.createMediaElementSource(el);
+    analiz = ac.createAnalyser(); analiz.fftSize = 256;
+    muestras = new Uint8Array(analiz.fftSize);
+    src.connect(analiz); analiz.connect(ac.destination);
+    mudos = 0;
+
+    // Enrutar por un contexto dormido deja la respuesta MUDA, y quedarse
+    // callado es mucho peor que no animar. resume() es asíncrono, así que
+    // no sirve mirar el estado en la línea siguiente: hay que volver a mirar.
+    if(ac.state !== 'running'){
+      ac.resume().catch(()=>{});
+      setTimeout(()=>{
+        if(ac.state === 'running' || el !== audioActual) return;
+        modoSint = true; analiz = null;          // se rinde el analizador
+        const t = el.currentTime, fuente = el.src, vol = el.volume;
+        el.pause();
+        const bis = new Audio(fuente);            // este NO pasa por el contexto
+        bis.volume = vol;
+        try{ bis.currentTime = t; }catch(e){}
+        audioActual = bis; bis.play().catch(()=>{});
+      }, 350);
+    }
+  }catch(e){ modoSint = true; analiz = null; }
+}
+
+function nivelVoz(){
+  if(!hablando()) return 0;
+  if(analiz && !modoSint){
+    analiz.getByteTimeDomainData(muestras);
+    let pico = 0;
+    for(let i=0;i<muestras.length;i++){ const v = Math.abs(muestras[i]-128); if(v>pico) pico = v; }
+    if(pico > 1){ vioSenal = true; mudos = 0; return Math.min(1, pico/64); }
+    // Silencio. Si el analizador YA entregó señal alguna vez, esto es una
+    // pausa del habla y la boca se cierra — que es justo lo que debe pasar.
+    // Solo si nunca entregó nada se concluye que no sirve y se cambia de modo.
+    if(vioSenal || ++mudos <= 45) return 0;
+    modoSint = true;
+  }
+  const t = performance.now()/1000;
+  return 0.30 + 0.34*Math.abs(Math.sin(t*7.7)) * (0.55 + 0.45*Math.abs(Math.sin(t*2.9)));
+}
+
+let ampSuave = 0;
+
+function pintarCara(){
+  if(!cx || !caraLista) return;
+  const S = 136, DPR = Math.min(devicePixelRatio||1, 2);
+  if(cl.width !== S*DPR){ cl.width = cl.height = S*DPR; }
+  cx.setTransform(DPR,0,0,DPR,0,0);
+  cx.clearRect(0,0,S,S);
+
+  const objetivo = nivelVoz();
+  // Sube rápido y baja lento: una boca no se cierra de golpe entre sílabas.
+  ampSuave += (objetivo - ampSuave) * (objetivo > ampSuave ? 0.55 : 0.16);
+  const a = ampSuave, t = performance.now()/1000;
+
+  const R = S/2 - 5;
+  const respira = 1 + Math.sin(t*1.6)*0.012 + a*0.045;   // late al hablar
+  const cxc = S/2, cyc = S/2 - a*2.5;                     // y cabecea un poco
+
+  // halo: ámbar al hablar, rojo si el micrófono está abierto
+  const rojo = micAbierto && !hablando();
+  const col = rojo ? '255,95,86' : '245,166,35';
+  const fuerza = rojo ? 0.35 + 0.25*Math.abs(Math.sin(t*3.4)) : a;
+  if(fuerza > 0.02){
+    const g = cx.createRadialGradient(cxc,cyc,R*0.85, cxc,cyc,R+16*fuerza+6);
+    g.addColorStop(0, 'rgba('+col+',' + (0.30*fuerza).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba('+col+',0)');
+    cx.fillStyle = g;
+    cx.beginPath(); cx.arc(cxc,cyc,R+22,0,7); cx.fill();
+  }
+
+  cx.save();
+  cx.beginPath(); cx.arc(cxc,cyc,R,0,7); cx.clip();
+
+  const w = fotoCara.naturalWidth, h = fotoCara.naturalHeight;
+  const D = R*2*respira, x0 = cxc-D/2, y0 = cyc-D/2;
+  const quijada = a*D*0.11;
+
+  // arriba: ojos y frente, quietos
+  cx.drawImage(fotoCara, 0, 0, w, h*CORTE,
+                         x0, y0, D, D*CORTE);
+  // abajo: hocico y lengua, estirados hacia abajo con la voz
+  cx.drawImage(fotoCara, 0, h*CORTE, w, h*(1-CORTE),
+                         x0, y0+D*CORTE, D, D*(1-CORTE)+quijada);
+  cx.restore();
+
+  cx.strokeStyle = 'rgba('+col+',' + (0.34 + 0.5*fuerza).toFixed(3) + ')';
+  cx.lineWidth = 1.6 + fuerza*2.6;
+  cx.beginPath(); cx.arc(cxc,cyc,R,0,7); cx.stroke();
 }
 
 function alternarMic(){
@@ -867,6 +1014,7 @@ traerClima(); traerIndicadores();
 setInterval(traerClima, 15*60*1000);        // el clima no cambia cada minuto
 setInterval(traerIndicadores, 60*60*1000);
 
+bucle();   // todo declarado: recién ahora se puede pintar
 </script></body></html>"""
 
 
