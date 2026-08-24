@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 14,
+   "grado": 15,
    "color": "#f5a623"
   },
   {
@@ -439,7 +439,7 @@
    ],
    "cuerpo": "`/AdminVentas` muestra **COSTO NETO: $0**. En el esquema, `Product.cost` existe\ny está descrito como *\"costo neto unitario del producto (para cálculo de\nmargen)\"*.\n\n**Está construido y nadie lo llenó.**\n\nCargar los costos daría **margen bruto por producto y por categoría**, calculado\nsolo, sin inventario y sin contador. Responde la pregunta que nunca se pudo\nplantear: cuáles productos ganan plata y cuáles no.\n\nMáximo valor por mínimo esfuerzo de todo lo identificado el 20-ago.",
    "origen": "DiMangoToGo /AdminVentas + esquema Product.cost del repo",
-   "grado": 5,
+   "grado": 6,
    "color": "#4a9eff"
   },
   {
@@ -477,7 +477,7 @@
    ],
    "cuerpo": "El log de errores del servidor de impresión de Playa repite quince veces:\n\n> `[COLA] Job <id> ya se imprimio en esta sesion (Base44 lo sigue marcando\n> pendiente) - se omite para no duplicar`\n\n**Qué significa:** el servidor imprime el trabajo, pero **DiMangoToGo (Base44)\nnunca lo marca como impreso**. La cola queda llena de trabajos fantasma que\nsiguen figurando pendientes.\n\n**Qué evita el desastre hoy:** una lista en memoria del propio servidor de\nimpresión, que recuerda qué salió \"en esta sesión\" y lo omite.\n\n**Por qué es frágil:** esa lista vive en RAM. Si el proceso se reinicia —corte de\nluz, reinicio de Windows, o el arranque automático de P-008— la lista se pierde,\nBase44 sigue diciendo \"pendiente\", y **se reimprimen de golpe todos los trabajos\nacumulados**: boletas y precuentas viejas saliendo en cadena, probablemente en\nmedio del servicio.\n\n**Agravante:** el arranque automático que se creó en P-008 hace este escenario\n*más* probable, no menos. Antes alguien levantaba el servidor a mano y estaba\nmirando; ahora arranca solo.\n\n**Dónde se arregla:** en DiMangoToGo, no en el servidor de impresión. El job debe\nmarcarse como impreso cuando el servidor confirma. Mientras eso no ocurra, cada\nreinicio es una ruleta.\n\n**Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6**\n(`C:\\dimango\\print-server\\servidor-impresion-playa-v6.js`) en estado `stopped`,\npero en el repositorio existe una **v7**. La entrada de PM2 apunta a una versión\nreemplazada. Pendiente confirmar qué proceso imprime hoy en Playa.\n\n---\n\n**Agravante descubierto el 21-ago-2026:** el local del Mall tiene **su propio PC\ncon servidor de impresión local y arranque automático ya configurado** (S-012).\n\nSi corre el mismo código, **el riesgo de reimpresión masiva ya está activo ahí,\nhoy, sin que nadie lo haya introducido**: cada corte de luz en el Mall levanta el\nservidor con la lista anti-duplicados vacía mientras Base44 sigue marcando\ntrabajos como pendientes.\n\n**Evidencia a buscar:** preguntar en el Mall si alguna vez salieron boletas o\nprecuentas viejas de golpe después de un corte de luz. Si ocurrió, H-018 deja de\nser hipótesis.\n\n\n---\n\n## CONFIRMADO CON DATOS — 23-ago-2026, 23:00 hora de Arica\n\nYa no es hipótesis. Consulta directa a la entidad `PrintJob` de DiMangoToGo\n(autoridad 1 — sistema oficial):\n\n**14 documentos se marcaron impresos de golpe, en 8,3 segundos**, entre las\n23:00:30 y las 23:00:38. El más viejo se había creado **cinco horas antes**\n(21:59). Los reintentos acumulados iban de 22 a **86** en un solo documento.\n\nTodos son de **Playa**. Falta confirmar en terreno si salieron en papel una vez\no dos: preguntar si esa noche, cerca de las 23:00, salieron boletas y precuentas\nviejas de mesas ya cerradas.\n\n## El Mall NO tiene el problema — y tiene la solución escrita\n\nEstado real de la cola: **Mall con cero pendientes**, todos `impreso`, con\n`intentos` 0 o 1 y `printed_at` **2 a 4 segundos** después de crearse. Playa\ntarda 22-25 s en el caso bueno.\n\n`C:\\dimango\\print-server\\servidor-impresion-mall-v6.js` hace lo correcto:\n\n- marca `estado: 'imprimiendo'` ANTES de imprimir, \"para que otra vuelta no lo\n  tome dos veces\" (línea 279)\n- marca `estado: 'impreso'` + `printed_at` al terminar (líneas 291-294)\n- marca `estado: 'error'` con mensaje si falla (líneas 299-301)\n- **arranca la cola dentro de `server.listen`**, así que solo consulta el proceso\n  que tomó el puerto 3001 — dos instancias no compiten (línea 322)\n- backoff ante 429: sube la espera hasta 60 s en vez de martillar Base44\n\nSu encabezado explica el origen: DiMangoToGo pasó de mandar impresión por HTTP\n(*push*) a dejar registros en la cola (*pull*), y la v5.2 no leía esa cola — \"por\neso Mall no imprimía\". El problema ya se resolvió una vez, acá.\n\n**Playa corre otra versión.** El mensaje de su log —\"ya se imprimió en esta\nsesión, Base44 lo sigue marcando pendiente\"— **no existe en el código del Mall**.\n\n**El arreglo no es diseñar nada: es llevar la v6 del Mall a Playa.**\n\n## Lo que falta hacer (mañana)\n\n1. En ServidorPlaya, los mismos dos comandos que se corrieron en SERVMALL:\n   qué `node.exe` corre y el extracto del archivo. Comparar con el del Mall.\n2. Preguntar en Playa por las boletas viejas de las 23:00.\n3. Al abrir el Mall, confirmar que hay algo escuchando en el 3001: la noche del\n   23-ago **no había ningún `node.exe` corriendo en SERVMALL**. Puede ser normal\n   con el local cerrado, pero S-012 dice que ese PC tiene arranque automático.\n\n## Credencial expuesta\n\n`BASE44_API_KEY` está en texto plano en la línea 35 del archivo, y quedó visible\nen una captura de pantalla el 23-ago. Da acceso de lectura y escritura a los\ndatos de DiMangoToGo. **Cuarto caso del patrón de H-019.** Rotar en Base44 y\nactualizar el archivo en los dos servidores.",
    "origen": "C:\\\\Users\\\\usuario\\\\.pm2\\\\logs\\\\impresion-playa-error.log, 21-ago-2026",
-   "grado": 5,
+   "grado": 6,
    "color": "#4a9eff"
   },
   {
@@ -517,6 +517,26 @@
    "cuerpo": "**Solo un proceso a la vez escucha bien el micrófono del Mac.** Con el cerebro\nabierto y el micrófono en modo fijo, `escuchar.py` mide **0.0000** — literalmente\nnada, ni ruido de fondo.\n\nEs una consecuencia directa del arreglo del mismo día (S-017): antes el\nmicrófono se apagaba solo entre turnos y dejaba huecos por donde el detector\nalcanzaba a oír. Ahora que el pestillo queda puesto hasta que Ricardo lo saque,\nel conflicto es permanente.\n\n**Consecuencia práctica:** mientras el cerebro esté escuchando, aplaudir no hace\nnada. Hay que apagar el micrófono del cerebro para que el despertar funcione.\n\n**Esto arruinó tres intentos de calibración** antes de entenderlo, y produjo un\nveredicto falso — \"el aplauso no sirve como disparador\"— que salía de un\ninstrumento sordo, no de una medición. Por eso `brain/calibrar.py` ahora arranca\ncomprobando que el micrófono llegue y **se detiene** si no.\n\n**Duda de fondo, sin resolver:** el aplauso como disparador es frágil por diseño.\nDepende de un umbral fijo sobre una entrada que macOS amplifica sola, compite por\nel micrófono con el propio cerebro, y `escuchar.py` no valida la duración del\npico pese a que su documentación dice que sí. Un atajo de teclado global o el\nícono del Dock hacen lo mismo, son deterministas y no dependen de que nadie deje\ncaer una taza.\n\n**Estado:** `escuchar.py` quedó **detenido** el 23-ago. Corría con `--umbral 0.15`\n—la mitad del que trae por defecto— y por eso cualquier par de ruidos secos\ndespertaba a Maximus solo. Antes de relanzarlo hay que calibrar, y para calibrar\nhay que soltar el micrófono.",
    "origen": "medido en el Mac el 23-ago-2026: 0.0000 con Chrome escuchando",
    "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-021",
+   "tipo": "hallazgo",
+   "titulo": "El arranque automático de Maximus existe y corrió — y aun así no levantó",
+   "estado": "cerrado",
+   "autoridad": 2,
+   "fuente": "OBSERVADO",
+   "fecha": "2026-08-24",
+   "tags": [
+    "infraestructura",
+    "servidorplaya",
+    "arranque-automatico",
+    "uvicorn",
+    "riesgo-operacional"
+   ],
+   "cuerpo": "Corte de luz en Playa Chinchorro. Al volver la energía, Windows reinició. Ricardo\nno tocó nada — su primer mensaje fue *\"no he hecho nada, solo q revise y se había\ncortado la luz y no levantó al reinicio\"*.\n\n**Resultado:** `/maximus/chat` respondía **404** desde el cerebro visual.\n\n## Lo nuevo que este caso confirma\n\nP-008 punto 1 decía *\"nada arranca solo\"* como riesgo teórico, y el 23-ago se\ncobró la primera factura (ver `P-008.md`, sección \"Dejó de ser un riesgo\nteórico\"). Ese día la causa fue humana: alguien cerró la ventana equivocada.\n\n**Este caso es distinto y peor: esta vez SÍ existe tarea programada\n(`Maximus-Arranque`, verificado con `Get-ScheduledTask`), apunta al script\ncorrecto (`C:\\dimango-agent\\arranque.bat`, verificado con `Select -ExpandProperty\nActions`), el script en sí es correcto, y el reinicio disparó la tarea sin que\nnadie interviniera — y aun así no quedó nada escuchando en el puerto 8000.**\n\nO sea: **la tarea programada que P-008 pedía como solución ya estaba puesta, y no\nfue suficiente.** El problema no era la ausencia de automatización — era que la\nautomatización tiene un eslabón que falla en silencio.\n\n## Diagnóstico (aplicando L-006: verificar antes de teorizar)\n\n1. `netstat -ano | findstr :8000` + `Get-CimInstance Win32_Process -Filter\n   \"ProcessId=X\"` mostraron un PID con el `CommandLine` correcto\n   (`python -m uvicorn agent.main:app --host 0.0.0.0 --port 8000`) pero el\n   endpoint seguía sin responder bien — quedaba un proceso a medio levantar.\n2. `git log -1` y `git status` en el servidor: código al día, limpio, igual al\n   repositorio. **No era código viejo.** Se descartó la hipótesis inicial de\n   Maximus (código pre-rollback de L-006) apenas Ricardo aportó el dato real\n   (fue corte de luz, no un despliegue).\n3. `Select-String -Path \"agent\\main.py\" -Pattern \"maximus/chat\"` confirmó la\n   ruta declarada sin condición en el código — un 404 ahí es imposible si el\n   proceso está realmente arriba y sirviendo ese archivo.\n4. Se mató el proceso zombi (`Stop-Process -Force`) y se corrió `arranque.bat`\n   a mano: PM2 resucitó bien (`server6`, `voiceagentkit`, etc.), pero\n   `Invoke-WebRequest http://localhost:8000/openapi.json` dio **\"no es posible\n   conectar con el servidor remoto\"** — nada escuchaba. El error pasó de 404 a\n   502 (ngrok sin backend) a conexión rechazada, cada uno un síntoma distinto\n   del mismo hueco: `start \"\" /min python -m uvicorn ...` no dejó nada vivo.\n\n## La causa exacta queda sin confirmar — y eso es lo que hay que arreglar\n\n`start \"\" /min <exe>` lanza `python.exe` directo, no dentro de `cmd.exe`. Si el\nproceso truena al arrancar, **la ventana se cierra sola** y no queda rastro ni\ntraceback que leer — al revés de lo que Maximus asumió al principio (fue\ncorregido en la misma sesión). No se pudo determinar si murió por una carrera de\ntiempos con PM2, un puerto que tardó en soltarse, o algo del propio arranque de\nuvicorn.\n\n## Arreglo aplicado — funciona, pero es frágil\n\nSe corrió `python -m uvicorn agent.main:app --host 0.0.0.0 --port 8000` **en\nprimer plano**, dentro de la sesión RDP activa. Arrancó limpio, sin errores.\nRicardo confirmó desde el cerebro: *\"probé y ya me respondió bien.\"*\n\n**Esto no es la solución — es el parche que devolvió el servicio hoy.** El\nproceso vive en una ventana de una sesión remota abierta: si esa ventana se\ncierra o la sesión se corta, Maximus vuelve a caer, y otra vez sin aviso.\n\n## Lo que falta, en orden\n\n1. **Sacar el agente de `start /min` y ponerlo bajo PM2**, igual que\n   `server6` y `voiceagentkit` ya lo están dentro del mismo `arranque.bat`. PM2\n   reinicia solo si el proceso muere; `start /min` no.\n2. **Una verificación posterior al arranque**, no solo la ejecución del script:\n   confirmar que el puerto 8000 quedó `LISTENING` antes de dar por bueno el\n   despliegue (repite la lección de L-006, aplicada esta vez *durante* el\n   incidente, no después).\n3. Seguir sin activar más automatización de impresión (H-018) hasta que esto\n   esté resuelto — un arranque automático que falla en silencio es peor en la\n   cola de impresión que en el chat.",
+   "origen": "ServidorPlaya, sesión de diagnóstico en vivo con Ricardo por RDP, 24-ago-2026",
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -570,7 +590,7 @@
    ],
    "cuerpo": "Tótems, autoservicio y reducción de cajas se justifican con un ahorro de costo\nlaboral que era inmedible.\n\n**Parcialmente resuelto:** con H-011 ya existe el costo laboral por local y por\npuesto. Ahora sí se puede medir si un tótem ahorró o costó.\n\nY sin ese número, Aurexgroup tampoco tiene caso de venta: no se puede vender un\nROI que no se midió en el propio laboratorio.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#27c93f"
   },
   {
@@ -625,7 +645,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 6,
+   "grado": 7,
    "color": "#27c93f"
   },
   {
@@ -974,7 +994,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 12,
+   "grado": 13,
    "color": "#ff5f56"
   },
   {
@@ -990,9 +1010,9 @@
     "servidorplaya",
     "riesgo"
    ],
-   "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.",
+   "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.\n\n## Segunda caída, 24-ago-2026 — con tarea programada puesta y aun así falló\n\nVer `H-021.md`. Corte de luz, Windows reinició, la tarea `Maximus-Arranque` SÍ\ncorrió (verificado), PM2 SÍ resucitó sus procesos — y aun así `start /min\npython -m uvicorn` no dejó nada escuchando en el puerto 8000. **La tarea\nprogramada que este pendiente pedía ya existía, y no bastó.** El punto 1 de\nesta lista queda redefinido: no es \"falta arranque automático\", es \"el\narranque automático tiene un paso (`start /min` para uvicorn) que falla en\nsilencio y sin PM2 detrás para reintentar\". Arreglo del día: proceso corrido a\nmano en primer plano — funciona hoy, no sobrevive un reinicio ni el cierre de\nla sesión RDP.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 12,
+   "grado": 14,
    "color": "#ff5f56"
   },
   {
@@ -1053,6 +1073,26 @@
    "color": "#ff5f56"
   },
   {
+   "id": "P-012",
+   "tipo": "pendiente",
+   "titulo": "Herramienta de ventas en tiempo real para Maximus",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "HECHO",
+   "fecha": "2026-08-23",
+   "tags": [
+    "tablero",
+    "ventas",
+    "maximus",
+    "base44",
+    "alertas"
+   ],
+   "cuerpo": "Ricardo pide que Maximus sepa las ventas en tiempo real por local: lo más\nvendido, cantidades, montos, y poder preguntarle cosas como \"¿se vendió lasaña\nhoy, cuántas y en qué local?\".\n\n**Viable hoy, verificado el 23-ago-2026** consultando la API de Base44 en vivo.\nLa entidad `Order` trae por ítem: `product_name`, `quantity`, `price`,\n`category`, `location` y hora. `VentaCaja` trae totales, medio de pago, local,\nturno y propinas. El dato ya existe y responde.\n\n**Cómo se hace — una herramienta, no un sistema.** Se agrega una función al\nagente (`consultar_ventas(desde, hasta, local, producto)`) que consulta Base44\n**en el momento de la pregunta**. Sin copia de datos, sin proceso de\nsincronización, sin una segunda fuente que contradiga a la primera. Esfuerzo\nestimado: una tarde, porque el canal de Telegram y el agente ya existen.\n\n**Prerrequisito de máximo valor:** el campo `cost` de cada ítem viene en `null`\n(H-016). Mientras siga vacío, Maximus dirá **cuánto se vendió** pero nunca\n**cuánto se ganó**. Cargar los costos de los productos convierte la misma\nherramienta en margen por producto y por categoría, sin inventario y sin\ncontador.\n\n**La objeción de Maximus, registrada:** poder *preguntar* es reactivo — requiere\nque a Ricardo se le ocurra preguntar, o sea que sigue siendo el cuello de\nbotella, ahora con mejor interfaz. **El salto real es que Maximus avise sin que\nle pregunten**: \"el Mall va 30% bajo un domingo normal a esta hora\", \"las pastas\nno se venden hace tres días\". Eso sí reduce dependencia, y se construye sobre la\nmisma herramienta.\n\n**Pregunta que ordena el diseño y hay que responder antes de escribir código:**\n¿qué decisión se va a tomar con ese dato? Si es curiosidad, es un juguete caro en\natención. Si es para detectar quiebres de stock, controlar la reposición del Mall\n(P-007) o ver un local cayendo antes de que termine el mes, el diseño se ordena\nsolo alrededor de esa decisión.\n\n**No es proyecto nuevo: es el tablero de gestión que ya está en las prioridades,\nen su versión más barata.** Va después de P-008 y H-018, que son riesgos activos\ncon factura ya cobrada.\n\n**Acordado el 23-ago-2026:** se arma en la misma sesión en que se revise el\nservidor de impresión de Playa.",
+   "origen": "pedido de Ricardo el 23-ago-2026; viabilidad verificada consultando la API de Base44",
+   "grado": 5,
+   "color": "#ff5f56"
+  },
+  {
    "id": "R-001",
    "tipo": "regla",
    "titulo": "Caja chica por local — propuesta",
@@ -1105,7 +1145,7 @@
    ],
    "cuerpo": "Plataforma propia sobre Base44: pedidos, atención, caja, pagos, autoservicio.\n**Fuente única de venta desde el 1-jul-2026.** 519 archivos.\n\n**Pantallas clave:** `/AdminVentas` (venta por local, medio de pago,\nconciliación SII) · `/Caja` · `/Checklist` · `/Kioskos` · `/CierreTurno`.\n\n**Emisión de DTE:** no emite; delega en SimpleFactura (S-003).\n\n**Deuda técnica:** el puente venta↔bodega es matching por **nombre de texto**\n(`ReglaInsumo.nombre_en_venta`). Renombrar un producto rompe la conversión en\nsilencio.",
    "origen": "repo titicheo65/dimangotogo + uso directo",
-   "grado": 16,
+   "grado": 17,
    "color": "#ff8c42"
   },
   {
@@ -1233,7 +1273,7 @@
    ],
    "cuerpo": "Windows en el local de Playa Chinchorro. Se accede por AnyDesk/Splashtop.\n\n**Tres servicios y tres túneles ngrok** (tope del plan Hobbyist):\n\n| Puerto | Servicio | Túnel |\n|---|---|---|\n| 8000 | agente WhatsApp | oak-cornea-marlin.ngrok-free.dev |\n| 8001 | `functions.main` (voiceagentkit) | voiceagentkit.ngrok.app |\n| 3003 | — | dimango.ngrok.app |\n\n**Riesgo estructural:** si se corta la luz o internet en Playa, se caen el agente\nde clientes y Maximus. Nada arranca solo.",
    "origen": "inspección directa, 20-ago-2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#ff8c42"
   },
   {
@@ -1906,6 +1946,26 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-021",
+   "a": "P-008",
+   "rel": "agravado_por"
+  },
+  {
+   "de": "H-021",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-021",
+   "a": "H-018",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-021",
+   "a": "S-008",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -2286,6 +2346,11 @@
    "rel": "relacionado"
   },
   {
+   "de": "P-008",
+   "a": "H-021",
+   "rel": "agrava"
+  },
+  {
    "de": "P-009",
    "a": "P-001",
    "rel": "deriva_de"
@@ -2334,6 +2399,31 @@
    "de": "P-011",
    "a": "P-008",
    "rel": "relacionado"
+  },
+  {
+   "de": "P-012",
+   "a": "H-016",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-012",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-012",
+   "a": "L-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-012",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-012",
+   "a": "S-001",
+   "rel": "menciona"
   },
   {
    "de": "R-001",
