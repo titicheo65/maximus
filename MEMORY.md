@@ -527,10 +527,8 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 
 | # | Qué | Por qué acá | Plazo |
 |---|---|---|---|
-| 1 | **P-010 — filtración del Mall: activar el seguro y documentar** | Un tercero formal esperando respuesta por escrito, con daño físico de por medio. Y es munición para renegociar el arriendo del 37,4% (H-015). **Era prioridad 1 el 22-ago y sigue sin tocarse** | **Atrasado** |
 | 2 | **P-008 — que el agente y ngrok arranquen solos** | Sube desde el puesto 8: **el 23-ago se cobró dos horas de webhook caído, un domingo con los locales operando**, y nadie se habría enterado si Ricardo no estaba mirando. Ya existe el precedente propio: `subir_venta_mall` | **Esta semana** |
 | 3 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012). **Resolver antes que el punto 2, o se agrava** | **Días** |
-| 4 | **Verificar tótems bajo carga (D-006)** | Comprometido para el sábado 22-ago. No se hizo. "Sin errores" no es verificación (D-007) | **Atrasado** |
 | 5 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012). Una pregunta, no un proyecto | Días |
 | 6 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
 | 7 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
@@ -543,7 +541,12 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 
 **Observación de Maximus sobre el 23-ago (domingo):** el día completo se fue en infraestructura del propio Maximus — despertar duplicado, micrófono, privacidad del panel, dos credenciales rotadas, dos horas de webhook caído. Se resolvieron cosas reales, incluidas dos exposiciones de credenciales. **Pero ninguna movió venta, margen ni dependencia**, y las tres prioridades de arriba de la lista siguen exactamente donde estaban el sábado. Es el patrón de T-001 —proyecto iniciado por Ricardo desplazando la prioridad declarada— y queda registrado para el veredicto del 14-sep.
 
-**Cerrados, se conservan por trazabilidad:**
+**Cerrados el 23-ago-2026 (informado por Ricardo, autoridad 4):**
+
+- **P-010 — filtración del Mall.** No hubo daño: el siniestro no se materializó. **Pero el valor de esa nota nunca fue el daño, era el documento**: Mallplaza dejó constancia por escrito de un defecto de aguas lluvias en el local que arrienda al 37,4% de su venta neta. Queda por confirmar si se respondió por escrito a Yanira Tara y si la carta está guardada donde se encuentre en noviembre.
+- **D-006 — tótems.** Funcionando, los niños ya no salen de la app, y ahora envían respaldo por Telegram (pendiente registrar qué envían exactamente). **Sigue sin medirse la venta que se cae por sesiones abandonadas** — sin ese número no se puede justificar comprar más tótems ni retirarlos (L-003).
+
+**Cerrados antes, se conservan por trazabilidad:**
 
 | | Qué | Cómo cerró |
 |---|---|---|
