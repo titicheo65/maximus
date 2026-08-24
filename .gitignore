@@ -11,3 +11,7 @@ audio/
 *.mp3
 *.m4a
 *.wav
+
+# Caché de Python: se regenera solo, ensucia los diffs
+__pycache__/
+*.pyc
