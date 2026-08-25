@@ -143,35 +143,45 @@ PLANTILLA = r"""<!doctype html>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#07080c;color:#dfe3ea;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
 #lienzo{position:fixed;inset:0;cursor:grab}#lienzo:active{cursor:grabbing}
-.panel{position:fixed;top:64px;bottom:0;width:330px;background:rgba(12,14,20,.93);backdrop-filter:blur(14px);
+.panel{position:fixed;top:102px;bottom:0;width:330px;background:rgba(12,14,20,.93);backdrop-filter:blur(14px);
  border-right:1px solid #1c2030;padding:20px;overflow-y:auto;z-index:10}
 
-/* ── HUD superior ── */
-#hud{position:fixed;top:0;left:0;right:0;height:64px;z-index:22;display:flex;align-items:stretch;
- background:linear-gradient(180deg,rgba(10,12,18,.98),rgba(10,12,18,.92));
- border-bottom:1px solid #1c2030;backdrop-filter:blur(16px);font-variant-numeric:tabular-nums}
-.reloj{flex:0 0 auto;padding:9px 20px;border-right:1px solid #14171f;display:flex;flex-direction:column;
- justify-content:center;min-width:132px}
-.reloj .ciu{font-size:9px;letter-spacing:.16em;color:#4d5566;font-weight:600;margin-bottom:1px}
-.reloj .hr{font-size:19px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.15}
-.reloj .hr .seg{font-size:11px;color:#4d5566}
-.reloj .tmp{font-size:10.5px;color:#7d8698;margin-top:1px}
-.reloj.local{background:rgba(245,166,35,.05)}
+/* ── HUD superior, estilo tarjetas ── */
+#hud{position:fixed;top:0;left:0;right:0;height:78px;z-index:22;display:flex;align-items:center;gap:14px;
+ padding:0 16px;background:linear-gradient(180deg,rgba(10,12,18,.98),rgba(10,12,18,.92));
+ border-bottom:1px solid #1c2030;backdrop-filter:blur(16px);font-variant-numeric:tabular-nums;
+ overflow-x:auto;scrollbar-width:none}
+#hud::-webkit-scrollbar{display:none}
+.hud-grupo{display:flex;gap:8px;flex:none}
+.reloj{flex:0 0 auto;padding:8px 14px;border-radius:10px;background:#12151f;border:1px solid #1c2030;
+ display:flex;flex-direction:column;justify-content:center;min-width:118px}
+.reloj .ciu{font-size:8.5px;letter-spacing:.14em;color:#4d5566;font-weight:700;display:flex;
+ align-items:center;gap:4px}
+.reloj .hr{font-size:17px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.2;margin-top:1px}
+.reloj .hr .seg{font-size:10px;color:#4d5566}
+.reloj .tmp{font-size:10px;color:#7d8698;margin-top:1px}
+.reloj.local{background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.25)}
 .reloj.local .ciu{color:#f5a623}
 .reloj.noche .hr{color:#8b93a3}
-#ind{flex:1;padding:9px 22px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0}
-#ind .fila1,#ind .fila2{display:flex;gap:20px;flex-wrap:wrap;font-size:11px;white-space:nowrap}
-#ind b{color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;font-weight:500}
-#ind .k{color:#4d5566}
-#ind .alerta{color:#ff8fa3}
-#ind .ok{color:#4a9e6f}
-#hud{overflow-x:auto;scrollbar-width:none}
-#hud::-webkit-scrollbar{display:none}
+#stats{display:flex;gap:8px;flex:1;min-width:0}
+.stat{flex:1;min-width:100px;padding:8px 13px;border-radius:10px;background:#12151f;border:1px solid #1c2030;
+ display:flex;align-items:center;gap:9px}
+.stat .ic{font-size:15px;line-height:1}
+.stat .v{font-size:17px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.15;font-weight:600}
+.stat .k{font-size:9px;letter-spacing:.1em;color:#5c6478;font-weight:600;text-transform:uppercase}
+.stat.alerta{background:rgba(255,95,86,.08);border-color:rgba(255,95,86,.3)}
+.stat.alerta .v{color:#ff8fa3}
+#ticker{position:fixed;top:78px;left:0;right:0;height:24px;z-index:21;display:flex;align-items:center;
+ gap:18px;padding:0 18px;background:rgba(10,12,18,.9);border-bottom:1px solid #14171f;
+ font-size:11px;white-space:nowrap;overflow-x:auto;scrollbar-width:none;backdrop-filter:blur(10px)}
+#ticker::-webkit-scrollbar{display:none}
+#ticker b{color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;font-weight:500}
+#ticker .k{color:#4d5566}
 @media(max-width:1250px){
-  .reloj{min-width:108px;padding:9px 13px}
-  .reloj .hr{font-size:17px} .reloj .hr .seg{display:none}
-  #ind{padding:9px 14px;min-width:280px}
-  #ind .fila1,#ind .fila2{gap:13px;font-size:10.5px}
+  .reloj{min-width:96px;padding:7px 10px}
+  .reloj .hr{font-size:15px} .reloj .hr .seg{display:none}
+  .stat{min-width:80px;padding:7px 10px}
+  .stat .v{font-size:15px}
 }
 .panel.der{right:0;left:auto;border-right:0;border-left:1px solid #1c2030;width:220px}
 h1{font-size:15px;letter-spacing:.14em;color:#f5a623;margin-bottom:2px;font-weight:600}
@@ -185,6 +195,32 @@ input:focus{border-color:#f5a623}
 .fila:hover{background:#171b26}
 .punto{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;flex:none}
 .n{color:#4d5566;font-size:11px}
+/* ── tarjetas de prioridad (de MEMORY.md, no inventadas) ── */
+.tarjeta{background:linear-gradient(180deg,#12151f,#0e1017);border:1px solid #1c2030;border-radius:10px;
+ padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.tarjeta:hover{border-color:#374050}
+.tarjeta .tt{font-size:12px;font-weight:600;color:#dfe3ea;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.tarjeta .tt .num{color:#4d5566;font-weight:700;font-size:10.5px}
+.tarjeta .mo{font-size:10.5px;color:#7d8698;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;
+ -webkit-box-orient:vertical;overflow:hidden}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:2.5px 9px;border-radius:20px;
+ letter-spacing:.04em;margin-top:7px;text-transform:uppercase}
+.badge.urgente{background:#4a1420;color:#ff8fa3}
+.badge.pronto{background:#5f4a0d;color:#ffd166}
+.badge.corriendo{background:#0d3a5f;color:#6cc4ff}
+.badge.baja{background:#171b26;color:#5c6478}
+/* ── estado de los locales (datos reales de DiMangoToGo, vía servidor) ── */
+.local-card{background:linear-gradient(180deg,#12151f,#0e1017);border:1px solid #1c2030;border-radius:10px;
+ padding:10px 12px;margin-bottom:10px}
+.local-h{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:700;
+ color:#dfe3ea;letter-spacing:.04em;margin-bottom:7px}
+.local-h .punto-abierto{width:6px;height:6px;border-radius:50%;background:#4a9e6f;display:inline-block;
+ margin-right:5px;box-shadow:0 0 6px #4a9e6f}
+.local-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:2.5px 0}
+.local-row .k{color:#5c6478}
+.local-row b{font-family:ui-monospace,Menlo,monospace;font-weight:600;color:#c9d1de}
+.local-row b.malo{color:#ff8fa3}
+.local-row b.bueno{color:#4a9e6f}
 #insp{background:#0e1118;border:1px solid #1c2030;border-radius:11px;padding:14px;font-size:12.5px}
 #insp h3{font-size:13.5px;color:#fff;margin-bottom:7px;line-height:1.35}
 #insp .meta{font-size:10.5px;color:#5c6478;margin-bottom:10px;line-height:1.7}
@@ -209,13 +245,15 @@ input:focus{border-color:#f5a623}
 #btnvoz{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
 #btnvoz.on{border-color:#f5a623;color:#f5a623;opacity:1}
-#btnmic,#btnojo{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
+#btnmic,#btnojo,#btncam{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
 #btnojo:hover{border-color:#50e3c2;color:#50e3c2;opacity:1}
 #btnojo.on{border-color:#50e3c2;color:#50e3c2;opacity:1}
+#btncam:hover{border-color:#4a9eff;color:#4a9eff;opacity:1}
+#btncam.on{border-color:#4a9eff;color:#4a9eff;opacity:1}
 #btnmic.on{border-color:#ff5f56;color:#ff5f56;opacity:1;animation:lat 1.4s ease-in-out infinite}
 @keyframes lat{0%,100%{box-shadow:0 0 0 0 rgba(255,95,86,.5)}50%{box-shadow:0 0 0 9px rgba(255,95,86,0)}}
-#cfg{position:fixed;top:78px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
+#cfg{position:fixed;top:112px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
  color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
 #cfg:hover{background:#f5a623;color:#07080c}
 #cfg.ok{border-color:#2a4a3a;color:#4a9e6f;font-weight:400}
@@ -249,15 +287,20 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 @media(max-width:760px){.panel{width:100%;height:52vh;bottom:auto;top:auto;bottom:0;border-top:1px solid #1c2030}}
 </style></head><body>
 <div id="hud">
-  <div class="reloj local" data-tz="America/Santiago"><div class="ciu">ARICA</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div class="reloj" data-tz="America/New_York"><div class="ciu">WASHINGTON</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div class="reloj" data-tz="Europe/Madrid"><div class="ciu">MADRID</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div class="reloj" data-tz="Europe/Rome"><div class="ciu">MILANO</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div id="ind">
-    <div class="fila1"><span class="k">cargando indicadores…</span></div>
-    <div class="fila2"></div>
+  <div class="hud-grupo">
+    <div class="reloj local" data-tz="America/Santiago"><div class="ciu">📍 ARICA</div><div class="hr">—</div><div class="tmp">—</div></div>
+    <div class="reloj" data-tz="America/New_York"><div class="ciu">WASHINGTON</div><div class="hr">—</div><div class="tmp">—</div></div>
+    <div class="reloj" data-tz="Europe/Madrid"><div class="ciu">MADRID</div><div class="hr">—</div><div class="tmp">—</div></div>
+    <div class="reloj" data-tz="Europe/Rome"><div class="ciu">MILANO</div><div class="hr">—</div><div class="tmp">—</div></div>
+  </div>
+  <div id="stats">
+    <div class="stat"><span class="ic">📊</span><div><div class="v" id="st-notas">–</div><div class="k">Notas</div></div></div>
+    <div class="stat"><span class="ic">🔗</span><div><div class="v" id="st-conex">–</div><div class="k">Conexiones</div></div></div>
+    <div class="stat"><span class="ic">📂</span><div><div class="v" id="st-abiertos">–</div><div class="k">Abiertos</div></div></div>
+    <div class="stat" id="st-conflicto-card"><span class="ic">⚠️</span><div><div class="v" id="st-conflicto">–</div><div class="k">En conflicto</div></div></div>
   </div>
 </div>
+<div id="ticker"><span class="k">cargando indicadores…</span></div>
 
 <canvas id="lienzo"></canvas>
 <button id="ocultar" onclick="document.body.classList.toggle('sinpaneles');setTimeout(ajustar,60)">☰ paneles</button>
@@ -267,6 +310,8 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
   <div class="sub" id="cuenta"></div>
   <input id="buscar" placeholder="Buscar en el cerebro…" autocomplete="off">
   <div id="resultados"></div>
+  <div class="tit">PRIORIDADES VIGENTES</div>
+  <div id="prioridades"></div>
   <div class="tit">INSPECTOR</div>
   <div id="insp"><div style="color:#4d5566;font-size:12px">Haz clic en un nodo para leerlo.
   Solo ese nodo y sus conexiones quedan iluminados.</div></div>
@@ -275,6 +320,8 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 </div>
 
 <div class="panel der">
+  <div class="tit">ESTADO DE LOS LOCALES</div>
+  <div id="locales"><div style="color:#4d5566;font-size:11px">cargando…</div></div>
   <div class="tit">TIPOS</div><div id="tipos"></div>
   <div class="tit">AUTORIDAD DE FUENTE</div>
   <div style="font-size:10.5px;color:#5c6478;line-height:1.9">
@@ -289,6 +336,7 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 <div id="barra">
   <input id="chat" placeholder="Pregúntale a Maximus…  (Enter para enviar)" autocomplete="off">
   <button id="btnojo" onclick="mirarPantalla()" title="Que Maximus mire tu pantalla">👁</button>
+  <button id="btncam" onclick="mirarCamara()" title="Que Maximus mire por la cámara">📷</button>
   <button id="btnmic" onclick="alternarMic()" title="Hablarle a Maximus">🎤</button>
   <button id="btnvoz" onclick="alternarVoz()" title="Que Maximus conteste hablando">🔊</button>
   <span id="estado"></span>
@@ -313,7 +361,73 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 <script>
 const D = __DATOS__;
 const c = document.getElementById('lienzo'), x = c.getContext('2d');
-let W, H; function medir(){W=c.width=innerWidth;H=c.height=innerHeight} medir(); onresize=medir;
+let W, H;
+
+// ── fondo: campo de estrellas, en espacio de pantalla (no se mueve con el
+// grafo — da sensación de profundidad, como si los nodos flotaran delante) ──
+let estrellas = [];
+function generarEstrellas(){
+  const total = Math.round(W*H/6500);
+  estrellas = Array.from({length: total}, () => ({
+    x: Math.random()*W, y: Math.random()*H,
+    r: Math.random()*1.3 + 0.3,
+    fase: Math.random()*Math.PI*2,
+    vel: 0.4 + Math.random()*1.1,
+  }));
+}
+function pintarEstrellas(t){
+  x.save();
+  const g = x.createRadialGradient(W*0.5,H*0.4,0, W*0.5,H*0.4, Math.max(W,H)*0.75);
+  g.addColorStop(0,'rgba(40,32,58,.35)'); g.addColorStop(.55,'rgba(15,18,28,.15)'); g.addColorStop(1,'rgba(7,8,12,0)');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  for(const e of estrellas){
+    const tw = 0.45 + 0.55*Math.abs(Math.sin(t*e.vel + e.fase));
+    x.globalAlpha = tw*0.85;
+    x.beginPath(); x.arc(e.x,e.y,e.r,0,7); x.fillStyle='#dfe6f5'; x.fill();
+  }
+  x.globalAlpha = 1;
+  x.restore();
+}
+
+function medir(){W=c.width=innerWidth;H=c.height=innerHeight; generarEstrellas()} medir(); onresize=medir;
+
+// sombreado de un color hex, factor -1 (negro) .. 0 (igual) .. 1 (blanco)
+function sombrear(hex, factor){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  const mezcla = factor>0 ? 255 : 0, f = Math.abs(factor);
+  r = Math.round(r+(mezcla-r)*f); g = Math.round(g+(mezcla-g)*f); b = Math.round(b+(mezcla-b)*f);
+  return `rgb(${r},${g},${b})`;
+}
+
+// Prioridades vigentes — transcritas a mano de la tabla "Prioridades
+// vigentes" en MEMORY.md (23-ago-2026 → hoy). No se generan solas todavía:
+// si la tabla de MEMORY.md cambia, hay que actualizar esta lista a mano.
+// TODO real, no maquillaje: que grafo.py las lea del frontmatter (campo
+// `prioridad`) y las regenere junto con el resto del índice.
+const PRIORIDADES = [
+  {n:3,  id:'H-018', titulo:'Reimpresión masiva por cola fantasma', motivo:'No activar más automatización de impresión hasta ver a maximus-agent sobrevivir un corte de luz real bajo PM2', plazo:'Días'},
+  {n:6,  id:'P-007', titulo:'Control de reposiciones', motivo:'Pedido explícito de Ricardo. Primero medir la cobertura de recetas — 68,4% en Playa', plazo:'1-2 semanas'},
+  {n:7,  id:'P-002', titulo:'Comisiones MP vs Transbank', motivo:'$20,5M/año en juego. Una tarde de trabajo', plazo:'1-2 semanas'},
+  {n:8,  id:null,    titulo:'Bitácora de escalamientos', motivo:'Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep', plazo:'Corriendo'},
+  {n:9,  id:null,    titulo:'Tablero de gestión', motivo:'Ya no arranca de cero: H-001…H-005 y H-015 son la primera fila', plazo:'3-4 semanas'},
+  {n:10, id:'P-005', titulo:'Inventario — decidir si se instala', motivo:'Sin esto la merma es inmedible. Antes probar la vía barata: cargar Product.cost', plazo:'4-6 semanas'},
+  {n:11, id:'P-011', titulo:'Separar el historial privado', motivo:'El riesgo real ya se cerró con H-019. Esto endurece algo que hoy funciona', plazo:'Baja'},
+  {n:12, id:null,    titulo:'Segundo al mando', motivo:'Lead time largo, condicionado al veredicto de T-001', plazo:'Meses'},
+  {n:13, id:null,    titulo:'Congelar proyectos nuevos', motivo:'Hasta que las de arriba estén cerradas', plazo:'Permanente'},
+];
+function clasePlazo(p){
+  if(p==='Días') return 'urgente';
+  if(p.includes('semana')) return 'pronto';
+  if(p==='Corriendo') return 'corriendo';
+  return 'baja';
+}
+document.getElementById('prioridades').innerHTML = PRIORIDADES.map(p => `
+  <div class="tarjeta" ${p.id?`onclick="abrir('${p.id}')"`:''}>
+    <div class="tt"><span class="num">#${p.n}</span> ${p.titulo}</div>
+    <div class="mo">${p.motivo}</div>
+    <span class="badge ${clasePlazo(p.plazo)}">${p.plazo}</span>
+  </div>`).join('');
 
 const N = D.nodos, A = D.aristas;
 const idx = {}; N.forEach((n,i)=>{idx[n.id]=i; n.x=W/2+(Math.random()-.5)*420; n.y=H/2+(Math.random()-.5)*420; n.vx=0; n.vy=0;});
@@ -349,13 +463,14 @@ const radio = n => 5 + Math.min(n.grado,12)*1.5;
 
 function pintar(){
   x.clearRect(0,0,W,H);
+  pintarEstrellas(performance.now()/1000);
   x.save(); x.translate(cam.x,cam.y); x.scale(cam.z,cam.z);
 
   A.forEach(e=>{
     const a=N[idx[e.de]], b=N[idx[e.a]];
     if(!a||!b||oculto.has(a.tipo)||oculto.has(b.tipo))return;
     const act = !resaltados || (resaltados.has(e.de)&&resaltados.has(e.a));
-    x.strokeStyle = act ? 'rgba(90,150,120,.42)' : 'rgba(60,66,80,.08)';
+    x.strokeStyle = act ? 'rgba(120,150,210,.30)' : 'rgba(60,66,80,.08)';
     x.lineWidth = act ? 1 : .5;
     x.beginPath(); x.moveTo(a.x,a.y); x.lineTo(b.x,b.y); x.stroke();
   });
@@ -364,11 +479,36 @@ function pintar(){
     if(oculto.has(n.tipo))return;
     const act = !resaltados || resaltados.has(n.id), r=radio(n);
     x.globalAlpha = act ? 1 : .13;
-    x.beginPath(); x.arc(n.x,n.y,r,0,7); x.fillStyle=n.color; x.fill();
+    // brillo suave, más fuerte en los nodos con más conexiones — da la
+    // sensación de "orbe" sin inventar nodos que no existen en la memoria real
+    if(act){
+      x.shadowBlur = 6 + Math.min(n.grado,12)*1.1;
+      x.shadowColor = n.color;
+    }
+    // planeta: gradiente esférico con luz desde arriba-izquierda, en vez de
+    // un círculo plano — es lo que da la sensación de volumen en el espacio
+    const esf = x.createRadialGradient(n.x-r*0.35,n.y-r*0.38,r*0.05, n.x,n.y,r*1.05);
+    esf.addColorStop(0, sombrear(n.color,.55));
+    esf.addColorStop(.5, n.color);
+    esf.addColorStop(1, sombrear(n.color,-.45));
+    x.beginPath(); x.arc(n.x,n.y,r,0,7); x.fillStyle=esf; x.fill();
+    x.shadowBlur = 0;
+    // anillo, solo en los planetas más grandes — como Saturno
+    if(n.grado>=12 && act){
+      x.save(); x.translate(n.x,n.y); x.rotate(-0.42);
+      x.strokeStyle = sombrear(n.color,.35); x.globalAlpha = 0.4;
+      x.lineWidth = Math.max(1, r*0.09);
+      x.beginPath(); x.ellipse(0,0, r*1.85, r*0.62, 0, 0, 7); x.stroke();
+      x.restore(); x.globalAlpha = act ? 1 : .13;
+    }
     if(n.id===sel){x.strokeStyle='#fff'; x.lineWidth=2; x.stroke()}
-    if(cam.z>0.62 && (act||!resaltados)){
+    // etiqueta: siempre visible en los nodos más conectados (aunque esté lejos
+    // el zoom), y en el resto solo al acercarse — así no se satura el mapa
+    const siempre = n.grado>=8;
+    if((cam.z>0.62 || siempre) && (act||!resaltados)){
       x.fillStyle = act?'#c9d1de':'#3d4454';
-      x.font = (n.grado>4?'600 ':'')+ (10/Math.max(cam.z,.75)*cam.z+2) +'px -apple-system,sans-serif';
+      const base = siempre && cam.z<=0.62 ? 11/cam.z : (10/Math.max(cam.z,.75)*cam.z+2);
+      x.font = (n.grado>4?'600 ':'')+ base +'px -apple-system,sans-serif';
       x.textAlign='center'; x.fillText(n.id, n.x, n.y-r-5);
     }
     x.globalAlpha=1;
@@ -383,7 +523,7 @@ function ajustar(){
   const xs=vis.map(n=>n.x), ys=vis.map(n=>n.y);
   const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
   // los paneles se encogen en ventanas angostas; el área libre nunca es negativa
-  const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50, hud=64;
+  const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50, hud=102;
   // 250 abajo: barra de chat + la cara del perro. Los nodos no se esconden detrás.
   const dispW=Math.max(W-izq-der-mg*2, 220), dispH=Math.max(H-hud-mg*2-250, 200);
   cam.z=Math.max(0.12, Math.min(dispW/Math.max(x1-x0,1), dispH/Math.max(y1-y0,1), 1.7));
@@ -653,6 +793,62 @@ async function mirarPantalla(){
   btn.classList.remove('on');
 }
 
+// Igual que mirarPantalla() pero con la cámara integrada del Mac en vez de
+// compartir pantalla. Mismo endpoint (/maximus/ver), mismo formato — la
+// única diferencia real es getUserMedia en vez de getDisplayMedia.
+async function mirarCamara(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    mostrarRta('Este navegador no puede usar la cámara. Ábrelo en Chrome.');
+    return;
+  }
+  if(!g('mx_tok')){ configurar(); return; }
+
+  const btn = document.getElementById('btncam');
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}, audio:false});
+  }catch(e){
+    mostrarRta('No pude acceder a la cámara: ' + e.message); return;
+  }
+
+  btn.classList.add('on'); estado('mirando');
+  try{
+    const track = stream.getVideoTracks()[0];
+    const video = document.createElement('video');
+    video.srcObject = stream; video.muted = true;
+    await video.play();
+    await new Promise(r=>setTimeout(r, 350));   // la cámara enfoca, no se captura de golpe
+
+    const c = document.createElement('canvas');
+    c.width = video.videoWidth; c.height = video.videoHeight;
+    c.getContext('2d').drawImage(video, 0, 0);
+    track.stop(); stream.getTracks().forEach(t=>t.stop());
+
+    const dataUrl = c.toDataURL('image/jpeg', 0.82);
+
+    const pregunta = document.getElementById('chat').value.trim();
+    document.getElementById('chat').value = '';
+    mostrarRta('mirando…');
+    estado('analizando');
+
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/ver', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-maximus-token':g('mx_tok'),
+               'ngrok-skip-browser-warning':'1'},
+      body: JSON.stringify({imagen:dataUrl, mime:'image/jpeg', pregunta})
+    });
+    if(!r.ok){ mostrarRta('El agente respondió ' + r.status); estado(''); btn.classList.remove('on'); return; }
+    const d = await r.json();
+    mostrarRta(d.respuesta);
+    estado('');
+    if(g('mx_voz')==='1') hablarRespuesta(d.respuesta);
+  }catch(e){
+    mostrarRta('No pude capturar la cámara: ' + e.message);
+    estado('');
+  }
+  btn.classList.remove('on');
+}
+
 // Pide solo el audio de un texto ya generado (para lo que ve, no para el chat)
 async function hablarRespuesta(texto){
   try{
@@ -668,6 +864,7 @@ async function hablarRespuesta(texto){
   }catch(e){}
 }
 window.mirarPantalla = mirarPantalla;
+window.mirarCamara = mirarCamara;
 
 // ── hablarle a Maximus ────────────────────────────────────────────
 // Reconocimiento del propio navegador: gratis, sin servidor, sin API key.
@@ -814,6 +1011,37 @@ function pintarCara(){
   // abajo: hocico y lengua, estirados hacia abajo con la voz
   cx.drawImage(fotoCara, 0, h*CORTE, w, h*(1-CORTE),
                          x0, y0+D*CORTE, D, D*(1-CORTE)+quijada);
+
+  // línea de escaneo — solo mientras habla, como si lo estuviera analizando
+  if(a > 0.05){
+    const ciclo = 2.2, prog = (t/ciclo) % 1;
+    const ys = cyc - R + prog*R*2;
+    const gs = cx.createLinearGradient(cxc-R,ys,cxc+R,ys);
+    gs.addColorStop(0,'rgba(90,220,255,0)'); gs.addColorStop(.5,'rgba(140,230,255,'+(0.55*a).toFixed(3)+')'); gs.addColorStop(1,'rgba(90,220,255,0)');
+    cx.fillStyle = gs; cx.fillRect(cxc-R, ys-1.1, R*2, 2.2);
+  }
+  cx.restore();
+
+  // HUD tipo consola espacial: anillos girando en sentido contrario + escuadras
+  cx.save(); cx.translate(cxc,cyc);
+  const cian = 'rgba(120,210,255,'+(0.30+0.28*a).toFixed(3)+')';
+  cx.strokeStyle = cian; cx.lineWidth = 1;
+  cx.setLineDash([2,6]); cx.rotate(t*0.35);
+  cx.beginPath(); cx.arc(0,0,R+9,0,7); cx.stroke();
+  cx.setLineDash([1,4]); cx.rotate(-t*0.6);
+  cx.beginPath(); cx.arc(0,0,R+4.5,0,7); cx.stroke();
+  cx.setLineDash([]);
+  // escuadras de escáner, en las cuatro diagonales
+  cx.strokeStyle = 'rgba(120,210,255,'+(0.5+0.35*a).toFixed(3)+')'; cx.lineWidth = 1.4;
+  const br = R+15, bl = 7;
+  for(const ang of [45,135,225,315]){
+    const rad = ang*Math.PI/180, ex = Math.cos(rad)*br, ey = Math.sin(rad)*br;
+    const tx = -Math.sin(rad), ty = Math.cos(rad);
+    cx.beginPath();
+    cx.moveTo(ex-tx*bl, ey-ty*bl); cx.lineTo(ex,ey);
+    cx.lineTo(ex+Math.cos(rad)*bl, ey+Math.sin(rad)*bl);
+    cx.stroke();
+  }
   cx.restore();
 
   cx.strokeStyle = 'rgba('+col+',' + (0.34 + 0.5*fuerza).toFixed(3) + ')';
@@ -982,37 +1210,68 @@ async function traerClima(){
 }
 
 async function traerIndicadores(){
-  const f1 = document.querySelector('#ind .fila1');
-  const f2 = document.querySelector('#ind .fila2');
+  const ticker = document.getElementById('ticker');
 
   // lo que sale del propio cerebro no depende de internet: se pinta primero
   const abiertos = N.filter(n=>['abierto','propuesto','conflicto'].includes(n.estado)).length;
   const conf = N.filter(n=>n.estado==='conflicto');
-  f2.innerHTML =
-    `<span><span class="k">notas</span> <b>${N.length}</b></span>`+
-    `<span><span class="k">conexiones</span> <b>${A.length}</b></span>`+
-    `<span><span class="k">abiertos</span> <b>${abiertos}</b></span>`+
-    (conf.length
-      ? `<span class="alerta">▲ ${conf.length} en conflicto: ${conf.map(c=>c.id).join(' ')}</span>`
-      : `<span class="ok">sin conflictos</span>`);
+  document.getElementById('st-notas').textContent = N.length;
+  document.getElementById('st-conex').textContent = A.length;
+  document.getElementById('st-abiertos').textContent = abiertos;
+  document.getElementById('st-conflicto').textContent = conf.length;
+  document.getElementById('st-conflicto-card').classList.toggle('alerta', conf.length>0);
+  document.getElementById('st-conflicto-card').title = conf.length ? conf.map(c=>c.id).join(' ') : 'sin conflictos';
 
   try{
     const d = await (await fetch('https://mindicador.cl/api')).json();
     const n = v => v.toLocaleString('es-CL',{maximumFractionDigits:2});
-    f1.innerHTML =
+    ticker.innerHTML =
       `<span><span class="k">dólar</span> <b>$${n(d.dolar.valor)}</b></span>`+
       `<span><span class="k">euro</span> <b>$${n(d.euro.valor)}</b></span>`+
       `<span><span class="k">UF</span> <b>$${n(d.uf.valor)}</b></span>`+
       `<span><span class="k">UTM</span> <b>$${n(d.utm.valor)}</b></span>`+
       `<span class="k">al ${d.dolar.fecha.slice(0,10)}</span>`;
   }catch(e){
-    f1.innerHTML = '<span class="k">indicadores no disponibles (sin conexión)</span>';
+    ticker.innerHTML = '<span class="k">indicadores no disponibles (sin conexión)</span>';
   }
 }
 
 traerClima(); traerIndicadores();
 setInterval(traerClima, 15*60*1000);        // el clima no cambia cada minuto
 setInterval(traerIndicadores, 60*60*1000);
+
+async function cargarEstadoLocales(){
+  const el = document.getElementById('locales');
+  if(!g('mx_tok')){
+    el.innerHTML = '<div style="color:#4d5566;font-size:11px">Configura la conexión (⚙ arriba) para ver esto.</div>';
+    return;
+  }
+  try{
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/estado-locales?t=' + Date.now(), {
+      cache: 'no-store',
+      headers:{'x-maximus-token': g('mx_tok'), 'ngrok-skip-browser-warning':'1'}
+    });
+    if(!r.ok){
+      el.innerHTML = `<div style="color:#4d5566;font-size:11px">No se pudo cargar (${r.status}).</div>`;
+      return;
+    }
+    const d = await r.json();
+    const n = v => Math.round(v).toLocaleString('es-CL');
+    const tarjeta = (nombre, x) => `
+      <div class="local-card">
+        <div class="local-h"><span><span class="punto-abierto"></span>${nombre}</span></div>
+        <div class="local-row"><span class="k">Ventas hoy</span><b>$${n(x.ventas_hoy)}</b></div>
+        <div class="local-row"><span class="k">Transacciones</span><b>${x.num_ventas}</b></div>
+        <div class="local-row"><span class="k">Stock bajo mínimo</span>
+          <b class="${x.stock_bajo_minimo>0?'malo':'bueno'}">${x.stock_bajo_minimo}</b></div>
+      </div>`;
+    el.innerHTML = tarjeta('PLAYA', d.playa) + tarjeta('MALL', d.mall);
+  }catch(e){
+    el.innerHTML = '<div style="color:#4d5566;font-size:11px">Sin conexión con el servidor.</div>';
+  }
+}
+cargarEstadoLocales();
+setInterval(cargarEstadoLocales, 5*60*1000);
 
 bucle();   // todo declarado: recién ahora se puede pintar
 </script></body></html>"""
