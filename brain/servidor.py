@@ -35,7 +35,7 @@ except ImportError:
     SSL_CTX = ssl.create_default_context()
 
 BASE = Path(__file__).resolve().parent
-AGENTE = os.getenv("MAXIMUS_AGENTE", "https://oak-cornea-marlin.ngrok-free.dev").rstrip("/")
+AGENTE = os.getenv("MAXIMUS_AGENTE", "https://maximus.ngrok.app").rstrip("/")
 PUERTO = int(os.getenv("MAXIMUS_PUERTO", "8899"))
 
 # Solo se reenvía lo del cerebro. El panel /admin y el webhook no se exponen
