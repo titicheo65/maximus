@@ -649,6 +649,24 @@
    "color": "#27c93f"
   },
   {
+   "id": "L-007",
+   "tipo": "leccion",
+   "titulo": "L-007",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "",
+   "fecha": "2026-08-25",
+   "tags": [
+    "base44",
+    "deploy",
+    "funciones"
+   ],
+   "cuerpo": "# L-007 · En Base44, editar el archivo de una función no la despliega\n\nAl agregar búsqueda por nombre a `maximusBodega` (DimangoWorking), la edición\nse guardó bien en el editor —se veía el código nuevo, `read_file` lo\nconfirmaba— pero la URL pública siguió sirviendo la versión vieja durante\nvarios minutos. Ni reescribir el archivo ni borrarlo y recrearlo lo\nsolucionó.\n\n**Lo que sí funcionó:** Ricardo entró al editor de Base44, abrió la\nfunción y la **publicó explícitamente** (botón \"Publish\"/\"Deploy\", fuera\ndel panel de \"Test Function\" — el test corre contra el código en\nedición, no contra la URL pública). Ahí sí, el endpoint respondió con el\ncódigo nuevo al instante.\n\n**Regla derivada:** crear una función Base44 nueva se refleja sola en la\nURL pública. **Editar una que ya existe, no** — hace falta un paso de\npublicación aparte. Si un endpoint que antes funcionaba deja de reflejar\nun cambio después de editarlo, antes de sospechar del código, revisar si\nfalta publicar.",
+   "origen": "",
+   "grado": 1,
+   "color": "#27c93f"
+  },
+  {
    "id": "M-001",
    "tipo": "metrica",
    "titulo": "Margen bruto",
@@ -1521,7 +1539,7 @@
    ],
    "cuerpo": "# S-021 · Cinco capacidades nuevas — 24/25-ago-2026\n\nResumen de lo construido en una sola sesión larga, para que quede trazable\nsin tener que leer la transcripción completa.\n\n## 1. Maximus lee ventas y stock reales de DiMangoToGo\nHerramienta `ventas_dimango` (`maximus.py`) → función `maximusVentas` en\nDiMangoToGo, solo lectura, secreto compartido (`MAXIMUS_API_SECRET` /\n`DIMANGOTOGO_MAXIMUS_SECRET`). Monto, medios de pago, productos vendidos,\nstock por producto y local.\n\n## 2. Maximus lee el checklist de reposición\nHerramienta `checklist_dimango` → función `maximusChecklist`, replica el\ncálculo real de `/Checklist` (venta × receta). Reveló que\n`ChecklistPedido` (DimangoWorking) está muerto desde marzo y que la\ncobertura de recetas en Playa es 68,4% — ver `P-007.md`.\n\n## 3. Alertas de venta creadas por conversación\n`agent/alertas_venta.py` — Ricardo pide \"avísame cuando se venda X\" o\n\"cuando se vendan N\", corre un loop cada 90s, avisa por WhatsApp una vez\npor día. Se cancela con \"deja de avisarme de X\". Ver `S-020.md`.\n\n## 4. Memoria personal — notas, mejoras, recordatorios, tareas\n`agent/notas_personales.py` — un carril aparte de los seis archivos de\nnegocio. Se inyecta sola en el prompt (contexto variable, sin caché).\nRecordatorios con hora avisan por WhatsApp cuando vencen\n(`loop_recordatorios_personales`). \"Tarea\" es la misma tabla, categoría\nnueva — no un sistema paralelo.\n\n## 5. Maximus ve — fotos por WhatsApp y cámara del Mac\n- WhatsApp: `MensajeEntrante` gana `imagen_b64`/`imagen_mime`. Fotos de\n  comprobante (personal autorizado) siguen su flujo de siempre; fotos de\n  Ricardo pasan por la visión de Claude. Otros números se ignoran.\n- Cámara del Mac: botón 📷 en el cerebro, mismo endpoint `/maximus/ver`\n  que ya existía para compartir pantalla (S-014) — solo cambia\n  `getUserMedia` por `getDisplayMedia`. Es una foto, no video en vivo:\n  Claude no tiene visión de video en tiempo real.\n\n## Además, diseño del cerebro visual\nNodos como planetas (gradiente esférico + brillo + anillos en los más\nconectados), campo de estrellas de fondo, HUD superior en tarjetas\n(relojes + estadísticas reales, nunca inventadas), panel de Prioridades\nVigentes (transcrito de `MEMORY.md`, a mano — pendiente automatizar),\npanel de Estado de los Locales (ventas y stock reales, vía\n`/maximus/estado-locales`, proxied para que el secreto de DiMangoToGo\nnunca toque el navegador). HUD tipo Jarvis en la cara — quedó sutil,\npendiente de reforzar si Ricardo lo pide de nuevo.\n\n## Bugs reales encontrados y corregidos en el camino\n- El puente local (`servidor.py`) solo reenviaba POST, no GET — por eso\n  el panel de locales daba 404 aunque el servidor remoto funcionaba bien.\n- El endpoint nuevo no era cacheable — Chrome repitió un 404 viejo de\n  antes del despliegue. Se agregó `Cache-Control: no-store` +\n  cache-buster.\n- Dos intentos descartados antes de las alertas de venta: un evento de\n  Base44 Workflows que no guardaba, y un polling permanente que Ricardo\n  no quería (él pidió reglas bajo su control, no vigilancia constante).\n- **El más caro: `grafo.py` pisó todo el diseño del día.** Genera\n  `cerebro.html` desde una `PLANTILLA` fija dentro del propio script —\n  cada edición de diseño se hizo directo en `cerebro.html`, nunca en la\n  plantilla. Al correr `grafo.py` para el índice de esta misma nota, se\n  regeneró desde la plantilla vieja y borró planetas, estrellas, HUD en\n  tarjetas y los dos paneles nuevos (315 líneas de golpe). Recuperado\n  del commit `577776e` y la `PLANTILLA` reconstruida desde ahí — ver\n  commit `7d28a14`. **Regla derivada:** si se edita `cerebro.html` a\n  mano, `grafo.py` deja de ser la fuente de verdad hasta que su\n  `PLANTILLA` se actualice con el mismo cambio.\n\n## Pendiente, sin resolver\n- **Telegram sigue sin responder.** Se investigó parcialmente (webhook\n  apuntaba al dominio ngrok viejo, corregido) pero no se confirmó que\n  funcione. Ricardo decidió dejarlo para otra sesión.\n- El origen del `python.exe` zombi del 24-ago (H-021) sigue sin\n  explicarse — sin eso, no se activa más automatización de impresión\n  (H-018).",
    "origen": "",
-   "grado": 5,
+   "grado": 6,
    "color": "#ff8c42"
   },
   {
@@ -2103,6 +2121,11 @@
   {
    "de": "L-006",
    "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-007",
+   "a": "S-021",
    "rel": "relacionado"
   },
   {
