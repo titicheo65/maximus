@@ -40,33 +40,25 @@ PUERTO = int(os.getenv("MAXIMUS_PUERTO", "8899"))
 
 # Solo se reenvía lo del cerebro. El panel /admin y el webhook no se exponen
 # acá ni por error: este puente es para hablar con Maximus, nada más.
-PERMITIDAS = ("/maximus/chat", "/maximus/ver")
+PERMITIDAS_POST = ("/maximus/chat", "/maximus/ver")
+PERMITIDAS_GET = ("/maximus/estado-locales",)
 
 
 class Puente(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE), **kwargs)
 
-    def do_POST(self):
-        ruta = self.path.split("?")[0]
-        if ruta not in PERMITIDAS:
-            self.send_error(404, "No encontrado")
-            return
-
-        largo = int(self.headers.get("Content-Length") or 0)
-        cuerpo = self.rfile.read(largo) if largo else b""
-
+    def _reenviar(self, ruta_completa, metodo, cuerpo):
         pedido = urllib.request.Request(
-            AGENTE + ruta,
+            AGENTE + ruta_completa,
             data=cuerpo,
-            method="POST",
+            method=metodo,
             headers={
                 "Content-Type": "application/json",
                 "x-maximus-token": self.headers.get("x-maximus-token", ""),
                 "ngrok-skip-browser-warning": "1",
             },
         )
-
         try:
             with urllib.request.urlopen(pedido, timeout=180, context=SSL_CTX) as r:
                 datos, codigo = r.read(), r.status
@@ -75,7 +67,8 @@ class Puente(SimpleHTTPRequestHandler):
         except Exception as e:
             # El cerebro espera JSON siempre: un error de red no debe llegarle
             # como una página de error que no sabe leer.
-            datos = json.dumps({"respuesta": f"No pude alcanzar al agente: {e}"}).encode()
+            datos = json.dumps({"respuesta": f"No pude alcanzar al agente: {e}",
+                                 "detail": f"No pude alcanzar al agente: {e}"}).encode()
             codigo = 502
 
         self.send_response(codigo)
@@ -83,6 +76,22 @@ class Puente(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(datos)))
         self.end_headers()
         self.wfile.write(datos)
+
+    def do_POST(self):
+        ruta = self.path.split("?")[0]
+        if ruta not in PERMITIDAS_POST:
+            self.send_error(404, "No encontrado")
+            return
+        largo = int(self.headers.get("Content-Length") or 0)
+        cuerpo = self.rfile.read(largo) if largo else b""
+        self._reenviar(ruta, "POST", cuerpo)
+
+    def do_GET(self):
+        ruta = self.path.split("?")[0]
+        if ruta in PERMITIDAS_GET:
+            self._reenviar(self.path, "GET", None)
+            return
+        super().do_GET()          # todo lo demás: el archivo estático de siempre
 
     def log_message(self, *args):
         pass          # sin ruido en la consola
