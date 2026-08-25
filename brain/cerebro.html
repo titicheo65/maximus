@@ -739,6 +739,37 @@ function pintarCara(){
   // abajo: hocico y lengua, estirados hacia abajo con la voz
   cx.drawImage(fotoCara, 0, h*CORTE, w, h*(1-CORTE),
                          x0, y0+D*CORTE, D, D*(1-CORTE)+quijada);
+
+  // línea de escaneo — solo mientras habla, como si lo estuviera analizando
+  if(a > 0.05){
+    const ciclo = 2.2, prog = (t/ciclo) % 1;
+    const ys = cyc - R + prog*R*2;
+    const gs = cx.createLinearGradient(cxc-R,ys,cxc+R,ys);
+    gs.addColorStop(0,'rgba(90,220,255,0)'); gs.addColorStop(.5,'rgba(140,230,255,'+(0.55*a).toFixed(3)+')'); gs.addColorStop(1,'rgba(90,220,255,0)');
+    cx.fillStyle = gs; cx.fillRect(cxc-R, ys-1.1, R*2, 2.2);
+  }
+  cx.restore();
+
+  // HUD tipo consola espacial: anillos girando en sentido contrario + escuadras
+  cx.save(); cx.translate(cxc,cyc);
+  const cian = 'rgba(120,210,255,'+(0.30+0.28*a).toFixed(3)+')';
+  cx.strokeStyle = cian; cx.lineWidth = 1;
+  cx.setLineDash([2,6]); cx.rotate(t*0.35);
+  cx.beginPath(); cx.arc(0,0,R+9,0,7); cx.stroke();
+  cx.setLineDash([1,4]); cx.rotate(-t*0.6);
+  cx.beginPath(); cx.arc(0,0,R+4.5,0,7); cx.stroke();
+  cx.setLineDash([]);
+  // escuadras de escáner, en las cuatro diagonales
+  cx.strokeStyle = 'rgba(120,210,255,'+(0.5+0.35*a).toFixed(3)+')'; cx.lineWidth = 1.4;
+  const br = R+15, bl = 7;
+  for(const ang of [45,135,225,315]){
+    const rad = ang*Math.PI/180, ex = Math.cos(rad)*br, ey = Math.sin(rad)*br;
+    const tx = -Math.sin(rad), ty = Math.cos(rad);
+    cx.beginPath();
+    cx.moveTo(ex-tx*bl, ey-ty*bl); cx.lineTo(ex,ey);
+    cx.lineTo(ex+Math.cos(rad)*bl, ey+Math.sin(rad)*bl);
+    cx.stroke();
+  }
   cx.restore();
 
   cx.strokeStyle = 'rgba('+col+',' + (0.34 + 0.5*fuerza).toFixed(3) + ')';
