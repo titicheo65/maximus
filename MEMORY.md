@@ -527,9 +527,7 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 
 | # | Qué | Por qué acá | Plazo |
 |---|---|---|---|
-| 2 | **P-008 — que el agente y ngrok arranquen solos** | Sube desde el puesto 8: **el 23-ago se cobró dos horas de webhook caído, un domingo con los locales operando**, y nadie se habría enterado si Ricardo no estaba mirando. Ya existe el precedente propio: `subir_venta_mall` | **Esta semana** |
-| 3 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012). **Resolver antes que el punto 2, o se agrava** | **Días** |
-| 5 | **P-006 — ¿existe arriendo de Playa Chinchorro?** | Candidato #1 de los ~$36M/mes sin explicar (H-012). Una pregunta, no un proyecto | Días |
+| 3 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012). **No activar más automatización de impresión hasta ver a `maximus-agent` sobrevivir un corte de luz real bajo PM2 (ver H-021)** | **Días** |
 | 6 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
 | 7 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
 | 8 | **Bitácora de escalamientos (skill `viernes`)** | Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
@@ -539,7 +537,27 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 | 12 | **Segundo al mando** | Lead time largo, condicionado al veredicto de T-001 | Meses |
 | 13 | **Congelar proyectos nuevos** | Hasta que 1-7 estén cerrados | Permanente |
 
+**Nota 24-ago:** P-006 ya no debió figurar en esta tabla — cerrado desde el 20-ago
+(ver `P-006.md` y la fila de cerrados más abajo). Quedó vivo por un desfase entre
+la nota atómica y esta vista narrativa. Corregido acá; Ricardo lo reconfirmó hoy
+sin que yo se lo pidiera, sin que aportara nada nuevo.
+
 **Observación de Maximus sobre el 23-ago (domingo):** el día completo se fue en infraestructura del propio Maximus — despertar duplicado, micrófono, privacidad del panel, dos credenciales rotadas, dos horas de webhook caído. Se resolvieron cosas reales, incluidas dos exposiciones de credenciales. **Pero ninguna movió venta, margen ni dependencia**, y las tres prioridades de arriba de la lista siguen exactamente donde estaban el sábado. Es el patrón de T-001 —proyecto iniciado por Ricardo desplazando la prioridad declarada— y queda registrado para el veredicto del 14-sep.
+
+**Sigue abierto — la prueba real llegó el 24-ago y no pasó limpia:**
+
+- **P-008 punto 1 — "nada arranca solo".** Migrado a PM2 esa madrugada
+  (`maximus-agent`, mismo mecanismo que `server6` y `voiceagentkit`) y
+  verificado con un reinicio simulado. **El mismo día hubo un corte de luz
+  real**, y esta vez el fallo fue distinto: un `python.exe` zombi nacido en
+  el reinicio de esa mañana (10:45 AM) ocupó el puerto 8000 **por fuera del
+  control de PM2** — PM2 en sí no falló, pero no podía tomar un puerto ya
+  tomado por algo que él no lanzó. Se resolvió a mano (`Stop-Process -Force`
+  + `pm2 restart`), confirmado con WhatsApp real. **Telegram sigue sin
+  responder**, pendiente de revisar. Detalle completo en `H-021.md` y
+  `P-008.md`. **No se activa más automatización de impresión (H-018) hasta
+  encontrar de dónde sale ese proceso zombi** — sin eso, el próximo corte de
+  luz puede repetir lo mismo.
 
 **Cerrados el 23-ago-2026 (informado por Ricardo, autoridad 4):**
 
@@ -553,6 +571,7 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 | ~~P-001~~ | contingencia de emisión DTE | 20-ago. SimpleFactura + emisión manual que los encargados saben usar. **El riesgo estaba sobreestimado por Maximus** (L-005). Queda el residual P-009 |
 | ~~P-003~~ | venta de julio por local | 20-ago por **H-015**: Playa $100,04M / Mall $33,98M netos. Reveló que el arriendo del Mall es el 37,4% de su venta |
 | ~~P-004~~ | costo laboral de julio | 20-ago por **H-011**: $30,27M líquido, 45 personas, $36-42M cargado |
+| ~~P-006~~ | arriendo de Playa Chinchorro | 20-ago: Playa es propiedad de Ricardo, sin arriendo. Descarta el candidato #1 del residual de H-012 (ver `P-006.md`) |
 
 **Fuera de la lista (resuelto):** "decidir arquitectura Toteat vs DiMangoToGo" — cerrado por D-008 el 30-jun-2026.
 
