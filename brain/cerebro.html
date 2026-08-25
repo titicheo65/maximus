@@ -47,6 +47,20 @@ input:focus{border-color:#f5a623}
 .fila:hover{background:#171b26}
 .punto{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;flex:none}
 .n{color:#4d5566;font-size:11px}
+/* ── tarjetas de prioridad (de MEMORY.md, no inventadas) ── */
+.tarjeta{background:linear-gradient(180deg,#12151f,#0e1017);border:1px solid #1c2030;border-radius:10px;
+ padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.tarjeta:hover{border-color:#374050}
+.tarjeta .tt{font-size:12px;font-weight:600;color:#dfe3ea;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.tarjeta .tt .num{color:#4d5566;font-weight:700;font-size:10.5px}
+.tarjeta .mo{font-size:10.5px;color:#7d8698;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;
+ -webkit-box-orient:vertical;overflow:hidden}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:2.5px 9px;border-radius:20px;
+ letter-spacing:.04em;margin-top:7px;text-transform:uppercase}
+.badge.urgente{background:#4a1420;color:#ff8fa3}
+.badge.pronto{background:#5f4a0d;color:#ffd166}
+.badge.corriendo{background:#0d3a5f;color:#6cc4ff}
+.badge.baja{background:#171b26;color:#5c6478}
 #insp{background:#0e1118;border:1px solid #1c2030;border-radius:11px;padding:14px;font-size:12.5px}
 #insp h3{font-size:13.5px;color:#fff;margin-bottom:7px;line-height:1.35}
 #insp .meta{font-size:10.5px;color:#5c6478;margin-bottom:10px;line-height:1.7}
@@ -129,6 +143,8 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
   <div class="sub" id="cuenta"></div>
   <input id="buscar" placeholder="Buscar en el cerebro…" autocomplete="off">
   <div id="resultados"></div>
+  <div class="tit">PRIORIDADES VIGENTES</div>
+  <div id="prioridades"></div>
   <div class="tit">INSPECTOR</div>
   <div id="insp"><div style="color:#4d5566;font-size:12px">Haz clic en un nodo para leerlo.
   Solo ese nodo y sus conexiones quedan iluminados.</div></div>
@@ -213,6 +229,35 @@ function sombrear(hex, factor){
   r = Math.round(r+(mezcla-r)*f); g = Math.round(g+(mezcla-g)*f); b = Math.round(b+(mezcla-b)*f);
   return `rgb(${r},${g},${b})`;
 }
+
+// Prioridades vigentes — transcritas a mano de la tabla "Prioridades
+// vigentes" en MEMORY.md (23-ago-2026 → hoy). No se generan solas todavía:
+// si la tabla de MEMORY.md cambia, hay que actualizar esta lista a mano.
+// TODO real, no maquillaje: que grafo.py las lea del frontmatter (campo
+// `prioridad`) y las regenere junto con el resto del índice.
+const PRIORIDADES = [
+  {n:3,  id:'H-018', titulo:'Reimpresión masiva por cola fantasma', motivo:'No activar más automatización de impresión hasta ver a maximus-agent sobrevivir un corte de luz real bajo PM2', plazo:'Días'},
+  {n:6,  id:'P-007', titulo:'Control de reposiciones', motivo:'Pedido explícito de Ricardo. Primero medir la cobertura de recetas — 68,4% en Playa', plazo:'1-2 semanas'},
+  {n:7,  id:'P-002', titulo:'Comisiones MP vs Transbank', motivo:'$20,5M/año en juego. Una tarde de trabajo', plazo:'1-2 semanas'},
+  {n:8,  id:null,    titulo:'Bitácora de escalamientos', motivo:'Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep', plazo:'Corriendo'},
+  {n:9,  id:null,    titulo:'Tablero de gestión', motivo:'Ya no arranca de cero: H-001…H-005 y H-015 son la primera fila', plazo:'3-4 semanas'},
+  {n:10, id:'P-005', titulo:'Inventario — decidir si se instala', motivo:'Sin esto la merma es inmedible. Antes probar la vía barata: cargar Product.cost', plazo:'4-6 semanas'},
+  {n:11, id:'P-011', titulo:'Separar el historial privado', motivo:'El riesgo real ya se cerró con H-019. Esto endurece algo que hoy funciona', plazo:'Baja'},
+  {n:12, id:null,    titulo:'Segundo al mando', motivo:'Lead time largo, condicionado al veredicto de T-001', plazo:'Meses'},
+  {n:13, id:null,    titulo:'Congelar proyectos nuevos', motivo:'Hasta que las de arriba estén cerradas', plazo:'Permanente'},
+];
+function clasePlazo(p){
+  if(p==='Días') return 'urgente';
+  if(p.includes('semana')) return 'pronto';
+  if(p==='Corriendo') return 'corriendo';
+  return 'baja';
+}
+document.getElementById('prioridades').innerHTML = PRIORIDADES.map(p => `
+  <div class="tarjeta" ${p.id?`onclick="abrir('${p.id}')"`:''}>
+    <div class="tt"><span class="num">#${p.n}</span> ${p.titulo}</div>
+    <div class="mo">${p.motivo}</div>
+    <span class="badge ${clasePlazo(p.plazo)}">${p.plazo}</span>
+  </div>`).join('');
 
 const N = D.nodos, A = D.aristas;
 const idx = {}; N.forEach((n,i)=>{idx[n.id]=i; n.x=W/2+(Math.random()-.5)*420; n.y=H/2+(Math.random()-.5)*420; n.vx=0; n.vy=0;});
