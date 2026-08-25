@@ -1049,7 +1049,8 @@ async function cargarEstadoLocales(){
     return;
   }
   try{
-    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/estado-locales', {
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/estado-locales?t=' + Date.now(), {
+      cache: 'no-store',
       headers:{'x-maximus-token': g('mx_tok'), 'ngrok-skip-browser-warning':'1'}
     });
     if(!r.ok){
