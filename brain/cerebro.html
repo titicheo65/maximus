@@ -753,8 +753,51 @@ function sonar(b64, volumen){
     audioActual = new Audio('data:audio/mpeg;base64,' + b64);
     audioActual.volume = volumen;
     engancharAudio(audioActual);      // para que la cara se mueva con la voz
+    audioActual.onended = () => pararEscuchaParar();
     audioActual.play().catch(()=>{});
+    arrancarEscuchaParar();   // micrófono aparte, solo para la palabra de parada
   }catch(e){ /* si el navegador bloquea el autoplay, el texto ya está */ }
+}
+
+// ── palabra de parada: escucha en paralelo MIENTRAS habla ──────────
+// El mic normal se cierra al hablar (evita que se escuche a sí mismo y
+// responda en bucle). Este es un reconocimiento aparte, dedicado solo a
+// detectar "para/stop/cállate" — si algo se le cuela por eco, lo peor que
+// pasa es que se calla antes de tiempo, no que conteste algo inventado.
+const PALABRAS_PARAR = ['para', 'stop', 'detente', 'callate', 'silencio', 'basta'];
+let recParar = null;
+
+function _sinTildes(s){
+  return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+}
+
+function arrancarEscuchaParar(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR || !hablando()) return;
+  try{
+    recParar = new SR();
+    recParar.lang = 'es-CL';
+    recParar.continuous = true;
+    recParar.interimResults = true;
+    recParar.onresult = e => {
+      for(let i = e.resultIndex; i < e.results.length; i++){
+        const t = _sinTildes(e.results[i][0].transcript);
+        if(PALABRAS_PARAR.some(p => t.includes(p))){
+          if(audioActual){ try{ audioActual.pause(); }catch(err){} }
+          pararEscuchaParar();
+          if(micAbierto) setTimeout(arrancarMic, 200);   // vuelve al mic normal
+          return;
+        }
+      }
+    };
+    recParar.onend = () => { if(hablando()) arrancarEscuchaParar(); };  // se reinicia sola mientras siga hablando
+    recParar.onerror = () => {};   // no molesta con errores: es una escucha silenciosa de fondo
+    recParar.start();
+  }catch(e){ recParar = null; }
+}
+
+function pararEscuchaParar(){
+  if(recParar){ try{ recParar.onend = null; recParar.stop(); }catch(e){} recParar = null; }
 }
 
 // ── la cara ───────────────────────────────────────────────────────
@@ -927,9 +970,20 @@ function alternarMic(){
   }
 
   micAbierto = true; fallosSeguidos = 0;
+  acumulado = '';               // frase nueva: no arrastra la anterior
   marcarMic(); estado('escuchando');
   arrancarMic();
 }
+
+// Se acumula ACÁ AFUERA, no dentro de arrancarMic — Chrome corta el turno en
+// cada pausa (rec.continuous=false porque continuous=true es poco confiable
+// en Chrome), y si el acumulado viviera dentro de la función, cada reinicio
+// perdía lo ya dicho. El envío real se demora con un temporizador: si vuelve
+// a hablar antes de que se cumpla, se cancela — así una pausa para respirar
+// no corta la frase en dos pedazos.
+let acumulado = '';
+let temporizadorEnvio = null;
+const PAUSA_ANTES_DE_ENVIAR = 1200;  // ms de silencio real antes de mandar
 
 function arrancarMic(){
   if(!micAbierto || escuchando || hablando()) return;
@@ -942,17 +996,20 @@ function arrancarMic(){
   rec.interimResults = true;
 
   const caja = document.getElementById('chat');
-  let final = '';              // local a cada turno: no arrastra lo ya enviado
 
-  rec.onstart = () => { escuchando = true; fallosSeguidos = 0; marcarMic(); estado('escuchando'); };
+  rec.onstart = () => {
+    escuchando = true; fallosSeguidos = 0; marcarMic(); estado('escuchando');
+    // si había un envío pendiente, siguió hablando: no era el final todavía
+    if(temporizadorEnvio){ clearTimeout(temporizadorEnvio); temporizadorEnvio = null; }
+  };
 
   rec.onresult = e => {
     let interino = '';
     for(let i = e.resultIndex; i < e.results.length; i++){
       const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) final += t; else interino += t;
+      if(e.results[i].isFinal) acumulado += t; else interino += t;
     }
-    caja.value = (final + interino).trim();     // se ve lo que va entendiendo
+    caja.value = (acumulado + interino).trim();     // se ve lo que va entendiendo
   };
 
   rec.onerror = ev => {
@@ -972,10 +1029,22 @@ function arrancarMic(){
 
   rec.onend = () => {
     escuchando = false;
-    const t = caja.value.trim();
-    if(t){ caja.value=''; preguntar(t); }        // al callarte, se envía solo
-    if(micAbierto){ estado('escuchando'); setTimeout(arrancarMic, 300); }
-    else { marcarMic(); estado(''); }
+    if(micAbierto){
+      estado('escuchando'); setTimeout(arrancarMic, 300);
+      // no se manda todavía — puede ser una pausa para respirar, no el final.
+      // Se manda solo si no vuelve a hablar dentro de PAUSA_ANTES_DE_ENVIAR.
+      if(acumulado.trim()){
+        temporizadorEnvio = setTimeout(() => {
+          temporizadorEnvio = null;
+          const t = acumulado.trim(); acumulado = ''; caja.value = '';
+          if(t) preguntar(t);
+        }, PAUSA_ANTES_DE_ENVIAR);
+      }
+    } else {
+      marcarMic(); estado('');
+      const t = acumulado.trim(); acumulado = '';
+      if(t){ caja.value=''; preguntar(t); }
+    }
   };
 
   try { rec.start(); }
@@ -1001,6 +1070,14 @@ setInterval(() => {
 function pararMic(){
   micAbierto = false;                      // primero suelta el pestillo…
   try{ rec && rec.stop(); }catch(e){}      // …o el onend lo volvería a abrir
+  // apagado explícito: manda ya lo acumulado, no espera la pausa
+  if(temporizadorEnvio){ clearTimeout(temporizadorEnvio); temporizadorEnvio = null; }
+  const t = acumulado.trim();
+  if(t){
+    acumulado = '';
+    const caja = document.getElementById('chat');
+    caja.value = ''; preguntar(t);
+  }
   marcarMic(); estado('');
 }
 function marcarMic(){
