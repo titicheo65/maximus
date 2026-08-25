@@ -994,7 +994,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n**Lo que falta para que esto cierre el caso original de Ricardo** (\"se venden\n10 Coca-Colas, reponen 12 → alerta\"):\n1. Subir la cobertura de recetas — sobre todo bar y guarniciones — o aceptar\n   que esas categorías quedan fuera del control.\n2. Cargar `stock_actual`/`stock_minimo` en `Insumo` (catálogo en\n   construcción hoy).\n3. Recién ahí tiene sentido comparar \"a reponer\" contra \"lo que se pidió\" y\n   generar una alerta real — no antes.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 15,
+   "grado": 16,
    "color": "#ff5f56"
   },
   {
@@ -1145,7 +1145,7 @@
    ],
    "cuerpo": "Plataforma propia sobre Base44: pedidos, atención, caja, pagos, autoservicio.\n**Fuente única de venta desde el 1-jul-2026.** 519 archivos.\n\n**Pantallas clave:** `/AdminVentas` (venta por local, medio de pago,\nconciliación SII) · `/Caja` · `/Checklist` · `/Kioskos` · `/CierreTurno`.\n\n**Emisión de DTE:** no emite; delega en SimpleFactura (S-003).\n\n**Deuda técnica:** el puente venta↔bodega es matching por **nombre de texto**\n(`ReglaInsumo.nombre_en_venta`). Renombrar un producto rompe la conversión en\nsilencio.",
    "origen": "repo titicheo65/dimangotogo + uso directo",
-   "grado": 18,
+   "grado": 19,
    "color": "#ff8c42"
   },
   {
@@ -1388,7 +1388,7 @@
    ],
    "cuerpo": "`POST /maximus/ver` + botón 👁 en el cerebro. Comparte pantalla, Maximus la mira\ncon la memoria atómica cargada y responde. La imagen no se guarda.\n\n**Verificado:** lee correctamente las pantallas de DiMangoWorking y DiMangoToGo,\nincluidos los montos.\n\n**Por qué importa más de lo que parece:** permite consultar los sistemas **sin\nintegrarlos**. Nada de API, nada de arreglar el matching por nombre de producto\n(el hueco #1 de H-010).\n\n**Su límite:** ve **una pantalla a la vez**. Para cruzar el pedido con la venta\n—que es P-007— hay que tener ambas fuentes visibles en la misma captura.\n\n**Corrección aplicada el 22-ago, en dos intentos:** leía los montos en formato\nestadounidense y `$40.464.040` lo interpretaba como cuarenta dólares.\n\nEl primer arreglo —agregar la regla al prompt— **no funcionó**, porque la\ninstrucción iba *después* de la imagen: cuando llegaba, el modelo ya había leído\nlos montos. El segundo la puso **antes** de la imagen y agregó un control de\nmagnitud (venta mensual ~$160M, almuerzo $8.000-20.000: si un número no encaja\nen ese orden, se leyó mal).\n\n**Lección de diseño:** en un mensaje con imagen, las instrucciones que\ncondicionan *cómo interpretarla* van antes de la imagen. Después, corrigen tarde.\n\n**Camino que abre para P-007:** la versión asistida —Ricardo muestra, Maximus\ncruza— cuesta cero desarrollo y entrega el 80% del valor. Sirve además para\ndecidir si vale la pena construir la versión automática con alertas.",
    "origen": "probado el 22-ago-2026 sobre /ChecklistInsumos y una captura de escritorio",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff8c42"
   },
   {
@@ -1480,7 +1480,7 @@
    "tags": [],
    "cuerpo": "# S-019 · Túneles ngrok fijos — 24-ago-2026\n\n## Setup definitivo\n\n| Dominio | Puerto | Proceso PM2 | Sirve |\n|---|---|---|---|\n| `maximus.ngrok.app` | 8000 | `maximus-ngrok` (id 9) | WhatsApp webhook + Maximus chat + Telegram webhook |\n| `voiceagentkit.ngrok.app` | 8001 | `voiceagentkit-ngrok` (id 3) | Voice agent |\n| `dimango.ngrok.app` | 3003 | `dimango-ngrok` (id 8) — **errored** | Apple Wallet / passes |\n\n## Webhooks registrados\n\n- **WhatsApp (Meta):** `https://maximus.ngrok.app/webhook` · token `dimango-verify-2026`\n- **Telegram (@gerentedimango_bot):** `https://maximus.ngrok.app/telegram/webhook`\n\n## Cerebro (Mac)\n\n`servidor.py` apunta a `https://maximus.ngrok.app` como default. Para arrancar:\n```bash\ncd ~/harvey && python3 brain/servidor.py\n```\nAcceso: `http://localhost:8899/cerebro.html`\n\n## Historia\n\nAntes usaba `oak-cornea-marlin.ngrok-free.dev` (plan gratuito, URL efímera). Al matar los procesos ngrok para liberar slots, ese túnel murió para siempre. Se reemplazó con `maximus.ngrok.app` (dominio reservado, permanente). Costo: ~1 hora sin WhatsApp el 24-ago, actualización del webhook en Meta y registro del webhook de Telegram.\n\n## Pendiente\n\n- `dimango-ngrok` sigue en estado `errored` — investiar por qué falla el arranque de `dimango.ngrok.app` en PM2.\n\n## Colisión con una sesión en paralelo — 24-ago-2026, noche\n\nEste cambio lo hizo otra sesión de Claude corriendo al mismo tiempo que esta\n(confirmado por Ricardo). Yo no lo vi pasar, y seguía trabajando sobre el\nsupuesto viejo: `arranque.bat` migrado a PM2 esa misma tarde (ver `H-021.md`)\ntodavía terminaba con `start /min ngrok.exe ... --url=oak-cornea-marlin.ngrok-\nfree.dev` — el dominio que este documento dice que **murió para siempre**.\n\n**Riesgo real que esto generaba:** en el próximo reinicio, `arranque.bat`\niba a lanzar un segundo `ngrok.exe` a mano, compitiendo por la sesión de\ncuenta con los túneles que PM2 ya trae solo (`maximus-ngrok`,\n`voiceagentkit-ngrok`). ngrok normalmente solo permite una sesión activa por\ncuenta — la nueva mata a la vieja o viceversa, sin avisar.\n\n**Corregido la misma noche:** se sacó la línea de `ngrok.exe` de\n`arranque.bat`, confirmado con `findstr /i \"ngrok.exe\"` vacío. Ahora\n`pm2 resurrect` es quien trae los túneles, consistente con este documento.\n\n**Lección derivada:** dos sesiones de Claude Code editando la misma\ninfraestructura de producción sin coordinarse es exactamente el mismo tipo\nde riesgo que un humano cerrando la ventana equivocada (P-008,\n23-ago). La memoria en `memoria/` es la única defensa — funcionó: esta nota\nfue la que permitió detectar el desfase antes de que causara una caída real.",
    "origen": "",
-   "grado": 1,
+   "grado": 2,
    "color": "#ff8c42"
   },
   {
@@ -1499,7 +1499,29 @@
    ],
    "cuerpo": "# S-020 · Alertas de venta creadas por conversación — 24/25-ago-2026\n\nRicardo le pide a Maximus por chat \"avísame cuando se venda un fettuccine\" o\n\"cuando se vendan 5 bife chorizo\", y queda corriendo sola hasta que le diga\n\"deja de avisarme de X\".\n\n## Cómo llegamos acá — dos intentos descartados antes del bueno\n\n1. **Base44 Workflows (Automatizaciones), evento `create` de `Order` →\n   función `maximusAlertaVenta`.** Mismo patrón que ya usa `onNewKioskoOrder`\n   para avisar al grupo de Telegram. El editor visual de Workflows de Base44\n   no guardaba — se abandonó, función borrada.\n2. **Polling automático permanente, todo el día**, con una función nueva\n   `maximusOrdenesNuevas`. Ricardo aclaró que no quería eso: quiere reglas\n   que él mismo cree y apague por conversación, no vigilancia corriendo sola\n   sin que él la haya pedido. Función borrada también.\n\n**Lo que sí quedó, y es más simple que los dos intentos anteriores:** no se\ntocó Base44 para nada. Todo vive en el servidor de Maximus, reusando\n`maximusVentas` (la función de solo lectura de esta misma tarde, ver\n`P-007.md`).\n\n## Diseño\n\n- Tabla `alertas_venta` en el mismo SQLite que usa `agent/memory.py`\n  (`agent/alertas_venta.py`): producto, umbral, local (opcional), estado,\n  último día avisado.\n- Tres herramientas de Maximus: `crear_alerta_venta`, `listar_alertas_venta`,\n  `cancelar_alerta_venta` (coincide por texto, o `\"todas\"`).\n- Loop en segundo plano (`loop_alertas_venta`, cada 90s) — mismo mecanismo\n  que ya corre en producción para los recordatorios de colación\n  (`loop_recordatorios`, `colacion.py`). Consulta `maximusVentas` para hoy,\n  compara contra cada alerta activa, y avisa **una vez por día por alerta**\n  cuando se cruza el umbral. No hace falta cancelarla para que no repita el\n  mismo aviso el mismo día — se resetea sola al día siguiente.\n\n## Limitación conocida, dicha de frente\n\n**El aviso llega solo por WhatsApp**, al primer número de\n`MAXIMUS_OWNER_PHONES`. No por Telegram — ese canal seguía sin confirmarse\nfuncionando cuando se construyó esto (ver `H-021.md`, `S-019.md`). Si\nTelegram queda confirmado, sumarlo es agregar el chat_id de origen al crear\nla alerta en vez de resolver el destino fijo que usa hoy.\n\n## Pendiente de verificar\n\nDesplegado el 24-ago de noche. **Sin pedidos a esa hora para probarlo en\nvivo** — Ricardo lo prueba mañana (25-ago) vendiendo o esperando un\nfettuccine, y confirmando que `cancelar_alerta_venta` corta el aviso.",
    "origen": "",
-   "grado": 3,
+   "grado": 4,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-021",
+   "tipo": "sistema",
+   "titulo": "Maximus gana cinco capacidades nuevas en un día",
+   "estado": "activo",
+   "autoridad": 2,
+   "fuente": "",
+   "fecha": "",
+   "tags": [
+    "maximus",
+    "ventas",
+    "checklist",
+    "fotos",
+    "camara",
+    "tareas",
+    "whatsapp"
+   ],
+   "cuerpo": "# S-021 · Cinco capacidades nuevas — 24/25-ago-2026\n\nResumen de lo construido en una sola sesión larga, para que quede trazable\nsin tener que leer la transcripción completa.\n\n## 1. Maximus lee ventas y stock reales de DiMangoToGo\nHerramienta `ventas_dimango` (`maximus.py`) → función `maximusVentas` en\nDiMangoToGo, solo lectura, secreto compartido (`MAXIMUS_API_SECRET` /\n`DIMANGOTOGO_MAXIMUS_SECRET`). Monto, medios de pago, productos vendidos,\nstock por producto y local.\n\n## 2. Maximus lee el checklist de reposición\nHerramienta `checklist_dimango` → función `maximusChecklist`, replica el\ncálculo real de `/Checklist` (venta × receta). Reveló que\n`ChecklistPedido` (DimangoWorking) está muerto desde marzo y que la\ncobertura de recetas en Playa es 68,4% — ver `P-007.md`.\n\n## 3. Alertas de venta creadas por conversación\n`agent/alertas_venta.py` — Ricardo pide \"avísame cuando se venda X\" o\n\"cuando se vendan N\", corre un loop cada 90s, avisa por WhatsApp una vez\npor día. Se cancela con \"deja de avisarme de X\". Ver `S-020.md`.\n\n## 4. Memoria personal — notas, mejoras, recordatorios, tareas\n`agent/notas_personales.py` — un carril aparte de los seis archivos de\nnegocio. Se inyecta sola en el prompt (contexto variable, sin caché).\nRecordatorios con hora avisan por WhatsApp cuando vencen\n(`loop_recordatorios_personales`). \"Tarea\" es la misma tabla, categoría\nnueva — no un sistema paralelo.\n\n## 5. Maximus ve — fotos por WhatsApp y cámara del Mac\n- WhatsApp: `MensajeEntrante` gana `imagen_b64`/`imagen_mime`. Fotos de\n  comprobante (personal autorizado) siguen su flujo de siempre; fotos de\n  Ricardo pasan por la visión de Claude. Otros números se ignoran.\n- Cámara del Mac: botón 📷 en el cerebro, mismo endpoint `/maximus/ver`\n  que ya existía para compartir pantalla (S-014) — solo cambia\n  `getUserMedia` por `getDisplayMedia`. Es una foto, no video en vivo:\n  Claude no tiene visión de video en tiempo real.\n\n## Además, diseño del cerebro visual\nNodos como planetas (gradiente esférico + brillo + anillos en los más\nconectados), campo de estrellas de fondo, HUD superior en tarjetas\n(relojes + estadísticas reales, nunca inventadas), panel de Prioridades\nVigentes (transcrito de `MEMORY.md`, a mano — pendiente automatizar),\npanel de Estado de los Locales (ventas y stock reales, vía\n`/maximus/estado-locales`, proxied para que el secreto de DiMangoToGo\nnunca toque el navegador). HUD tipo Jarvis en la cara — quedó sutil,\npendiente de reforzar si Ricardo lo pide de nuevo.\n\n## Bugs reales encontrados y corregidos en el camino\n- El puente local (`servidor.py`) solo reenviaba POST, no GET — por eso\n  el panel de locales daba 404 aunque el servidor remoto funcionaba bien.\n- El endpoint nuevo no era cacheable — Chrome repitió un 404 viejo de\n  antes del despliegue. Se agregó `Cache-Control: no-store` +\n  cache-buster.\n- Dos intentos descartados antes de las alertas de venta: un evento de\n  Base44 Workflows que no guardaba, y un polling permanente que Ricardo\n  no quería (él pidió reglas bajo su control, no vigilancia constante).\n\n## Pendiente, sin resolver\n- **Telegram sigue sin responder.** Se investigó parcialmente (webhook\n  apuntaba al dominio ngrok viejo, corregido) pero no se confirmó que\n  funcione. Ricardo decidió dejarlo para otra sesión.\n- El origen del `python.exe` zombi del 24-ago (H-021) sigue sin\n  explicarse — sin eso, no se activa más automatización de impresión\n  (H-018).",
+   "origen": "",
+   "grado": 5,
    "color": "#ff8c42"
   },
   {
@@ -2777,6 +2799,31 @@
    "de": "S-020",
    "a": "S-019",
    "rel": "menciona"
+  },
+  {
+   "de": "S-021",
+   "a": "S-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-021",
+   "a": "S-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-021",
+   "a": "S-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-021",
+   "a": "S-020",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-021",
+   "a": "P-007",
+   "rel": "relacionado"
   },
   {
    "de": "T-001",
