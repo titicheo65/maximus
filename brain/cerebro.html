@@ -71,6 +71,18 @@ input:focus{border-color:#f5a623}
 .badge.pronto{background:#5f4a0d;color:#ffd166}
 .badge.corriendo{background:#0d3a5f;color:#6cc4ff}
 .badge.baja{background:#171b26;color:#5c6478}
+/* ── estado de los locales (datos reales de DiMangoToGo, vía servidor) ── */
+.local-card{background:linear-gradient(180deg,#12151f,#0e1017);border:1px solid #1c2030;border-radius:10px;
+ padding:10px 12px;margin-bottom:10px}
+.local-h{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:700;
+ color:#dfe3ea;letter-spacing:.04em;margin-bottom:7px}
+.local-h .punto-abierto{width:6px;height:6px;border-radius:50%;background:#4a9e6f;display:inline-block;
+ margin-right:5px;box-shadow:0 0 6px #4a9e6f}
+.local-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:2.5px 0}
+.local-row .k{color:#5c6478}
+.local-row b{font-family:ui-monospace,Menlo,monospace;font-weight:600;color:#c9d1de}
+.local-row b.malo{color:#ff8fa3}
+.local-row b.bueno{color:#4a9e6f}
 #insp{background:#0e1118;border:1px solid #1c2030;border-radius:11px;padding:14px;font-size:12.5px}
 #insp h3{font-size:13.5px;color:#fff;margin-bottom:7px;line-height:1.35}
 #insp .meta{font-size:10.5px;color:#5c6478;margin-bottom:10px;line-height:1.7}
@@ -168,6 +180,8 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 </div>
 
 <div class="panel der">
+  <div class="tit">ESTADO DE LOS LOCALES</div>
+  <div id="locales"><div style="color:#4d5566;font-size:11px">cargando…</div></div>
   <div class="tit">TIPOS</div><div id="tipos"></div>
   <div class="tit">AUTORIDAD DE FUENTE</div>
   <div style="font-size:10.5px;color:#5c6478;line-height:1.9">
@@ -1027,6 +1041,38 @@ async function traerIndicadores(){
 traerClima(); traerIndicadores();
 setInterval(traerClima, 15*60*1000);        // el clima no cambia cada minuto
 setInterval(traerIndicadores, 60*60*1000);
+
+async function cargarEstadoLocales(){
+  const el = document.getElementById('locales');
+  if(!g('mx_tok')){
+    el.innerHTML = '<div style="color:#4d5566;font-size:11px">Configura la conexión (⚙ arriba) para ver esto.</div>';
+    return;
+  }
+  try{
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/estado-locales', {
+      headers:{'x-maximus-token': g('mx_tok'), 'ngrok-skip-browser-warning':'1'}
+    });
+    if(!r.ok){
+      el.innerHTML = `<div style="color:#4d5566;font-size:11px">No se pudo cargar (${r.status}).</div>`;
+      return;
+    }
+    const d = await r.json();
+    const n = v => Math.round(v).toLocaleString('es-CL');
+    const tarjeta = (nombre, x) => `
+      <div class="local-card">
+        <div class="local-h"><span><span class="punto-abierto"></span>${nombre}</span></div>
+        <div class="local-row"><span class="k">Ventas hoy</span><b>$${n(x.ventas_hoy)}</b></div>
+        <div class="local-row"><span class="k">Transacciones</span><b>${x.num_ventas}</b></div>
+        <div class="local-row"><span class="k">Stock bajo mínimo</span>
+          <b class="${x.stock_bajo_minimo>0?'malo':'bueno'}">${x.stock_bajo_minimo}</b></div>
+      </div>`;
+    el.innerHTML = tarjeta('PLAYA', d.playa) + tarjeta('MALL', d.mall);
+  }catch(e){
+    el.innerHTML = '<div style="color:#4d5566;font-size:11px">Sin conexión con el servidor.</div>';
+  }
+}
+cargarEstadoLocales();
+setInterval(cargarEstadoLocales, 5*60*1000);
 
 bucle();   // todo declarado: recién ahora se puede pintar
 </script></body></html>
