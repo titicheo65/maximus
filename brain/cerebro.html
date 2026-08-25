@@ -5,35 +5,45 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#07080c;color:#dfe3ea;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
 #lienzo{position:fixed;inset:0;cursor:grab}#lienzo:active{cursor:grabbing}
-.panel{position:fixed;top:64px;bottom:0;width:330px;background:rgba(12,14,20,.93);backdrop-filter:blur(14px);
+.panel{position:fixed;top:102px;bottom:0;width:330px;background:rgba(12,14,20,.93);backdrop-filter:blur(14px);
  border-right:1px solid #1c2030;padding:20px;overflow-y:auto;z-index:10}
 
-/* ── HUD superior ── */
-#hud{position:fixed;top:0;left:0;right:0;height:64px;z-index:22;display:flex;align-items:stretch;
- background:linear-gradient(180deg,rgba(10,12,18,.98),rgba(10,12,18,.92));
- border-bottom:1px solid #1c2030;backdrop-filter:blur(16px);font-variant-numeric:tabular-nums}
-.reloj{flex:0 0 auto;padding:9px 20px;border-right:1px solid #14171f;display:flex;flex-direction:column;
- justify-content:center;min-width:132px}
-.reloj .ciu{font-size:9px;letter-spacing:.16em;color:#4d5566;font-weight:600;margin-bottom:1px}
-.reloj .hr{font-size:19px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.15}
-.reloj .hr .seg{font-size:11px;color:#4d5566}
-.reloj .tmp{font-size:10.5px;color:#7d8698;margin-top:1px}
-.reloj.local{background:rgba(245,166,35,.05)}
+/* ── HUD superior, estilo tarjetas ── */
+#hud{position:fixed;top:0;left:0;right:0;height:78px;z-index:22;display:flex;align-items:center;gap:14px;
+ padding:0 16px;background:linear-gradient(180deg,rgba(10,12,18,.98),rgba(10,12,18,.92));
+ border-bottom:1px solid #1c2030;backdrop-filter:blur(16px);font-variant-numeric:tabular-nums;
+ overflow-x:auto;scrollbar-width:none}
+#hud::-webkit-scrollbar{display:none}
+.hud-grupo{display:flex;gap:8px;flex:none}
+.reloj{flex:0 0 auto;padding:8px 14px;border-radius:10px;background:#12151f;border:1px solid #1c2030;
+ display:flex;flex-direction:column;justify-content:center;min-width:118px}
+.reloj .ciu{font-size:8.5px;letter-spacing:.14em;color:#4d5566;font-weight:700;display:flex;
+ align-items:center;gap:4px}
+.reloj .hr{font-size:17px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.2;margin-top:1px}
+.reloj .hr .seg{font-size:10px;color:#4d5566}
+.reloj .tmp{font-size:10px;color:#7d8698;margin-top:1px}
+.reloj.local{background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.25)}
 .reloj.local .ciu{color:#f5a623}
 .reloj.noche .hr{color:#8b93a3}
-#ind{flex:1;padding:9px 22px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0}
-#ind .fila1,#ind .fila2{display:flex;gap:20px;flex-wrap:wrap;font-size:11px;white-space:nowrap}
-#ind b{color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;font-weight:500}
-#ind .k{color:#4d5566}
-#ind .alerta{color:#ff8fa3}
-#ind .ok{color:#4a9e6f}
-#hud{overflow-x:auto;scrollbar-width:none}
-#hud::-webkit-scrollbar{display:none}
+#stats{display:flex;gap:8px;flex:1;min-width:0}
+.stat{flex:1;min-width:100px;padding:8px 13px;border-radius:10px;background:#12151f;border:1px solid #1c2030;
+ display:flex;align-items:center;gap:9px}
+.stat .ic{font-size:15px;line-height:1}
+.stat .v{font-size:17px;color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;line-height:1.15;font-weight:600}
+.stat .k{font-size:9px;letter-spacing:.1em;color:#5c6478;font-weight:600;text-transform:uppercase}
+.stat.alerta{background:rgba(255,95,86,.08);border-color:rgba(255,95,86,.3)}
+.stat.alerta .v{color:#ff8fa3}
+#ticker{position:fixed;top:78px;left:0;right:0;height:24px;z-index:21;display:flex;align-items:center;
+ gap:18px;padding:0 18px;background:rgba(10,12,18,.9);border-bottom:1px solid #14171f;
+ font-size:11px;white-space:nowrap;overflow-x:auto;scrollbar-width:none;backdrop-filter:blur(10px)}
+#ticker::-webkit-scrollbar{display:none}
+#ticker b{color:#dfe3ea;font-family:ui-monospace,Menlo,monospace;font-weight:500}
+#ticker .k{color:#4d5566}
 @media(max-width:1250px){
-  .reloj{min-width:108px;padding:9px 13px}
-  .reloj .hr{font-size:17px} .reloj .hr .seg{display:none}
-  #ind{padding:9px 14px;min-width:280px}
-  #ind .fila1,#ind .fila2{gap:13px;font-size:10.5px}
+  .reloj{min-width:96px;padding:7px 10px}
+  .reloj .hr{font-size:15px} .reloj .hr .seg{display:none}
+  .stat{min-width:80px;padding:7px 10px}
+  .stat .v{font-size:15px}
 }
 .panel.der{right:0;left:auto;border-right:0;border-left:1px solid #1c2030;width:220px}
 h1{font-size:15px;letter-spacing:.14em;color:#f5a623;margin-bottom:2px;font-weight:600}
@@ -91,7 +101,7 @@ input:focus{border-color:#f5a623}
 #btnojo.on{border-color:#50e3c2;color:#50e3c2;opacity:1}
 #btnmic.on{border-color:#ff5f56;color:#ff5f56;opacity:1;animation:lat 1.4s ease-in-out infinite}
 @keyframes lat{0%,100%{box-shadow:0 0 0 0 rgba(255,95,86,.5)}50%{box-shadow:0 0 0 9px rgba(255,95,86,0)}}
-#cfg{position:fixed;top:78px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
+#cfg{position:fixed;top:112px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
  color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
 #cfg:hover{background:#f5a623;color:#07080c}
 #cfg.ok{border-color:#2a4a3a;color:#4a9e6f;font-weight:400}
@@ -125,15 +135,20 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
 @media(max-width:760px){.panel{width:100%;height:52vh;bottom:auto;top:auto;bottom:0;border-top:1px solid #1c2030}}
 </style></head><body>
 <div id="hud">
-  <div class="reloj local" data-tz="America/Santiago"><div class="ciu">ARICA</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div class="reloj" data-tz="America/New_York"><div class="ciu">WASHINGTON</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div class="reloj" data-tz="Europe/Madrid"><div class="ciu">MADRID</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div class="reloj" data-tz="Europe/Rome"><div class="ciu">MILANO</div><div class="hr">—</div><div class="tmp">—</div></div>
-  <div id="ind">
-    <div class="fila1"><span class="k">cargando indicadores…</span></div>
-    <div class="fila2"></div>
+  <div class="hud-grupo">
+    <div class="reloj local" data-tz="America/Santiago"><div class="ciu">📍 ARICA</div><div class="hr">—</div><div class="tmp">—</div></div>
+    <div class="reloj" data-tz="America/New_York"><div class="ciu">WASHINGTON</div><div class="hr">—</div><div class="tmp">—</div></div>
+    <div class="reloj" data-tz="Europe/Madrid"><div class="ciu">MADRID</div><div class="hr">—</div><div class="tmp">—</div></div>
+    <div class="reloj" data-tz="Europe/Rome"><div class="ciu">MILANO</div><div class="hr">—</div><div class="tmp">—</div></div>
+  </div>
+  <div id="stats">
+    <div class="stat"><span class="ic">📊</span><div><div class="v" id="st-notas">–</div><div class="k">Notas</div></div></div>
+    <div class="stat"><span class="ic">🔗</span><div><div class="v" id="st-conex">–</div><div class="k">Conexiones</div></div></div>
+    <div class="stat"><span class="ic">📂</span><div><div class="v" id="st-abiertos">–</div><div class="k">Abiertos</div></div></div>
+    <div class="stat" id="st-conflicto-card"><span class="ic">⚠️</span><div><div class="v" id="st-conflicto">–</div><div class="k">En conflicto</div></div></div>
   </div>
 </div>
+<div id="ticker"><span class="k">cargando indicadores…</span></div>
 
 <canvas id="lienzo"></canvas>
 <button id="ocultar" onclick="document.body.classList.toggle('sinpaneles');setTimeout(ajustar,60)">☰ paneles</button>
@@ -353,7 +368,7 @@ function ajustar(){
   const xs=vis.map(n=>n.x), ys=vis.map(n=>n.y);
   const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
   // los paneles se encogen en ventanas angostas; el área libre nunca es negativa
-  const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50, hud=64;
+  const izq = W<900 ? 0 : 345, der = W<760 ? 0 : (W<900 ? 150 : 235), mg=50, hud=102;
   // 250 abajo: barra de chat + la cara del perro. Los nodos no se esconden detrás.
   const dispW=Math.max(W-izq-der-mg*2, 220), dispH=Math.max(H-hud-mg*2-250, 200);
   cam.z=Math.max(0.12, Math.min(dispW/Math.max(x1-x0,1), dispH/Math.max(y1-y0,1), 1.7));
@@ -983,31 +998,29 @@ async function traerClima(){
 }
 
 async function traerIndicadores(){
-  const f1 = document.querySelector('#ind .fila1');
-  const f2 = document.querySelector('#ind .fila2');
+  const ticker = document.getElementById('ticker');
 
   // lo que sale del propio cerebro no depende de internet: se pinta primero
   const abiertos = N.filter(n=>['abierto','propuesto','conflicto'].includes(n.estado)).length;
   const conf = N.filter(n=>n.estado==='conflicto');
-  f2.innerHTML =
-    `<span><span class="k">notas</span> <b>${N.length}</b></span>`+
-    `<span><span class="k">conexiones</span> <b>${A.length}</b></span>`+
-    `<span><span class="k">abiertos</span> <b>${abiertos}</b></span>`+
-    (conf.length
-      ? `<span class="alerta">▲ ${conf.length} en conflicto: ${conf.map(c=>c.id).join(' ')}</span>`
-      : `<span class="ok">sin conflictos</span>`);
+  document.getElementById('st-notas').textContent = N.length;
+  document.getElementById('st-conex').textContent = A.length;
+  document.getElementById('st-abiertos').textContent = abiertos;
+  document.getElementById('st-conflicto').textContent = conf.length;
+  document.getElementById('st-conflicto-card').classList.toggle('alerta', conf.length>0);
+  document.getElementById('st-conflicto-card').title = conf.length ? conf.map(c=>c.id).join(' ') : 'sin conflictos';
 
   try{
     const d = await (await fetch('https://mindicador.cl/api')).json();
     const n = v => v.toLocaleString('es-CL',{maximumFractionDigits:2});
-    f1.innerHTML =
+    ticker.innerHTML =
       `<span><span class="k">dólar</span> <b>$${n(d.dolar.valor)}</b></span>`+
       `<span><span class="k">euro</span> <b>$${n(d.euro.valor)}</b></span>`+
       `<span><span class="k">UF</span> <b>$${n(d.uf.valor)}</b></span>`+
       `<span><span class="k">UTM</span> <b>$${n(d.utm.valor)}</b></span>`+
       `<span class="k">al ${d.dolar.fecha.slice(0,10)}</span>`;
   }catch(e){
-    f1.innerHTML = '<span class="k">indicadores no disponibles (sin conexión)</span>';
+    ticker.innerHTML = '<span class="k">indicadores no disponibles (sin conexión)</span>';
   }
 }
 
