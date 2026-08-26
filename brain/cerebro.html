@@ -107,12 +107,13 @@ input:focus{border-color:#f5a623}
 #btnvoz{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
 #btnvoz.on{border-color:#f5a623;color:#f5a623;opacity:1}
-#btnmic,#btnojo,#btncam{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
+#btnmic,#btnojo,#btncam,#btnnoticias{background:rgba(14,17,24,.94);border:1px solid #232838;border-radius:50%;width:40px;height:40px;
  font-size:16px;cursor:pointer;color:#4d5566;flex:none;opacity:.45}
 #btnojo:hover{border-color:#50e3c2;color:#50e3c2;opacity:1}
 #btnojo.on{border-color:#50e3c2;color:#50e3c2;opacity:1}
 #btncam:hover{border-color:#4a9eff;color:#4a9eff;opacity:1}
 #btncam.on{border-color:#4a9eff;color:#4a9eff;opacity:1}
+#btnnoticias:hover{border-color:#f5a623;color:#f5a623;opacity:1}
 #btnmic.on{border-color:#ff5f56;color:#ff5f56;opacity:1;animation:lat 1.4s ease-in-out infinite}
 @keyframes lat{0%,100%{box-shadow:0 0 0 0 rgba(255,95,86,.5)}50%{box-shadow:0 0 0 9px rgba(255,95,86,0)}}
 #cfg{position:fixed;top:112px;right:14px;z-index:20;background:#171b26;border:1px solid #f5a623;
@@ -201,6 +202,7 @@ body.sinpaneles .panel{display:none} body.sinpaneles #ocultar{background:#f5a623
   <button id="btncam" onclick="mirarCamara()" title="Que Maximus mire por la cámara">📷</button>
   <button id="btnmic" onclick="alternarMic()" title="Hablarle a Maximus">🎤</button>
   <button id="btnvoz" onclick="alternarVoz()" title="Que Maximus conteste hablando">🔊</button>
+  <button id="btnnoticias" onclick="preguntar('Busca las noticias más importantes de hoy a nivel mundial y de deportes (tenis, sobre todo si hay Grand Slam en curso), y cuéntame qué está pasando.')" title="Noticias de hoy">📰</button>
   <span id="estado"></span>
 </div>
 <div id="rta"></div>
@@ -535,6 +537,29 @@ function estado(t, ms){
   if(ms) setTimeout(()=>{ if(e.textContent===t) e.textContent=''; }, ms);
 }
 
+// Convierte texto plano en HTML seguro con links clicables — y si hay un
+// link de YouTube, le agrega el video embebido debajo. Escapa primero
+// TODO el texto (incluida la parte que Maximus trajo de la búsqueda web,
+// que no es texto de confianza) y recién después reconoce URLs — nunca al
+// revés, o un link armado con HTML adentro podría inyectar algo.
+function _escapeHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function _enriquecerRespuesta(texto){
+  const escapado = _escapeHtml(texto);
+  const conLinks = escapado.replace(/(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener" style="color:#6cc4ff">$1</a>');
+  const yt = texto.match(/https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  let embed = '';
+  if(yt){
+    embed = `<div style="margin-top:12px"><iframe width="100%" height="220" `+
+      `src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" `+
+      `allow="autoplay; encrypted-media" allowfullscreen `+
+      `style="border-radius:8px"></iframe></div>`;
+  }
+  return conLinks + embed;
+}
+
 async function preguntar(texto){
   const url = g('mx_url') || DEFECTO;
   if(!g('mx_tok')){ configurar(); if(!g('mx_tok')) return; }
@@ -557,7 +582,7 @@ async function preguntar(texto){
     if(!r.ok){ caja.textContent='El agente respondió ' + r.status; estado(''); return; }
 
     const d = await r.json();
-    caja.textContent = d.respuesta;
+    let respuestaTexto = d.respuesta;
     estado('');
 
     if(d.audio) sonar(d.audio, 0.9);   // cierra el mic mientras habla: ver sonar()
@@ -567,9 +592,10 @@ async function preguntar(texto){
     if(usadas.length){
       resaltados = new Set(usadas);
       sel = usadas[0];
-      caja.textContent += '\n\n— usó ' + usadas.length + ' notas: ' + usadas.join(', ');
+      respuestaTexto += '\n\n— usó ' + usadas.length + ' notas: ' + usadas.join(', ');
       ajustarA(usadas);
     }
+    caja.innerHTML = _enriquecerRespuesta(respuestaTexto);
   }catch(e){
     caja.textContent = 'No pude hablar con el agente.\n\n' + e.message +
       '\n\nRevisa que el servidor esté arriba y que la URL sea la correcta (⚙ conexión).';
