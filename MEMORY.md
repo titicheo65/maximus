@@ -544,20 +544,20 @@ sin que yo se lo pidiera, sin que aportara nada nuevo.
 
 **Observación de Maximus sobre el 23-ago (domingo):** el día completo se fue en infraestructura del propio Maximus — despertar duplicado, micrófono, privacidad del panel, dos credenciales rotadas, dos horas de webhook caído. Se resolvieron cosas reales, incluidas dos exposiciones de credenciales. **Pero ninguna movió venta, margen ni dependencia**, y las tres prioridades de arriba de la lista siguen exactamente donde estaban el sábado. Es el patrón de T-001 —proyecto iniciado por Ricardo desplazando la prioridad declarada— y queda registrado para el veredicto del 14-sep.
 
-**Sigue abierto — la prueba real llegó el 24-ago y no pasó limpia:**
+**Cerrado el 26-ago-2026 — causa raíz encontrada tras tres repeticiones:**
 
-- **P-008 punto 1 — "nada arranca solo".** Migrado a PM2 esa madrugada
-  (`maximus-agent`, mismo mecanismo que `server6` y `voiceagentkit`) y
-  verificado con un reinicio simulado. **El mismo día hubo un corte de luz
-  real**, y esta vez el fallo fue distinto: un `python.exe` zombi nacido en
-  el reinicio de esa mañana (10:45 AM) ocupó el puerto 8000 **por fuera del
-  control de PM2** — PM2 en sí no falló, pero no podía tomar un puerto ya
-  tomado por algo que él no lanzó. Se resolvió a mano (`Stop-Process -Force`
-  + `pm2 restart`), confirmado con WhatsApp real. **Telegram sigue sin
-  responder**, pendiente de revisar. Detalle completo en `H-021.md` y
-  `P-008.md`. **No se activa más automatización de impresión (H-018) hasta
-  encontrar de dónde sale ese proceso zombi** — sin eso, el próximo corte de
-  luz puede repetir lo mismo.
+- **P-008 punto 1 — "nada arranca solo".** Migrado a PM2 el 24-ago
+  (`maximus-agent`, mismo mecanismo que `server6` y `voiceagentkit`). El
+  zombi del puerto 8000 se repitió tres veces (24-ago con corte de luz,
+  25-ago sin corte de luz) antes de encontrar la causa real: un
+  `iniciar-agente.bat` **en la carpeta de Inicio de Windows** —no en las
+  tareas programadas, por eso costó tanto verlo— que quedó de la carpeta
+  abandonada `C:\Users\usuario\Desktop\dimango-app` (H-013) y lanzaba su
+  propio Python en el puerto 8000 en cada arranque, por fuera de PM2.
+  Movido a respaldo junto con dos scripts más redundantes. Detalle
+  completo en `H-021.md` y `P-008.md`. **Único pendiente:** confirmarlo en
+  el próximo reinicio real. **Telegram sigue sin responder**, sin
+  investigar todavía.
 
 **Cerrados el 23-ago-2026 (informado por Ricardo, autoridad 4):**
 
