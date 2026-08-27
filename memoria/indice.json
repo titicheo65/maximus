@@ -579,6 +579,26 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-023",
+   "tipo": "hallazgo",
+   "titulo": "maximusGastos filtraba \"pendientes del mes\" hasta hoy, no hasta fin de mes",
+   "estado": "cerrado",
+   "autoridad": 1,
+   "fuente": "OBSERVADO",
+   "fecha": "2026-08-27",
+   "tags": [
+    "base44",
+    "dimangoworking",
+    "gastos",
+    "bug",
+    "proveedores"
+   ],
+   "cuerpo": "Al retomar `P-013` (proveedores pendientes vía `gastos_dimango`), Maximus\nrespondió $901.858, un solo proveedor (Bidfood). Ricardo mandó una captura\ndel panel real de Gestión Financiera: **5 registros pendientes, $2.931.050\nen total** — Simonin, Lipigas, Agrosuper, Avícola Karl y Bidfood.\n\n**Causa:** la función de Base44 `maximusGastos`\n(`dimangoworking.base44.app/functions/maximusGastos`) usaba `hoy` como\ndefault de `fecha_fin` cuando no se especifica rango de fechas:\n\n```ts\nconst fecha_fin: string = body.fecha_fin || hoy;\n```\n\nCuatro de los cinco gastos tenían `fecha_pago` el 28 o 29 de agosto —\ndías futuros dentro del mismo mes — y quedaban excluidos por el filtro\n`g.fecha_pago > fecha_fin`. Solo Bidfood, con vencimiento el mismo día de\nla consulta, pasaba el corte.\n\n**Por qué es un error de diseño, no solo un límite conocido:** el filtro\n\"hasta hoy\" tiene sentido para *vencidos* (la función hermana\n`reportarGastosVencidos` sí debe cortar ahí), pero no para *pendientes del\nmes* — un gasto pendiente con vencimiento el 29 de agosto sigue siendo\nparte de \"lo que se debe este mes\" el día 27. El propio panel de\nDiMangoWorking filtra por mes calendario completo, no por \"hasta hoy\".\n\n**Arreglo:** se cambió el default de `fecha_fin` a fin de mes calendario\nen vez de hoy, con una función nueva `finDeMes()`. Aplicado directo en el\neditor de Base44 y publicado explícitamente (`L-007`: editar el archivo no\nalcanza, hace falta el paso de Publish/Deploy aparte).\n\n**Verificado con datos reales, no solo \"sin errores\":** Maximus respondió\n$2.931.058 (vs. $2.931.050 del panel — diferencia de $8, sin investigar,\nprobablemente de transcripción) con los cinco proveedores. Coincide con la\nplanilla real.\n\n**Lección:** la herramienta llevaba viva desde el commit `7fb08f6`\n(anterior a esta sesión) sin que nadie la hubiera probado con un caso que\ntuviera vencimientos futuros dentro del mes — el primer uso real que\nencontró el bug fue este. Vale la pena, para cualquier herramienta nueva\nde Maximus, probarla contra un caso con datos mixtos (pasado y futuro,\npendiente y pagado) antes de darla por buena.",
+   "origen": "app.base44.com, panel Gestión Financiera de DiMangoWorking, 27-ago-2026",
+   "grado": 3,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -702,7 +722,7 @@
    ],
    "cuerpo": "# L-007 · En Base44, editar el archivo de una función no la despliega\n\nAl agregar búsqueda por nombre a `maximusBodega` (DimangoWorking), la edición\nse guardó bien en el editor —se veía el código nuevo, `read_file` lo\nconfirmaba— pero la URL pública siguió sirviendo la versión vieja durante\nvarios minutos. Ni reescribir el archivo ni borrarlo y recrearlo lo\nsolucionó.\n\n**Lo que sí funcionó:** Ricardo entró al editor de Base44, abrió la\nfunción y la **publicó explícitamente** (botón \"Publish\"/\"Deploy\", fuera\ndel panel de \"Test Function\" — el test corre contra el código en\nedición, no contra la URL pública). Ahí sí, el endpoint respondió con el\ncódigo nuevo al instante.\n\n**Regla derivada:** crear una función Base44 nueva se refleja sola en la\nURL pública. **Editar una que ya existe, no** — hace falta un paso de\npublicación aparte. Si un endpoint que antes funcionaba deja de reflejar\nun cambio después de editarlo, antes de sospechar del código, revisar si\nfalta publicar.",
    "origen": "",
-   "grado": 2,
+   "grado": 3,
    "color": "#27c93f"
   },
   {
@@ -1165,7 +1185,7 @@
    ],
    "cuerpo": "Ricardo pidió, en la misma sesión, sumar tres capacidades nuevas a Maximus:\nabrir cámaras de seguridad y desplegarlas en el PC, revisar calendario y\ncorreo, y consultar `DimangoWorking/GestionFinanciera` para saber qué\nproveedores tienen pendiente y cuánto se les debe, con aviso proactivo.\n\n**Decisión: las tres quedan parqueadas, ninguna se construye todavía.**\n`D-012` (26-ago) ya había decidido estabilidad primero, nada nuevo — y\n`H-022`, la propia prueba de esa decisión, seguía abierto en el momento de\neste pedido. Es además la tercera propuesta de sumar integraciones a\nMaximus en menos de doce horas (ver también el pedido de Gmail/Calendar/\nDrive y las dos guías \"arma tu Jarvis\" leídas la misma noche) — el patrón\nque mide `T-001`.\n\n## Orden de prioridad para cuando se retome, decidido con Ricardo\n\n1. ~~`DimangoWorking/GestionFinanciera` — proveedores pendientes y monto\n   adeudado.~~ **YA EXISTE Y FUNCIONA — confirmado el 27-ago-2026, no hacía\n   falta construir nada.** Al retomar este ítem se descubrió que la\n   herramienta `gastos_dimango` ya está en `agent/maximus.py` desde el\n   commit `7fb08f6`, conectada a una función de Base44\n   (`dimangoworking.base44.app/functions/maximusGastos`). Se probó en vivo\n   por WhatsApp/Telegram (\"¿cuánto le debo a los proveedores pendientes\n   este mes?\") y respondió con datos reales: **$901.858 pendiente, todo a\n   Bidfood, categoría alimentos** — etiquetando correctamente que ese\n   número depende de que los gastos se ingresen al día, y agregando de\n   forma proactiva un dato cruzado (honorarios de julio de Carlos Jirón,\n   sin pagar, sin leer desde el 21-ago).\n\n   **Lo que sigue abierto, y no es un proyecto de Maximus:**\n   - Confirmar disciplina de carga: si DiMangoWorking no se actualiza al\n     día, el número que entrega Maximus está incompleto sin que se note.\n   - El honorario de Carlos Jirón sin pagar — gestión administrativa\n     directa de Ricardo, no requiere ninguna herramienta nueva.\n\n2. **Calendario y correo.** Sigue parqueado — mismo caso evaluado antes\n   (Gmail/Calendar/Drive): útil, pero sin urgencia declarada y sin caso de\n   uso concreto todavía.\n3. **Cámaras de seguridad desplegadas en el PC.** Sigue de última: no se\n   identificó qué problema de negocio resuelve, y es una superficie nueva\n   de falla sobre un servidor que esta misma semana tuvo tres tipos\n   distintos de proceso zombi (`H-021`, PM2, ngrok — ver `H-022`). Encaja\n   directo en la advertencia de `L-002`: cada integración nueva es\n   dependencia nueva con mejor interfaz.\n\n**Lección de esta vuelta:** antes de planear construir algo para Maximus,\nvale la pena preguntarle a Maximus mismo si ya sabe hacerlo. Se evitó\ntrabajo de desarrollo completo por hacer la pregunta correcta primero.",
    "origen": "conversación con Ricardo, 27-ago-2026",
-   "grado": 5,
+   "grado": 7,
    "color": "#ff5f56"
   },
   {
@@ -2189,6 +2209,21 @@
    "de": "H-022",
    "a": "P-008",
    "rel": "agravado_por"
+  },
+  {
+   "de": "H-023",
+   "a": "P-013",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-023",
+   "a": "L-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-023",
+   "a": "P-013",
+   "rel": "corrige"
   },
   {
    "de": "L-001",
