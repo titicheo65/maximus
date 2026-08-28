@@ -1675,7 +1675,26 @@
    ],
    "cuerpo": "# S-024 · Checklist operativo por Telegram — 27-ago-2026\n\nRicardo ya tenía construido (sin subir a git) un sistema completo: un bot de\nTelegram por local (Mall, Playa), tareas con horario fijo definidas en\n`config/checklist_operativo.json`, botones \"hecho / problema / posponer +5\nmin\", reenvío a los 10 min si nadie responde, y escalamiento al supervisor\n(Ricardo) a los 20 min. Guarda quién respondió, cuándo, y da estadísticas de\ncumplimiento por tarea (`resumen_periodo()`).\n\n**Lo que pidió esta noche — \"más responsabilidad\", no más alarma:**\n\n> \"no si todo funciona bien solo que le quiero dar mas responsabilidad\"\n\nSe identificaron dos huecos reales revisando el código, no adivinados:\n\n1. **\"Posponer\" no tenía límite.** Alguien podía aplazar la misma tarea\n   indefinidamente, cada 5 minutos, sin nunca llegar a \"hecho\" ni a\n   escalar. **Arreglo:** tope de 2 posposiciones (`MAX_POSPOSICIONES`);\n   agotado el tope, solo quedan \"hecho\" o \"problema\".\n\n2. **El nombre registrado es el de la cuenta de Telegram, no de la persona\n   real** — y los locales usan **un teléfono compartido** por grupo, así\n   que siempre se registraría el mismo nombre sin importar quién tocó el\n   botón. **Arreglo:** al tocar \"hecho\" o \"problema\" no se marca de\n   inmediato — el bot pregunta \"¿quién confirma?\" y espera el siguiente\n   mensaje de texto del chat como nombre. Mientras nadie responda, la\n   tarea sigue `pendiente` y el reenvío/escalamiento existente la sigue\n   protegiendo — no se pierde cobertura mientras se espera el nombre.\n\nTabla nueva, `checklist_espera_nombre` (vía `Base.metadata.create_all`, sin\nmigración manual), que guarda qué chat está esperando nombre para qué envío\ny acción, consumida una sola vez al llegar el texto.\n\n**De paso, se subió a git todo el sistema completo** (`agent/main.py`,\n`agent/checklist_operativo.py`, `agent/telegram_checklist.py`,\n`config/checklist_operativo.json`) — hasta esta noche existía solo en el\nMac de Ricardo, sin respaldo en ningún repositorio, mismo riesgo que ya\ndocumentó `H-013` para otro sistema.\n\n**Verificado en vivo, ciclo completo:** tocar \"Hecho\" → el bot pide nombre\n→ se escribe un nombre de prueba → el mensaje original se actualiza con\n\"hecho por [nombre] a las [hora]\" y el bot confirma \"Anotado, gracias\n[nombre]\". No se aceptó \"funciona\" hasta ver las tres partes.\n\n**Pendiente, no bloqueante:** el reporte de cumplimiento por persona (no\nsolo por tarea) que Ricardo mencionó como paso siguiente — depende de si\nexiste una forma de saber quién debía estar de turno en cada horario, algo\nque no se resolvió esta noche.",
    "origen": "",
-   "grado": 2,
+   "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-025",
+   "tipo": "sistema",
+   "titulo": "Advisor diario — 3 recomendaciones rankeadas con seguimiento de 7 días",
+   "estado": "activo",
+   "autoridad": 2,
+   "fuente": "",
+   "fecha": "",
+   "tags": [
+    "advisor",
+    "telegram",
+    "prioridades",
+    "claude"
+   ],
+   "cuerpo": "# S-025 · Advisor diario — 27/28-ago-2026\n\nIdea tomada de un documento externo (\"How to Build a Personal Jarvis with\nClaude\", material de marketing de una comunidad de pago) — la mayoría del\ndocumento no aplicaba a DiMango (RevenueCat, Meta Ads, Buffer), pero un\npatrón sí: **Scout** (junta datos, solo lectura), **Operator** (hace\ntrabajo, escala lo que no sabe), **Advisor** (lee lo de los dos y dice qué\nhacer, con evidencia, y recuerda qué se recomendó y sigue sin resolverse).\n\nMaximus ya tenía Scout (`gastos_dimango`, `bodega_dimango`,\n`indicadores_chile` — todo lectura) y algo de Operator (`S-024`, el\nchecklist). Faltaba el Advisor.\n\n**Construido:** `scripts/advisor_diario.py`. Reutiliza exactamente la\nmisma memoria que ya carga Maximus (los 6 archivos de `~/harvey`, vía\n`cargar_memoria()` importada de `agent.maximus` — no duplica lógica).\nLlama a Claude una vez, con un prompt que pide exactamente 3\nrecomendaciones rankeadas (acción concreta + evidencia citando el\nhallazgo/decisión/prioridad por nombre + qué pasa si se ignora), y al\nfinal lista qué de los últimos 7 días sigue sin resolverse — guarda cada\nrespuesta del día en `advisor_historial/` para que el día siguiente pueda\ncomparar.\n\n**Distinto a todo lo demás construido hoy:** es el primer script de la\nnoche que **sí llama a Claude** (costo real, aunque bajo — una vez al\ndía). Todo lo demás (`S-023`, `check_correo.py`, `calendario_ricardo`) es\ndeterminista, sin costo de IA.\n\n**Verificado:** corrido a mano en `ServidorPlaya`, llegó el aviso por\nTelegram con las 3 recomendaciones. Ricardo dijo explícitamente que si no\nle sirve, lo desactiva — **no está programado como Tarea Programada\ntodavía**, se corrió una sola vez de prueba. Pendiente: decidir si se deja\ncorriendo diario (y a qué hora) después de ver cómo se sienten las\nrecomendaciones de los próximos días.",
+   "origen": "",
+   "grado": 1,
    "color": "#ff8c42"
   },
   {
@@ -3130,6 +3149,11 @@
    "rel": "relacionado"
   },
   {
+   "de": "S-025",
+   "a": "S-024",
+   "rel": "relacionado"
+  },
+  {
    "de": "T-001",
    "a": "E-001",
    "rel": "se_resuelve_con"
@@ -3145,7 +3169,9 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-08-27",
+ "generado": "2026-08-28",
  "huerfanos": [],
- "enlaces_rotos": []
+ "enlaces_rotos": [
+  "S-025 --relacionado--> MEMORY"
+ ]
 }
