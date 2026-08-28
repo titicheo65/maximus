@@ -1189,6 +1189,25 @@
    "color": "#ff5f56"
   },
   {
+   "id": "P-014",
+   "tipo": "pendiente",
+   "titulo": "Voz clonada de ElevenLabs no se confirma — diagnóstico a medias, cortado por la hora",
+   "estado": "abierto",
+   "autoridad": 2,
+   "fuente": "OBSERVADO",
+   "fecha": "2026-08-28",
+   "tags": [
+    "voz",
+    "elevenlabs",
+    "display",
+    "pendiente"
+   ],
+   "cuerpo": "Dentro de `S-026` (Maximus Display), se agregó un botón de micrófono que le\nhabla a Maximus y responde solo con audio, más el soporte para que\nTelegram use notas de voz. Ricardo ya clonó su voz en ElevenLabs\n(\"maximusvoz\") y configuró `ELEVENLABS_API_KEY` y `ELEVENLABS_VOICE_ID`\nen el `.env` del servidor — confirmado con `Select-String`, ambas\nvariables están ahí, bien formadas.\n\n**Lo que no se pudo confirmar antes de que Ricardo se fuera del\nservidor:** si la voz clonada realmente se está usando. Dos reportes\nsuyos, contradictorios entre sí sin evidencia de log:\n- Por Telegram (mandó nota de voz), respondió \"con la voz antigua\" — es\n  decir, sonó a `edge-tts`, no a ElevenLabs.\n- En el Display, el micrófono respondió una vez y después dejó de\n  responder (sin error visible en pantalla, no se llegó a revisar la\n  consola del navegador).\n\n**El log `[VOZ]` de `agent/voz.py` salió completamente vacío** en las\núltimas 100 líneas de `out.log` y `error.log`, pese a que Ricardo dice\nque sí sonó audio al menos una vez. Esto no cuadra, y no se investigó a\nfondo — **se descubrió al final que `pip install -r requirements.txt`\n(para instalar `num2words`, agregado la misma noche) seguía corriendo en\nsegundo plano mientras él hacía las pruebas.** Es probable que las\npruebas hayan corrido contra una instalación a medio terminar o un\nreinicio anterior al `pip install` completo — no confirmado.\n\n## Para retomar, en orden\n\n1. Confirmar que `pip install -r requirements.txt` terminó sin errores\n   (`num2words` y `docopt` instalados).\n2. `pm2 restart maximus-agent` limpio, después de eso.\n3. Una sola prueba a la vez — tocar el micrófono del Display UNA vez,\n   inmediatamente revisar `Get-Content maximus-agent-out.log -Tail 20`\n   SIN filtrar por \"[VOZ]\" (para no perder nada si el patrón de búsqueda\n   falla otra vez) y ver qué motor se usó de verdad.\n4. Si el micrófono deja de responder al segundo toque, revisar la\n   consola del navegador (F12) en ese momento — no se llegó a mirar.\n5. Solo después de eso, probar Telegram con una nota de voz real y\n   confirmar en el log si usó ElevenLabs o cayó a `edge-tts` — y si cayó,\n   por qué (el log de `[VOZ]` debería decir el motivo exacto).\n\n**No se sabe todavía si el problema es real o si fue una sesión de\nprueba contaminada por un despliegue a medias.** Primer paso al\nretomar: repetir la prueba limpia, no asumir que el bug existe.",
+   "origen": "ServidorPlaya, sesión en vivo con Ricardo por RDP, 28-ago-2026 madrugada",
+   "grado": 2,
+   "color": "#ff5f56"
+  },
+  {
    "id": "R-001",
    "tipo": "regla",
    "titulo": "Caja chica por local — propuesta",
@@ -1694,7 +1713,26 @@
    ],
    "cuerpo": "# S-025 · Advisor diario — 27/28-ago-2026\n\nIdea tomada de un documento externo (\"How to Build a Personal Jarvis with\nClaude\", material de marketing de una comunidad de pago) — la mayoría del\ndocumento no aplicaba a DiMango (RevenueCat, Meta Ads, Buffer), pero un\npatrón sí: **Scout** (junta datos, solo lectura), **Operator** (hace\ntrabajo, escala lo que no sabe), **Advisor** (lee lo de los dos y dice qué\nhacer, con evidencia, y recuerda qué se recomendó y sigue sin resolverse).\n\nMaximus ya tenía Scout (`gastos_dimango`, `bodega_dimango`,\n`indicadores_chile` — todo lectura) y algo de Operator (`S-024`, el\nchecklist). Faltaba el Advisor.\n\n**Construido:** `scripts/advisor_diario.py`. Reutiliza exactamente la\nmisma memoria que ya carga Maximus (los 6 archivos de `~/harvey`, vía\n`cargar_memoria()` importada de `agent.maximus` — no duplica lógica).\nLlama a Claude una vez, con un prompt que pide exactamente 3\nrecomendaciones rankeadas (acción concreta + evidencia citando el\nhallazgo/decisión/prioridad por nombre + qué pasa si se ignora), y al\nfinal lista qué de los últimos 7 días sigue sin resolverse — guarda cada\nrespuesta del día en `advisor_historial/` para que el día siguiente pueda\ncomparar.\n\n**Distinto a todo lo demás construido hoy:** es el primer script de la\nnoche que **sí llama a Claude** (costo real, aunque bajo — una vez al\ndía). Todo lo demás (`S-023`, `check_correo.py`, `calendario_ricardo`) es\ndeterminista, sin costo de IA.\n\n**Verificado:** corrido a mano en `ServidorPlaya`, llegó el aviso por\nTelegram con las 3 recomendaciones. Ricardo dijo explícitamente que si no\nle sirve, lo desactiva — **no está programado como Tarea Programada\ntodavía**, se corrió una sola vez de prueba. Pendiente: decidir si se deja\ncorriendo diario (y a qué hora) después de ver cómo se sienten las\nrecomendaciones de los próximos días.",
    "origen": "",
-   "grado": 1,
+   "grado": 3,
+   "color": "#ff8c42"
+  },
+  {
+   "id": "S-026",
+   "tipo": "sistema",
+   "titulo": "Maximus Display — pantalla en tiempo real en la red local, sin duplicar el núcleo",
+   "estado": "activo",
+   "autoridad": 2,
+   "fuente": "",
+   "fecha": "",
+   "tags": [
+    "display",
+    "sse",
+    "eventos",
+    "red-local"
+   ],
+   "cuerpo": "# S-026 · Maximus Display — 28-ago-2026, madrugada\n\nRicardo pidió una pantalla independiente (accesible desde cualquier\ndispositivo en su Wi-Fi — Smart TV, tablet, mini PC) que muestre en tiempo\nreal qué está haciendo Maximus, **sin duplicar el cerebro**. Pidió\nexplícitamente investigar la arquitectura primero, no construir a ciegas.\n\n**Investigación antes de tocar código:** `agent/main.py` era puro\nrequest/response HTTP — sin WebSocket, sin SSE, sin bus de eventos. El\nnúcleo real vive en `responder()` (`agent/maximus.py:947`): llama a\nClaude, y si pide una herramienta, la ejecuta en un loop hasta la\nrespuesta final. `/maximus/chat` (lo que ya usa `cerebro.html`) es una\ncaja negra — no había nada intermedio que observar mientras \"piensa\".\n\n**Construido, cuatro piezas, ninguna toca la lógica de decisión:**\n\n1. `agent/eventos.py` — bus de eventos en memoria, multi-suscriptor.\n   Regla de diseño explícita: `publicar()` nunca bloquea ni lanza — si\n   nadie mira la pantalla, el evento se pierde sin más, nunca se arriesga\n   una respuesta real de Maximus por esto.\n2. 3 líneas en `responder()`: publica `pensando` (al entrar), `ejecutando:\n   {herramienta}` (antes de cada llamada a `ejecutar_herramienta`), y\n   `respondiendo` (con el texto final).\n3. 2 líneas en `main.py`: publica `escuchando` en `/maximus/chat` y en\n   `/telegram/webhook`.\n4. `GET /maximus/eventos` (Server-Sent Events, no WebSocket — más simple\n   en FastAPI y soportado nativo por el navegador) y `GET\n   /maximus/display` (la página, autocontenida, en\n   `agent/static/maximus_display.html`).\n\n**Protegido con el mismo `MAXIMUS_CHAT_TOKEN`** que ya usa `cerebro.html`\n— como parámetro de URL, porque `EventSource` del navegador no permite\nmandar headers personalizados.\n\n**Honesto sobre lo que falta:** el panel de \"Conexiones\" (DiMangoToGo,\nDiMangoWorking, Telegram, base de datos) quedó con placeholders (`—`), no\ncon datos inventados — verificar esas conexiones de verdad es trabajo\naparte, no se fingió que ya estaba resuelto.\n\n**Verificado en la red real, no solo `localhost`:** abierto desde otro\ndispositivo con la IP local del servidor, mensaje real por Telegram, y\nRicardo confirmó que pasó por los cuatro estados (ESCUCHANDO → PENSANDO →\nRESPONDIENDO, con EJECUTANDO cuando corresponde) en vivo.\n\n**Modo Kiosk — pendiente, es configuración del dispositivo, no del\nservidor.** Chrome con `--kiosk`, o Fully Kiosk Browser en una Smart TV\nAndroid (mismo que ya usan los tótems, `D-006`) apuntando a la URL con el\ntoken.\n\n**Origen de la idea:** clasificada esta noche como proyecto nuevo que\ncompite con las prioridades reales de DiMango — se avisó explícitamente\nantes de construir, y Ricardo decidió conscientemente avanzar igual.",
+   "origen": "",
+   "grado": 2,
    "color": "#ff8c42"
   },
   {
@@ -2769,6 +2807,16 @@
    "rel": "relacionado"
   },
   {
+   "de": "P-014",
+   "a": "S-025",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-014",
+   "a": "S-026",
+   "rel": "relacionado"
+  },
+  {
    "de": "R-001",
    "a": "E-001",
    "rel": "deriva_de"
@@ -3151,6 +3199,11 @@
   {
    "de": "S-025",
    "a": "S-024",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-026",
+   "a": "S-025",
    "rel": "relacionado"
   },
   {
