@@ -726,6 +726,20 @@
    "color": "#27c93f"
   },
   {
+   "id": "L-008",
+   "tipo": "otro",
+   "titulo": "L-008",
+   "estado": "",
+   "autoridad": 5,
+   "fuente": "",
+   "fecha": "",
+   "tags": [],
+   "cuerpo": "# L-008 · Fallar en silencio en un control de acceso es peor que fallar con error\n\nEn `S-027` (portón por WhatsApp), un JSON corrupto en `config/porton.json`\nhizo que `cargar_config()` fallara y logueara el error del lado del servidor\n— pero `procesar_mensaje_porton()` interpretaba \"no hay config válida\" como\n\"no es la palabra clave\" y devolvía `None` en silencio. El mensaje \"porton\"\nseguía de largo hacia Maximus sin que Ricardo, mirando solo WhatsApp, tuviera\nninguna pista de que el problema era la configuración y no la lógica del\nportón. Costó varias rondas de prueba a ciegas hasta revisar el log del\nservidor directamente.\n\n**Regla derivada:** en un sistema que controla acceso físico o dinero, un\nerror de configuración debe ser tan ruidoso como un rechazo legítimo — nunca\ndegradar a \"silencio\" o \"sigue el flujo normal\". Si `porton.py` no puede\ncargar su config, la respuesta correcta no es \"no reconocí la palabra\", es\navisar explícitamente que el sistema está mal configurado.\n\n**Misma familia que `L-006`** (la primera línea del error manda) y `L-005`\n(un riesgo sin verificar la arquitectura real vale tan poco como uno\ninventado): en los tres casos, la falla estaba a la vista en un log, pero el\ndiagnóstico se demoró porque el síntoma visible (WhatsApp, un mensaje\ncortado, un riesgo estimado) no coincidía con la causa real.",
+   "origen": "",
+   "grado": 0,
+   "color": "#888"
+  },
+  {
    "id": "M-001",
    "tipo": "metrica",
    "titulo": "Margen bruto",
@@ -1734,6 +1748,20 @@
    "origen": "",
    "grado": 2,
    "color": "#ff8c42"
+  },
+  {
+   "id": "S-027",
+   "tipo": "otro",
+   "titulo": "S-027",
+   "estado": "",
+   "autoridad": 5,
+   "fuente": "",
+   "fecha": "",
+   "tags": [],
+   "cuerpo": "# S-027 · Portón por WhatsApp — verificado con apertura física real\n\nFeature pedida por Ricardo: 5 números autorizados (Ricardo, Alejandra, Verónica,\n\"playa cel\", Osorio) pueden abrir el portón mandando la palabra \"porton\" por\nWhatsApp, solo dentro de una ventana horaria configurada (producción:\n09:55–10:05). Cero interpretación de IA: número contra lista explícita +\nhora contra ventana, después llamada a la API de Tuya. Cada intento —abierto,\ndenegado por número, denegado por horario, error— queda en `porton_log`.\n\n**Verificado el 29-ago-2026, madrugada:** mensaje \"porton\" → \"Portón abierto ✅\"\n→ confirmado por Ricardo que el portón **se abrió físicamente**. Ciclo completo\nverificado, no solo el mensaje de texto.\n\n## Los dos bugs reales que costó destrabar esto — no fue el servidor\n\n**Bug 1 — orden del webhook (el importante, de lógica, no de infraestructura).**\nEl chequeo del portón se escribió DESPUÉS del bloque de Maximus en\n`webhook_handler`. Como Ricardo es a la vez el dueño (`MAXIMUS_OWNER_PHONES`)\ny uno de los autorizados del portón, su propio número entraba siempre al\nbloque de Maximus primero y hacía `continue` — el chequeo del portón nunca se\nalcanzaba para él. Toda la persecución de procesos zombie de esa noche fue\nsobre un síntoma real (había un proceso viejo compitiendo por el puerto 8000),\npero no explicaba por qué el mensaje iba a la IA: la causa era de orden de\ncódigo. **Corregido:** el portón, por ser una puerta física, intercepta antes\nque cualquier otra rama, incluida Maximus.\n\n**Bug 2 — JSON corrupto al editar a mano en Notepad.**\nAl editar `config/porton.json` directo en el servidor para las pruebas, quedó\ncon un error de sintaxis (`Expecting ',' delimiter`) — probablemente un\ncarácter invisible al escribir en Notepad de Windows. `cargar_config()` lo\ncapturaba y logueaba el error, pero como `procesar_mensaje_porton()` devuelve\n`None` en silencio cuando la config no carga, el mensaje seguía de largo hacia\nMaximus **sin ningún indicio visible en WhatsApp** de que algo estaba roto.\nSe resolvió reescribiendo el archivo completo en vez de editarlo campo por\ncampo, y verificando con `python -c \"import json; json.load(...)\"` antes de\ncada prueba — un paso que faltaba en el protocolo original.\n\n## Lección derivada — ver L-008\n\nUn fallo silencioso (`None` sin log) en un chequeo de seguridad es peor que un\nerror visible: dos veces esa noche el sistema \"no hizo nada\" cuando debía\nhaber dicho por qué. Corregido el hábito de verificación (JSON válido antes\nde probar), pero el código mismo podría loguear más fuerte cuando la config\nno carga — no se tocó esta noche, queda como mejora futura si vuelve a fallar.\n\n## Pendiente, no bloqueante\n\n- Confirmar con Alejandra, Verónica, \"playa cel\" y Osorio que también pueden\n  abrir dentro de la ventana — solo se probó con el número de Ricardo.\n- El horario de producción quedó en 09:55–10:05, confirmado por Ricardo.",
+   "origen": "",
+   "grado": 0,
+   "color": "#888"
   },
   {
    "id": "T-001",
@@ -3222,8 +3250,11 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-08-28",
- "huerfanos": [],
+ "generado": "2026-08-29",
+ "huerfanos": [
+  "L-008",
+  "S-027"
+ ],
  "enlaces_rotos": [
   "S-025 --relacionado--> MEMORY"
  ]
