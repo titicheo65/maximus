@@ -1186,9 +1186,9 @@
     "agente",
     "deuda-tecnica"
    ],
-   "cuerpo": "Hoy las conversaciones de Ricardo con Maximus están **ocultas** del panel, no\nseparadas: siguen en el mismo archivo de base de datos que los chats de clientes\n(S-018). Quien tenga acceso al `.db` del servidor las lee.\n\n**La versión buena ya está escrita** — guardaba el historial privado en una base\naparte, imposible de exponer aunque mañana alguien agregue una consulta y olvide\nfiltrar. Está en el commit `4eea4a1` de `titicheo65/dimango-agent`, y se puede\nrecuperar de ahí.\n\n**Por qué no está desplegada:** se subió un domingo con los locales operando, el\nagente no levantó y se atribuyó la caída a ese código. **Después se comprobó que\nla causa era un puerto tomado por un proceso zombi (L-006), no la segunda base.**\nO sea que probablemente funcionaba y se descartó por un diagnóstico errado.\n\n**Cómo retomarlo, y esta vez en orden:**\n1. Un día de semana, **nunca un domingo con los locales abiertos**.\n2. Probar el arranque en el servidor **antes** de dejarlo corriendo: en Windows,\n   con Python 3.14, que es donde no se probó.\n3. Verificar que el puerto 8000 está libre antes de arrancar (L-006).\n4. Recuperar `migrar_privado.py` del mismo commit para mover lo ya guardado. El\n   script simula por defecto y solo mueve con `--aplicar`; copia primero y borra\n   después.\n\n**Prioridad honesta: baja.** El riesgo real —el panel abierto a internet con\ncontraseña por defecto— ya se cerró con H-019. Esto es endurecer algo que hoy\nfunciona, no tapar un agujero abierto.",
+   "cuerpo": "## Actualización 31-ago-2026 — riesgo de acceso reducido, la separación física sigue pendiente\n\nSe encontró y corrigió un hueco real mientras se atendía esto (ver `S-030`):\n`es_privada()` no reconocía el Telegram de Ricardo (su canal principal desde\n`D-010`), así que sus conversaciones ahí sí eran visibles con la clave\ncompartida de `/admin`. Corregido. Además se construyó `/maximus/historial`,\nun visor propio protegido con su token, separado de `/admin`.\n\n**Esto NO es la separación física que sigue abajo** — sigue siendo la misma\ntabla de la base de datos, solo con el filtro de privacidad ahora completo y\nuna puerta de acceso propia. Si alguien tuviera acceso directo al `.db` del\nservidor (no al panel web), seguiría pudiendo leer todo. Ese riesgo de fondo\nno cambió con esto.\n\nHoy las conversaciones de Ricardo con Maximus están **ocultas** del panel, no\nseparadas: siguen en el mismo archivo de base de datos que los chats de clientes\n(S-018). Quien tenga acceso al `.db` del servidor las lee.\n\n**La versión buena ya está escrita** — guardaba el historial privado en una base\naparte, imposible de exponer aunque mañana alguien agregue una consulta y olvide\nfiltrar. Está en el commit `4eea4a1` de `titicheo65/dimango-agent`, y se puede\nrecuperar de ahí.\n\n**Por qué no está desplegada:** se subió un domingo con los locales operando, el\nagente no levantó y se atribuyó la caída a ese código. **Después se comprobó que\nla causa era un puerto tomado por un proceso zombi (L-006), no la segunda base.**\nO sea que probablemente funcionaba y se descartó por un diagnóstico errado.\n\n**Cómo retomarlo, y esta vez en orden:**\n1. Un día de semana, **nunca un domingo con los locales abiertos**.\n2. Probar el arranque en el servidor **antes** de dejarlo corriendo: en Windows,\n   con Python 3.14, que es donde no se probó.\n3. Verificar que el puerto 8000 está libre antes de arrancar (L-006).\n4. Recuperar `migrar_privado.py` del mismo commit para mover lo ya guardado. El\n   script simula por defecto y solo mueve con `--aplicar`; copia primero y borra\n   después.\n\n**Prioridad honesta: baja.** El riesgo real —el panel abierto a internet con\ncontraseña por defecto— ya se cerró con H-019. Esto es endurecer algo que hoy\nfunciona, no tapar un agujero abierto.",
    "origen": "despliegue del 23-ago-2026, revertido por un diagnóstico errado",
-   "grado": 5,
+   "grado": 6,
    "color": "#ff5f56"
   },
   {
@@ -1817,6 +1817,20 @@
    "cuerpo": "# S-029 · Riego de la parcela por WhatsApp — 30-ago-2026\n\nProyecto **personal** de Ricardo (su parcela, no DiMango) — no compite con\nprioridades del negocio, se construyó aprovechando la infraestructura\nTuya que ya existía para el portón (`S-027`).\n\n**Diseño, mismo criterio que el portón — determinístico, sin IA:**\n- Palabra exacta **\"agua\"** → enciende el riego.\n- Palabra exacta **\"no agua\"** → apaga.\n- **Sin ventana horaria** — pedido explícito de Ricardo, este dispositivo\n  es libre a cualquier hora.\n- 5 autorizados: Ricardo, Consu, Fran, Lisbeth, Giorgi.\n- Registro de auditoría propio (`riego_log`), igual que el portón.\n\n**Refactor de paso:** se sacó el cliente de la API de Tuya (firma HMAC,\ntoken, envío de comando) de `agent/porton.py` a un módulo compartido\n`agent/tuya_client.py`. El portón se reescribió para usarlo, sin cambiar\nsu comportamiento — evita mantener la misma firma HMAC duplicada en dos\narchivos.\n\n**Enganche del dispositivo:** el primer intento falló con `permission\ndeny` (código 1106 de Tuya) — el dispositivo nuevo no estaba vinculado al\nCloud Project, solo a la app Tuya Smart. Se resolvió vinculando la cuenta\nde la app al proyecto (`Link Tuya App Account`, con el UID de la cuenta).\n\n**Verificado en producción, 30-ago-2026:** \"agua\" y \"no agua\" probados\npor WhatsApp, encendido y apagado confirmados.",
    "origen": "",
    "grado": 0,
+   "color": "#888"
+  },
+  {
+   "id": "S-030",
+   "tipo": "otro",
+   "titulo": "S-030",
+   "estado": "",
+   "autoridad": 5,
+   "fuente": "",
+   "fecha": "",
+   "tags": [],
+   "cuerpo": "# S-030 · Historial privado de Maximus, separado de /admin\n\nRicardo preguntó cómo revisar sus conversaciones con Maximus sin\nexponerlas a quien tiene la clave compartida de `/admin` (Caja). Al\nrevisar el código para responder eso, se encontró un hueco real, no\nsolo la pregunta original.\n\n## El hueco encontrado — Telegram no estaba filtrado\n\n`es_privada()` en `agent/memory.py` reconocía el WhatsApp de Ricardo y el\ncerebro web (`web:`), pero **no su Telegram** (`tg:{chat_id}`) — el canal\nprincipal desde `D-010`, justamente porque WhatsApp tiene la limitación\nde ventana de 24h. Cualquiera con la clave de `/admin` podía leer esas\nconversaciones. Causa: `es_maximus()` compara contra el número de\nWhatsApp (`MAXIMUS_OWNER_PHONES`), y el chat_id de Telegram normalizado a\ndígitos nunca calza con ese número — nadie lo notó porque las pruebas de\n`P-011`/`H-019` se hicieron mirando el WhatsApp, no el Telegram.\n\n**Corregido:** `es_privada()` ahora reconoce el prefijo `tg:` y valida\ncontra `TELEGRAM_OWNER_CHAT_IDS` (`agent.telegram_maximus.es_owner()`).\nAnte cualquier error, una clave `tg:` se trata como privada por defecto\n(fail closed) — al revés que el resto de la función, porque una clave con\nese prefijo nunca puede ser un cliente real.\n\n## El visor nuevo — `/maximus/historial`\n\nPágina HTML simple, protegida con `MAXIMUS_CHAT_TOKEN` (mismo token que\n`/maximus/display`, acepta `?token=` en la URL para abrir directo del\nnavegador) — no la clave compartida de `/admin`. Lista las tres\nconversaciones privadas de Ricardo (WhatsApp, Telegram, cerebro web) y\nel detalle de cada una. El endpoint de detalle vuelve a chequear\n`es_privada()` del lado del servidor — nunca sirve una conversación de\ncliente aunque alguien adivine la clave.\n\n**No resuelve `P-011` completo** (separación física de la base de datos)\n— sigue siendo la misma tabla, solo con dos puertas de acceso distintas.\nSuficiente para el riesgo real de hoy (alguien con la clave de Caja\nleyendo los chats de Ricardo); la separación física sigue pendiente,\nprioridad baja, para cuando se pueda probar con calma.\n\n**Verificado en producción, 31-ago-2026** (con una demora por confusión\nde token — Ricardo probó primero un placeholder literal y después un\ntoken con un punto pegado al final por error de copiado; se resolvió\nverificando el valor exacto en el `.env` del servidor).",
+   "origen": "",
+   "grado": 1,
    "color": "#888"
   },
   {
@@ -2831,6 +2845,11 @@
    "rel": "relacionado"
   },
   {
+   "de": "P-011",
+   "a": "S-030",
+   "rel": "relacionado"
+  },
+  {
    "de": "P-012",
    "a": "H-016",
    "rel": "relacionado"
@@ -3306,7 +3325,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-08-30",
+ "generado": "2026-08-31",
  "huerfanos": [
   "H-024",
   "H-025",
