@@ -1857,6 +1857,20 @@
    "color": "#888"
   },
   {
+   "id": "S-032",
+   "tipo": "otro",
+   "titulo": "S-032",
+   "estado": "",
+   "autoridad": 5,
+   "fuente": "",
+   "fecha": "",
+   "tags": [],
+   "cuerpo": "# S-032 · Interruptor de voz clonada — costo controlable al instante\n\nCon `H-026` resuelto (la voz clonada de ElevenLabs ya funcionaba),\nRicardo preguntó si cada respuesta en su voz tiene costo — sí, ElevenLabs\ncobra por carácter sintetizado. Pidió dos cosas: bajar el tope de\ncaracteres, y poder prender/apagar la voz clonada al toque, sin tocar el\nservidor.\n\n## Lo construido\n\n- **`config/voz.json`** — límite bajado de 1.200 a **500 caracteres**, y\n  un interruptor `elevenlabs_activo`.\n- **`agent/voz_control.py`** — mismo criterio determinístico que\n  portón/riego: palabra clave exacta, sin interpretación de IA. **\"voz\n  clonada on\"** / **\"voz clonada off\"** cambian el archivo al instante.\n  Con \"off\", `agent/voz.py` usa siempre la voz gratis (`edge-tts`) aunque\n  la clave de ElevenLabs siga configurada — cero costo hasta que se\n  reactive.\n\n## El bug real — faltaba un tercer canal\n\nEnganchado primero solo en WhatsApp (`webhook_handler`) y Telegram\n(`telegram_webhook`). Ricardo probó desde **el cerebro visual**\n(`/maximus/chat`, canal \"web\") y el comando no interceptaba — pasaba\ndirecto a Claude, que respondía (razonablemente, sin conocer la función\nnueva) que no tenía esa herramienta y ofrecía editar código.\n\n**No era un problema de despliegue** — el log mostró `[MAXIMUS/WEB]`, la\npista de que el mensaje entró por un tercer endpoint que no se había\ntocado. Corregido agregando el mismo chequeo a `/maximus/chat`.\n\n**Lección:** Maximus responde desde tres puntos de entrada distintos\n(WhatsApp, Telegram, cerebro web), cada uno con su propio código. Un\ninterceptor determinístico nuevo tiene que agregarse a los tres, o\nfalla en silencio en el que se olvide — sin ningún error visible, porque\nsimplemente cae al camino normal (Claude) y responde con algo plausible.\n\n## Verificado\n\n\"voz clonada off\" / \"voz clonada on\" probados y confirmados en los tres\ncanales (WhatsApp, Telegram, cerebro web) — 1-sep-2026.\n\nTambién se corrigió un ID de voz nuevo que Ricardo generó con acento\nargentino en vez de chileno — resuelto directo en ElevenLabs, sin\ntocar código.",
+   "origen": "",
+   "grado": 0,
+   "color": "#888"
+  },
+  {
    "id": "T-001",
    "tipo": "tesis",
    "titulo": "No necesita un segundo al mando, necesita cerrar proyectos",
@@ -3348,7 +3362,8 @@
   "S-027",
   "S-028",
   "S-029",
-  "S-031"
+  "S-031",
+  "S-032"
  ],
  "enlaces_rotos": [
   "S-025 --relacionado--> MEMORY"
