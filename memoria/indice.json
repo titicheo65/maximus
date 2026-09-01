@@ -1843,6 +1843,20 @@
    "color": "#888"
   },
   {
+   "id": "S-031",
+   "tipo": "otro",
+   "titulo": "S-031",
+   "estado": "",
+   "autoridad": 5,
+   "fuente": "",
+   "fecha": "",
+   "tags": [],
+   "cuerpo": "# S-031 · Abrir mesa + pedido vía Maximus — primera pieza del flujo de garzón\n\nPedido de Ricardo (31-ago-2026): que Maximus pueda operar el flujo\ncompleto de garzón — abrir mesa, mandar pedido, precuenta, cerrar con\npago y propina. Es la pieza más grande construida en toda la sesión.\n**Se dividió a propósito**, en vez de construirla entera de una vez:\nhoy solo \"abrir mesa + pedido\". Precuenta y cierre con pago quedan para\notra sesión — son las partes más delicadas (cierre tiene pago dividido,\nboleta, propina; precuenta tiene un mecanismo real que no se llegó a\nidentificar del todo, distinto del `CreadorPrecuenta.jsx` manual que se\ninvestigó primero por error).\n\n## `pedido_mesa_dimango` — réplica de `WaiterNuevaOrden.jsx`\n\nMismo criterio de toda la noche: se leyó el código real\n(`confirmarPedido()`) antes de escribir nada. Abre la mesa (o reutiliza\nuna orden pendiente existente), busca cada producto pedido en el\ncatálogo del local correspondiente, arma la comanda, descuenta stock,\nactualiza `CuentaMesa`, y la manda a cocina/bar con el mismo mapeo de\ncategoría → pantalla (`DISPLAY_FALLBACK`) que usa la app real.\n\n**Dos límites explícitos, declarados en el tool y en el código — no se\nintentan resolver solos:**\n1. Productos con modificadores (sabor, tamaño, proteína) — Maximus no\n   elige por el cliente, avisa que hay que agregarlo desde el POS.\n2. Sin identificación de socio Club DiMango — eso lo sigue haciendo el\n   garzón físico.\n\nBúsqueda de mesa y de producto flexibles (mismo criterio que `H-027`):\nsin coincidencia exacta, no exacta = ambigua, sin adivinar.\n\n## El bug real, y por qué la primera explicación de Maximus no era mentira\n\nPrimer intento: Maximus dijo *\"el sistema requiere un garzón asignado y\nno tengo cómo saberlo\"*. Sonaba a otra alucinación (como el caso del\n\"agente de reposición\"), pero **esta vez era cierto, solo que con sus\npropias palabras en vez del error textual**. Causa real, encontrada\nrevisando el esquema de `CuentaMesa`: `waiter_id` es un campo\n**obligatorio** (`required`), y el código mandaba `null` cuando la mesa\nno tenía garzón asignado — que es siempre el caso cuando abre Maximus,\nporque no hay una sesión de garzón física detrás.\n\n**Corregido:** cuando no hay `waiter_id` real, se usa el string fijo\n`\"maximus\"` en vez de `null` — el campo es solo texto libre, sin\nvalidación de referencia contra la tabla de personal, así que no hace\nfalta crear un \"garzón Maximus\" de verdad en el sistema.\n\n**Lección para el diagnóstico:** el log real (`pm2 logs`) mostraba el\nmensaje de error de Base44 cortado justo en `\"Error in field waiter_\"` —\ncostó varias vueltas (findstr, Notepad, buscar continuación) sin\nencontrar el resto. Se resolvió más rápido leyendo el **esquema de la\nentidad** directamente que persiguiendo el log truncado. Cuando un log\nse corta sin explicación aparente, revisar la fuente de datos (esquema,\ntipo, validaciones) puede ser más rápido que insistir en verlo completo.\n\n## Verificado en producción, 31-ago/1-sep-2026\n\n\"Abre la mesa 608 en Playa y manda una Coca Light\" → mesa abierta, ítem\nagregado, comanda enviada. Confirmado por Ricardo.",
+   "origen": "",
+   "grado": 0,
+   "color": "#888"
+  },
+  {
    "id": "T-001",
    "tipo": "tesis",
    "titulo": "No necesita un segundo al mando, necesita cerrar proyectos",
@@ -3324,7 +3338,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-08-31",
+ "generado": "2026-09-01",
  "huerfanos": [
   "H-024",
   "H-025",
@@ -3333,7 +3347,8 @@
   "L-008",
   "S-027",
   "S-028",
-  "S-029"
+  "S-029",
+  "S-031"
  ],
  "enlaces_rotos": [
   "S-025 --relacionado--> MEMORY"
