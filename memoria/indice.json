@@ -715,6 +715,26 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-030",
+   "tipo": "hallazgo",
+   "titulo": "Los avisos de Telegram salían una hora antes: el horario de verano estaba desactivado en el servidor y alguien había ajustado el reloj a mano",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "",
+   "fecha": "",
+   "tags": [
+    "infraestructura",
+    "servidorplaya",
+    "telegram",
+    "checklist",
+    "hora"
+   ],
+   "cuerpo": "# H-030 · El servidor estaba una hora adelantado sin que se notara (8-sep-2026)\n\nChile adelantó la hora el sábado 5-sep-2026. Desde entonces los avisos de\nchecklist por Telegram llegaban **una hora antes**. Ricardo lo reportó con un\ndato que parecía descartar la causa obvia: *\"el servidor tiene la hora\ncorrecta\"*.\n\n## Por qué la hora \"correcta\" era la trampa\n\nEl diagnóstico salió de tres comandos:\n\n```\ntzutil /g   ->  Pacific SA Standard Time_dstoff\nGet-Date    ->  2026-09-08 20:13:26 -04:00\nUtcNow      ->  2026-09-09 00:13:36     (el UTC real era 23:13 del 8-sep)\n```\n\n**El sufijo `_dstoff` es la causa raíz: alguien desactivó el horario de verano**\nen Windows. El equipo quedó clavado en UTC-4 y no adelantó el sábado. Después\n—para que la pantalla mostrara la hora buena— **se ajustó el reloj a mano**.\n\nResultado: la hora local se veía perfecta, pero **el instante UTC del equipo\nquedó una hora adelantado**. Todo lo que se calcula desde UTC —que es todo—\ndisparaba antes de tiempo.\n\n**El código nunca estuvo mal.** `checklist_operativo.py` usa\n`datetime.now(ZoneInfo(\"America/Santiago\"))`, que es la forma correcta. Tomaba\nun instante equivocado y lo convertía bien.\n\n## La corrección\n\n```\ntzutil /s \"Pacific SA Standard Time\"      (sin _dstoff)\nSet-Service -Name w32time -StartupType Automatic\nStart-Service w32time\nw32tm /resync /force\n```\n\n**El servicio de hora de Windows estaba deshabilitado** — por eso el equipo\nnunca se corrigió solo, ni ese sábado ni antes. Quedó en automático.\n\nVerificado en los tres sistemas que dependen del reloj: Python (agente) y Node\n(servidor de impresión, que estampa la hora en los tickets) dan hora de Arica\ncon offset -03:00.\n\n**Pendiente menor:** Windows sigue mostrando -04:00 en su reloj local porque\ntiene las reglas de horario de verano de Chile desactualizadas; se corrige con\nWindows Update. No afecta al agente ni a la impresión, porque cada uno trae su\npropia base de zonas horarias.\n\n## Reglas derivadas\n\n1. **Nunca ajustar el reloj a mano en ServidorPlaya.** Si la hora se ve mal, lo\n   que está mal es la zona horaria o el servicio de hora — el reloj es el\n   síntoma. Ajustarlo a mano *esconde* el problema y rompe el UTC, que es lo\n   que de verdad usan los sistemas.\n2. **Un reloj que se ve bien no prueba que la hora esté bien.** Hay que mirar el\n   offset y el UTC, no la hora en pantalla. Es la misma familia de `L-006`: el\n   síntoma visible apuntaba en la dirección contraria a la causa.\n3. **Volver a revisar esto en marzo de 2027**, cuando termine el horario de\n   verano. Si Windows sigue con reglas viejas, el problema reaparece al revés\n   (mensajes una hora tarde).",
+   "origen": "",
+   "grado": 3,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -820,7 +840,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 10,
+   "grado": 11,
    "color": "#27c93f"
   },
   {
@@ -1219,7 +1239,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.\n\n## Segunda caída, 24-ago-2026 — con tarea programada puesta y aun así falló\n\nVer `H-021.md`. Corte de luz, Windows reinició, la tarea `Maximus-Arranque` SÍ\ncorrió (verificado), PM2 SÍ resucitó sus procesos — y aun así `start /min\npython -m uvicorn` no dejó nada escuchando en el puerto 8000. **La tarea\nprogramada que este pendiente pedía ya existía, y no bastó.** El punto 1 de\nesta lista queda redefinido: no es \"falta arranque automático\", es \"el\narranque automático tiene un paso (`start /min` para uvicorn) que falla en\nsilencio y sin PM2 detrás para reintentar\".\n\n## Punto 1 — cerrado esa misma madrugada, migrado a PM2\n\n`maximus-agent` quedó dentro de PM2 (`server6`, `voiceagentkit` y ahora\ntambién el agente), lanzado vía `iniciar_maximus.bat` con `--interpreter\ncmd.exe --interpreter-args \"/c\"`. `arranque.bat` ya no usa `start /min` para\nel agente — `pm2 resurrect` lo trae junto con los demás. Verificado con\n`pm2 list` (`online`) y `POST /maximus/chat` sin token → `401`. Detalle\ncompleto de los tres intentos fallidos antes de este, en `H-021.md`.\n\n**Sigue pendiente:** verlo pasar por un corte de luz real (no simulado) antes\nde darlo por blindado del todo — y solo entonces reconsiderar activar más\nautomatización de impresión (H-018).\n\n## La prueba real llegó ese mismo día — y no pasó limpia\n\nHubo un segundo corte de luz el 24-ago por la tarde. PM2 en sí no falló, pero\nun `python.exe` zombi — nacido en el reinicio de esa mañana, **por fuera del\ncontrol de PM2** — llevaba horas ocupando el puerto 8000. Ningún restart de\nPM2 podía tomar el puerto mientras el zombi siguiera vivo. Se resolvió a mano\n(`Stop-Process -Force` + `pm2 restart`), verificado con WhatsApp real\nrespondiendo. **Telegram sigue sin responder, pendiente de revisar.**\n\nDetalle completo en `H-021.md`. Migrar a PM2 resolvió el problema de\nconfiguración, pero no explicaba ni evitaba que naciera un proceso fuera\nde PM2 en el arranque — esa fuente faltaba encontrar.\n\n## Punto 1 — cerrado de verdad, 26-ago-2026\n\nTercera repetición del zombi (25-ago por la mañana, sin corte de luz esta\nvez) llevó a mirar donde nadie había mirado: la **carpeta de Inicio de\nWindows**, no las tareas programadas. Ahí vivía `iniciar-agente.bat`,\nresto de la carpeta abandonada `C:\\Users\\usuario\\Desktop\\dimango-app`\n(H-013) — lanzaba su propio Python en el puerto 8000 en cada arranque,\npor fuera de PM2. Junto con dos scripts más redundantes\n(`ServidorPlaya.bat`, `pm2-autostart.bat`). Los tres movidos a\n`Startup\\respaldo-25ago\\` — detalle completo en `H-021.md`.\n\n**Único pendiente real:** confirmarlo en el próximo reinicio de verdad.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 18,
+   "grado": 19,
    "color": "#ff5f56"
   },
   {
@@ -2022,7 +2042,7 @@
    ],
    "cuerpo": "# S-033 · Caja independiente en terminal iMin — imprime sin red\n\nRicardo compró un terminal **iMin Swan 2 (modelo I24D03)** para Playa Chinchorro:\nAndroid 13, pantalla táctil, **impresora térmica y gaveta integradas**. Pidió que\nfuera un punto de venta que imprimiera **sin depender del servidor de Windows**.\n\n## La pregunta de fondo que hizo primero, y su respuesta\n\n*\"¿Se puede generar ticket y DTE en otro punto independiente?\"*\n\n**Sí, y ya era posible sin construir nada.** Verificado leyendo el código: la\nemisión del DTE ocurre **100% en la nube** — la función `emitirBoletaV2` (Base44)\nle pega directo a `api.simplefactura.cl` y **SimpleFactura devuelve el folio**.\nEl servidor Windows **solo imprime, no emite**.\n\nConsecuencias: cualquier equipo con navegador e internet puede emitir; no hay\nlicencia por terminal ni rango de folios local; **no hay riesgo de folios\nduplicados** porque los asigna SimpleFactura del lado servidor.\n\nLos dos problemas quedaron separados: **emisión = nube (ya independiente)**,\n**impresión = local (lo que había que construir)**.\n\n## Cómo funciona la impresión local\n\niMin publica un **SDK de JavaScript** (`imin-printer` v1.4.0, MIT). La página\ncarga un archivo de 29 KB y se conecta por **WebSocket a `ws://127.0.0.1:8081`**,\nun servicio que corre **dentro de la tablet**. No sale a la red en ningún momento.\n\n- SDK descargado de `https://oss-sg.imin.sg/docs/demo/iMinJSPrinterSDK.zip` y\n  servido desde `public/imin-printer.min.js` del propio dominio.\n- `src/lib/iminPrinter.js` — adaptador: detecta, conecta, imprime, abre gaveta.\n- `src/lib/printQueue.js` — **punto único**: todo el sistema imprime por\n  `encolarImpresion()` (20 llamadas). Ahí se intercepta una sola vez: si hay iMin\n  imprime local y **no encola**; si no, sigue la cola de siempre.\n\n**Riesgo cero para el resto:** en Playa, Mall y tótems `disponible()` da false,\nel SDK ni se descarga, y ningún flujo cambia.\n\n## Verificado en producción (8-sep-2026)\n\nImprime **con el WiFi apagado**. Abre gaveta. Tres ventas reales probadas:\nefectivo con DTE, efectivo sin DTE, tarjeta sin DTE — todas correctas.\n\n**Control de la gaveta, a pedido de Ricardo:** en una venta se abre sola **solo\nsi el medio de pago es efectivo**; fuera de una venta, el botón **exige clave de\nModo Jefe**. Una caja que se abre sin control no es una caja.\n\n## Tres defectos propios, y lo que enseñan\n\n1. **`openCashBox()` después del corte de papel no funciona** — el comando se\n   pierde mientras la impresora sigue ocupada. La gaveta va **antes** de imprimir.\n2. **`printText()` agrega el salto de línea solo.** Pasarle además `\"\\n\"` produce\n   doble interlineado y rompe la alineación. Se leyó en el código del SDK, no se\n   adivinó desde la foto.\n3. **Mayúsculas inconsistentes en `medio_pago`** (`\"efectivo\"` en unos caminos,\n   `\"TARJETA\"` en otro). Una comparación estricta habría dejado la gaveta cerrada\n   en una venta en efectivo legítima. Normalizado.\n\n## El formato del ticket — resuelto\n\nFalta igualar el formato al del servidor. **La causa de que no calce: la copia de\n`printer-server.js` que está en el repositorio NO es la que corre en producción**\n—el ticket real tiene dirección, teléfono, \"CUENTA\", \"TURNO #\" y \"Local:\", y nada\nde eso existe en el archivo del repo—. Es `L-004` otra vez: dos fuentes de verdad,\nahora en la impresión. **Hay que sacar el archivo real del disco del Windows antes\nde seguir**, o cada iteración queda parecida pero no igual.\n\n**Resuelto el 9-sep:** Ricardo trajo el archivo real (`PRINT SERVER v6.0`). El\nformato quedó replicado desde ahí — título **\"CUENTA\"** siempre, folio al pie como\n*\"BOLETA ELECTRONICA N 123\"*, sin línea de medio de pago, sin cartel de\ncomprobante interno (el servidor ignora esos campos aunque la app los mande), y\n**con el timbre PDF417 impreso como imagen** vía `printSingleBitmap`. Ver `P-016`,\ndonde quedó registrado un error propio: había afirmado que el timbre no se\nimprimía, leyendo la copia vieja del repositorio.",
    "origen": "",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff8c42"
   },
   {
@@ -2705,6 +2725,21 @@
   {
    "de": "H-029",
    "a": "S-034",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-030",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-030",
+   "a": "S-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-030",
+   "a": "L-006",
    "rel": "relacionado"
   },
   {
