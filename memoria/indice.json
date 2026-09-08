@@ -106,7 +106,7 @@
    ],
    "cuerpo": "**Problema:** niños salían de la app en los tótems. Un tótem fuera de la app\nvende cero.\n**Diagnóstico:** no se arregla en la app — una PWA no puede impedir la salida.\nEs bloqueo a nivel de sistema operativo.\n**Solución:** Fully Kiosk Browser sobre Android.\n\n**Estado: implementado, NO verificado bajo carga real.** \"Sin errores\" no es lo\nmismo que probado. Verificar el sábado 22-ago con flujo de niños.\n\n**Pendientes originales:** confirmar que el auto-reload deja el carrito vacío ·\nel auto-reload es ciego a los pagos (mitigado con umbral de 120 s; el reset por\ncódigo en /Kioskos es la solución correcta) · registro de sesiones abandonadas\nno implementado.\n\n---\n\n## Reverificación del 23-ago-2026\n\nRicardo informa que **los tótems están funcionando y envían respaldo por\nTelegram**. *(Autoridad 4 — informado por Ricardo.)*\n\nLos niños ya no salen de la app: el problema que originó la decisión está\nresuelto y el bloqueo con Fully Kiosk aguantó el fin de semana.\n\n**Lo del respaldo por Telegram es nuevo y no estaba en esta decisión.** Pendiente\nregistrar qué envía exactamente y a quién — si son pedidos, estado del equipo o\nalertas de caída, cambia lo que cubre y merece nota de sistema propia.\n\n**Sigue sin responder, y es lo que decide si el tótem gana o pierde plata:**\n- **Sesiones abandonadas: no se miden.** Nadie sabe cuánta venta se cae en el\n  tótem, y sin ese número no se puede justificar comprar más ni retirarlos (L-003).\n- ¿El auto-reload deja el carrito vacío, o vuelve el pedido del cliente anterior?\n- ¿Llegó a recargar sobre un pago en curso? El umbral de 120 s lo hace poco\n  probable, no imposible.",
    "origen": "implementado por Ricardo, 19-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#f5a623"
   },
   {
@@ -291,7 +291,7 @@
    ],
    "cuerpo": "Mayo $11.874.572 · Junio $11.842.204 · **Julio $12.721.588 (+7,1%)** — sube\nmientras la venta cae 7,4%.\n\n**Resuelto por H-015:** el Mall hace el 25,35% de la venta, no la mitad. El\narriendo es el **37,4% de su venta neta**, casi el doble del umbral viable.\n\n**Pendiente:** leer el contrato — reajuste, componente variable, vencimiento y\nmulta por salida anticipada.",
    "origen": "RCV del SII",
-   "grado": 7,
+   "grado": 8,
    "color": "#4a9eff"
   },
   {
@@ -420,7 +420,7 @@
    ],
    "cuerpo": "GitHub bloqueó un push: Account SID y API Key de Twilio en texto plano dentro\nde `.claude/settings.local.json`.\n\n**No llegaron al repositorio.** El archivo quedó en `.gitignore`.\n\n**Pendiente:** las credenciales **siguen en el disco del Mac**. Riesgo bajo hoy\nporque el agente migró a Meta y Twilio ya no se usa, pero deben **rotarse o\neliminarse en el panel de Twilio** — borrarlas del archivo no las desactiva.",
    "origen": "push protection de GitHub",
-   "grado": 3,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -440,7 +440,7 @@
    ],
    "cuerpo": "| | Playa | Mall | Total |\n|---|---|---|---|\n| Venta bruta | $119.455.935 | $40.464.040 | $159.919.975 |\n| Venta c/IVA | $119.044.684 | $40.433.220 | $159.477.904 |\n| **Venta neta** | **$100.037.550** | **$33.977.496** | $134.015.045 |\n| Propinas (aparte) | $7.260.449 | $3.455.478 | $10.715.927 |\n| **% del total** | **74,65%** | **25,35%** | 100% |\n\n**Estado de resultados por local (ARITMÉTICA; supone mercadería 28,7% pareja):**\n\n| | Mall | Playa |\n|---|---|---|\n| Arriendo | **37,4%** | 0% (propio) |\n| Mercadería | 28,7% | 28,7% |\n| Laboral directo | 19,4% | 21,4% |\n| Medios de pago | 2,6% | 2,6% |\n| **Queda** | **11,8%** | **47,3%** |\n\n**El arriendo del Mall es 37,4% de su venta neta. El umbral de viabilidad es 20%.**\n\nY ese 11,8% no descuenta todavía: la mano de obra de Playa que produce para el\nMall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni\nadministración. **El Mall está en el borde o bajo el agua.**\n\n**Playa subsidia al Mall.** Ya no es hipótesis.\n\n**Para llegar a un arriendo del 20%:** vender $63,6M netos (crecer **87%**) o\nrenegociar el arriendo a $6,8M (**bajar 47%**). La tercera opción es cerrar.\n\n**Antes de decidir:** leer el contrato de Plaza Oeste — reajuste, componente\nvariable, vencimiento y multa por salida anticipada.",
    "origen": "DiMangoToGo /AdminVentas, resumen contable julio filtrado por local",
-   "grado": 15,
+   "grado": 16,
    "color": "#4a9eff"
   },
   {
@@ -496,7 +496,7 @@
    ],
    "cuerpo": "El log de errores del servidor de impresión de Playa repite quince veces:\n\n> `[COLA] Job <id> ya se imprimio en esta sesion (Base44 lo sigue marcando\n> pendiente) - se omite para no duplicar`\n\n**Qué significa:** el servidor imprime el trabajo, pero **DiMangoToGo (Base44)\nnunca lo marca como impreso**. La cola queda llena de trabajos fantasma que\nsiguen figurando pendientes.\n\n**Qué evita el desastre hoy:** una lista en memoria del propio servidor de\nimpresión, que recuerda qué salió \"en esta sesión\" y lo omite.\n\n**Por qué es frágil:** esa lista vive en RAM. Si el proceso se reinicia —corte de\nluz, reinicio de Windows, o el arranque automático de P-008— la lista se pierde,\nBase44 sigue diciendo \"pendiente\", y **se reimprimen de golpe todos los trabajos\nacumulados**: boletas y precuentas viejas saliendo en cadena, probablemente en\nmedio del servicio.\n\n**Agravante:** el arranque automático que se creó en P-008 hace este escenario\n*más* probable, no menos. Antes alguien levantaba el servidor a mano y estaba\nmirando; ahora arranca solo.\n\n**Dónde se arregla:** en DiMangoToGo, no en el servidor de impresión. El job debe\nmarcarse como impreso cuando el servidor confirma. Mientras eso no ocurra, cada\nreinicio es una ruleta.\n\n**Segundo hallazgo del mismo log:** PM2 tiene registrada la **v6**\n(`C:\\dimango\\print-server\\servidor-impresion-playa-v6.js`) en estado `stopped`,\npero en el repositorio existe una **v7**. La entrada de PM2 apunta a una versión\nreemplazada. Pendiente confirmar qué proceso imprime hoy en Playa.\n\n---\n\n**Agravante descubierto el 21-ago-2026:** el local del Mall tiene **su propio PC\ncon servidor de impresión local y arranque automático ya configurado** (S-012).\n\nSi corre el mismo código, **el riesgo de reimpresión masiva ya está activo ahí,\nhoy, sin que nadie lo haya introducido**: cada corte de luz en el Mall levanta el\nservidor con la lista anti-duplicados vacía mientras Base44 sigue marcando\ntrabajos como pendientes.\n\n**Evidencia a buscar:** preguntar en el Mall si alguna vez salieron boletas o\nprecuentas viejas de golpe después de un corte de luz. Si ocurrió, H-018 deja de\nser hipótesis.\n\n\n---\n\n## CONFIRMADO CON DATOS — 23-ago-2026, 23:00 hora de Arica\n\nYa no es hipótesis. Consulta directa a la entidad `PrintJob` de DiMangoToGo\n(autoridad 1 — sistema oficial):\n\n**14 documentos se marcaron impresos de golpe, en 8,3 segundos**, entre las\n23:00:30 y las 23:00:38. El más viejo se había creado **cinco horas antes**\n(21:59). Los reintentos acumulados iban de 22 a **86** en un solo documento.\n\nTodos son de **Playa**. Falta confirmar en terreno si salieron en papel una vez\no dos: preguntar si esa noche, cerca de las 23:00, salieron boletas y precuentas\nviejas de mesas ya cerradas.\n\n## El Mall NO tiene el problema — y tiene la solución escrita\n\nEstado real de la cola: **Mall con cero pendientes**, todos `impreso`, con\n`intentos` 0 o 1 y `printed_at` **2 a 4 segundos** después de crearse. Playa\ntarda 22-25 s en el caso bueno.\n\n`C:\\dimango\\print-server\\servidor-impresion-mall-v6.js` hace lo correcto:\n\n- marca `estado: 'imprimiendo'` ANTES de imprimir, \"para que otra vuelta no lo\n  tome dos veces\" (línea 279)\n- marca `estado: 'impreso'` + `printed_at` al terminar (líneas 291-294)\n- marca `estado: 'error'` con mensaje si falla (líneas 299-301)\n- **arranca la cola dentro de `server.listen`**, así que solo consulta el proceso\n  que tomó el puerto 3001 — dos instancias no compiten (línea 322)\n- backoff ante 429: sube la espera hasta 60 s en vez de martillar Base44\n\nSu encabezado explica el origen: DiMangoToGo pasó de mandar impresión por HTTP\n(*push*) a dejar registros en la cola (*pull*), y la v5.2 no leía esa cola — \"por\neso Mall no imprimía\". El problema ya se resolvió una vez, acá.\n\n**Playa corre otra versión.** El mensaje de su log —\"ya se imprimió en esta\nsesión, Base44 lo sigue marcando pendiente\"— **no existe en el código del Mall**.\n\n**El arreglo no es diseñar nada: es llevar la v6 del Mall a Playa.**\n\n## Lo que falta hacer (mañana)\n\n1. En ServidorPlaya, los mismos dos comandos que se corrieron en SERVMALL:\n   qué `node.exe` corre y el extracto del archivo. Comparar con el del Mall.\n2. Preguntar en Playa por las boletas viejas de las 23:00.\n3. Al abrir el Mall, confirmar que hay algo escuchando en el 3001: la noche del\n   23-ago **no había ningún `node.exe` corriendo en SERVMALL**. Puede ser normal\n   con el local cerrado, pero S-012 dice que ese PC tiene arranque automático.\n\n## Credencial expuesta\n\n`BASE44_API_KEY` está en texto plano en la línea 35 del archivo, y quedó visible\nen una captura de pantalla el 23-ago. Da acceso de lectura y escritura a los\ndatos de DiMangoToGo. **Cuarto caso del patrón de H-019.** Rotar en Base44 y\nactualizar el archivo en los dos servidores.\n\n---\n\n## CORRECCIÓN — 27-ago-2026: \"llevar la v6 del Mall a Playa\" era el arreglo\n## equivocado\n\nAl ejecutar el punto 1 de \"lo que falta\" (ver `H-022`), se leyó el archivo\nreal de Playa (`servidor-impresion-playa-v6.js`, 458 líneas, vigente hoy) en\nvez de asumir por el nombre de archivo. **Ya no corre la versión rota descrita\narriba.** Playa marca `estado: 'imprimiendo'` antes de imprimir y `estado:\n'impreso'` + `printed_at` después — la misma lógica del Mall — **y además\ntiene una capa extra que el Mall no tiene:** un `Set` en RAM\n(`yaImpresosEnEstaSesion`) que blinda contra reimpresión si el `update` a\nBase44 falla justo después de imprimir físicamente. El comentario en el\ncódigo lo dice explícito: *\"Recien aqui, con el ticket YA impreso\nfísicamente, lo blindamos contra reimpresión — si el update de abajo falla,\neste proceso no lo repetirá.\"*\n\nNo se sabe con certeza cuándo se agregó esa defensa a Playa — probablemente\nen algún momento después de que este hallazgo se escribiera el 21-ago — pero\nestá ahí, en el archivo que corre hoy. **Copiar el código del Mall a Playa\nhabría sido un retroceso**, no un arreglo: Playa soporta dos impresoras por\nIP (boleta y precuenta, cada una a su propia IP:puerto), y el Mall solo\nsoporta una por USB compartido (`copy /b` a un share local) — no hay forma de\nque ese código funcione en la red de Playa.\n\n**El problema real nunca fue el código de impresión — fue la inestabilidad\nde infraestructura.** El blindaje en RAM protege *dentro de una sesión*, pero\ncon el proceso reiniciándose 191 mil veces (`H-022`), esa memoria se borraba\nconstantemente. Si el `update` a Base44 fallaba una sola vez justo después de\nimprimir (el `ECONNRESET` visto en los logs), el job seguía \"pendiente\" para\nsiempre en Base44, y cada reinicio del proceso volvía a abrir la ventana de\nreimprimir ese job físicamente. **Arreglar los daemons duplicados de PM2 y\nlos túneles huérfanos (`H-022`) ataca la causa real; tocar este archivo no\nera necesario.**\n\n**Lección, misma familia que `L-005`:** un hallazgo escrito sobre una versión\ndel código puede quedar obsoleto si el código cambia después y nadie lo\nvuelve a leer antes de actuar sobre el hallazgo viejo. Se verificó el archivo\nreal antes de copiar nada — si no, se habría introducido una regresión real\npara \"arreglar\" algo que ya estaba bien.\n\n**Pendiente real, sin cambios:** rotar `BASE44_API_KEY`, expuesta en ambos\nservidores.",
    "origen": "C:\\\\Users\\\\usuario\\\\.pm2\\\\logs\\\\impresion-playa-error.log, 21-ago-2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#4a9eff"
   },
   {
@@ -516,7 +516,7 @@
    ],
    "cuerpo": "El panel `/admin` del agente —que lista **todas** las conversaciones— se publica\npor el túnel de ngrok, o sea que es alcanzable desde internet. Estaba protegido\ncon la contraseña que venía **escrita en el código**:\n\n```python\nADMIN_USER = os.getenv(\"ADMIN_USER\", \"admin\")\nADMIN_PASSWORD = os.getenv(\"ADMIN_PASSWORD\", \"dimango2026\")\n```\n\nEl `.env` no la sobreescribía. Cualquiera con la URL y esa clave —publicada en\nel repositorio— leía los chats de clientes y las conversaciones de Ricardo con\nMaximus: sueldos, márgenes, la inviabilidad del Mall.\n\n**Segunda credencial, el mismo día:** el token de `/maximus/chat` quedó visible\nen una captura de pantalla que Ricardo mandó para diagnosticar otra cosa. Ese\ntoken da acceso al chat con toda la memoria del negocio.\n\n**Ambas rotadas y verificadas el 23-ago-2026**, no dadas por buenas:\n\n| Verificación | Resultado |\n|---|---|\n| Clave vieja del panel (`admin`/`dimango2026`) | **401** |\n| Token viejo del chat | **401** |\n| Agente operativo después de rotar | 200 |\n\n**Es el tercer caso del mismo patrón** — después de H-014 (credenciales de Twilio\nen `.claude/settings.local.json`). La constante no es el descuido: es que el\nsistema **trae valores por defecto que funcionan**. Un default que funciona nunca\nse cambia, porque nada obliga a hacerlo.\n\n**Regla derivada:** ningún componente de DiMango debe arrancar con una credencial\npor defecto. Si falta la variable, que **no arranque** — falla ruidosa en vez de\nseguridad falsa.\n\n**Lo que sigue abierto:** el panel `/admin` no debería estar expuesto a internet.\nLa contraseña buena tapa el agujero; sacarlo del túnel lo cierra.",
    "origen": "leído del código y verificado contra el servidor el 23-ago-2026",
-   "grado": 7,
+   "grado": 10,
    "color": "#4a9eff"
   },
   {
@@ -555,7 +555,7 @@
    ],
    "cuerpo": "Corte de luz en Playa Chinchorro. Al volver la energía, Windows reinició. Ricardo\nno tocó nada — su primer mensaje fue *\"no he hecho nada, solo q revise y se había\ncortado la luz y no levantó al reinicio\"*.\n\n**Resultado:** `/maximus/chat` respondía **404** desde el cerebro visual.\n\n## Lo nuevo que este caso confirma\n\nP-008 punto 1 decía *\"nada arranca solo\"* como riesgo teórico, y el 23-ago se\ncobró la primera factura (ver `P-008.md`, sección \"Dejó de ser un riesgo\nteórico\"). Ese día la causa fue humana: alguien cerró la ventana equivocada.\n\n**Este caso es distinto y peor: esta vez SÍ existe tarea programada\n(`Maximus-Arranque`, verificado con `Get-ScheduledTask`), apunta al script\ncorrecto (`C:\\dimango-agent\\arranque.bat`, verificado con `Select -ExpandProperty\nActions`), el script en sí es correcto, y el reinicio disparó la tarea sin que\nnadie interviniera — y aun así no quedó nada escuchando en el puerto 8000.**\n\nO sea: **la tarea programada que P-008 pedía como solución ya estaba puesta, y no\nfue suficiente.** El problema no era la ausencia de automatización — era que la\nautomatización tiene un eslabón que falla en silencio.\n\n## Diagnóstico (aplicando L-006: verificar antes de teorizar)\n\n1. `netstat -ano | findstr :8000` + `Get-CimInstance Win32_Process -Filter\n   \"ProcessId=X\"` mostraron un PID con el `CommandLine` correcto\n   (`python -m uvicorn agent.main:app --host 0.0.0.0 --port 8000`) pero el\n   endpoint seguía sin responder bien — quedaba un proceso a medio levantar.\n2. `git log -1` y `git status` en el servidor: código al día, limpio, igual al\n   repositorio. **No era código viejo.** Se descartó la hipótesis inicial de\n   Maximus (código pre-rollback de L-006) apenas Ricardo aportó el dato real\n   (fue corte de luz, no un despliegue).\n3. `Select-String -Path \"agent\\main.py\" -Pattern \"maximus/chat\"` confirmó la\n   ruta declarada sin condición en el código — un 404 ahí es imposible si el\n   proceso está realmente arriba y sirviendo ese archivo.\n4. Se mató el proceso zombi (`Stop-Process -Force`) y se corrió `arranque.bat`\n   a mano: PM2 resucitó bien (`server6`, `voiceagentkit`, etc.), pero\n   `Invoke-WebRequest http://localhost:8000/openapi.json` dio **\"no es posible\n   conectar con el servidor remoto\"** — nada escuchaba. El error pasó de 404 a\n   502 (ngrok sin backend) a conexión rechazada, cada uno un síntoma distinto\n   del mismo hueco: `start \"\" /min python -m uvicorn ...` no dejó nada vivo.\n\n## La causa exacta queda sin confirmar — y eso es lo que hay que arreglar\n\n`start \"\" /min <exe>` lanza `python.exe` directo, no dentro de `cmd.exe`. Si el\nproceso truena al arrancar, **la ventana se cierra sola** y no queda rastro ni\ntraceback que leer — al revés de lo que Maximus asumió al principio (fue\ncorregido en la misma sesión). No se pudo determinar si murió por una carrera de\ntiempos con PM2, un puerto que tardó en soltarse, o algo del propio arranque de\nuvicorn.\n\n## Arreglo aplicado — funciona, pero es frágil\n\nSe corrió `python -m uvicorn agent.main:app --host 0.0.0.0 --port 8000` **en\nprimer plano**, dentro de la sesión RDP activa. Arrancó limpio, sin errores.\nRicardo confirmó desde el cerebro: *\"probé y ya me respondió bien.\"*\n\n**Esto no es la solución — es el parche que devolvió el servicio hoy.** El\nproceso vive en una ventana de una sesión remota abierta: si esa ventana se\ncierra o la sesión se corta, Maximus vuelve a caer, y otra vez sin aviso.\n\n## Cerrado de raíz — migrado a PM2, 24-ago-2026, mismo día\n\nEl punto 1 de \"lo que falta\" se hizo esa misma madrugada. `maximus-agent` quedó\nregistrado en PM2 igual que `server6` y `voiceagentkit`, dentro del mismo\n`arranque.bat` (vía `pm2 resurrect`), en vez de `start /min`.\n\n**No fue directo — tres intentos fallidos antes del que funcionó, cada uno\ninstructivo:**\n\n1. `pm2 start python --name maximus-agent --cwd ... -- -m uvicorn ... --host\n   0.0.0.0 --port 8000` → `error: unknown option '--host'`. El separador `--`\n   de PM2 no aisló los argumentos del script de las flags del propio PM2.\n2. Se envolvió el arranque en `C:\\dimango-agent\\iniciar_maximus.bat` y se probó\n   `pm2 start iniciar_maximus.bat --interpreter none` → PM2 intentó correr el\n   `.bat` con **Node.js** (`SyntaxError` en `@echo off`): sin intérprete\n   explícito, PM2 asume Node para cualquier script.\n3. `pm2 start cmd -- /c iniciar_maximus.bat` → mismo problema del punto 1:\n   `cmd` se abrió sin argumentos, se veía el banner interactivo de Windows y\n   nada más. El separador `--` de este PM2 no es confiable para pasar\n   argumentos sueltos, dos veces de dos.\n4. **Lo que funcionó:** `pm2 start iniciar_maximus.bat --name maximus-agent\n   --interpreter cmd.exe --interpreter-args \"/c\"` — usar el mecanismo nativo\n   de PM2 para intérpretes en vez de intentar pasar argumentos a mano.\n\nVerificado con el mismo rigor que exige L-006 — no \"sin errores\", sino probado:\n`pm2 list` con `maximus-agent online`, `POST /maximus/chat` sin token\ndevolviendo **401** (no 404, no error de conexión), y **apagando el proceso a\nmano y corriendo `arranque.bat` de nuevo** para simular el reinicio real. Ahí\nsalió el último detalle: `pm2 resurrect` no reinicia un proceso que ya existe\nregistrado en estado `stopped` — solo restaura los que faltan. Se resolvió con\n`pm2 restart maximus-agent` seguido de `pm2 save` para dejar guardado el\nestado *encendido*, no el apagado.\n\nRicardo confirmó desde el cerebro: **\"online, 401\"** — la ruta real de\nMaximus, no solo el endpoint de prueba.\n\n## La prueba real llegó el mismo día — y falló primero, 24-ago-2026 tarde\n\nHubo un segundo corte de luz real ese mismo día (el `python.exe` zombi que se\nencontró arrancó a las **10:45:03 de la mañana**, hora del servidor). Al\nreinicio, ni WhatsApp-Maximus ni Telegram respondieron — WhatsApp cayó de\nvuelta al agente de atención a clientes en vez de enrutar a Ricardo.\n\n**Diagnóstico en vivo (L-006: verificar antes de teorizar), con varios giros:**\n\n1. `pm2 logs maximus-agent` mostraba el mismo `SyntaxError` de Node\n   interpretando `iniciar_maximus.bat` que ya se había resuelto — parecía que\n   el proceso había perdido el `--interpreter cmd.exe`. Se recreó\n   (`pm2 delete` + `pm2 start ... --interpreter cmd.exe --interpreter-args\n   \"/c\"`) y `pm2 describe maximus-agent` confirmó la configuración correcta,\n   creada esa misma tarde.\n2. Aun así, un `curl` a `/maximus/chat` seguía devolviendo `{\"detail\":\"Not\n   Found\"}` — una respuesta real de FastAPI, pero con la ruta equivocada.\n   Eso solo pasa si **otro proceso**, con código viejo, está sirviendo el\n   puerto.\n3. `netstat -ano | findstr :8000` mostró un único LISTENING en el puerto,\n   PID 10100. `Get-Process -Id 10100` lo identificó: `python.exe`, arrancado\n   a las **10:45:03 AM** — horas antes de cualquiera de los restarts de PM2\n   de esa tarde.\n\n**La causa real: un `python.exe` zombi, nacido en el reinicio de esta\nmañana, llevaba seis horas ocupando el puerto 8000 por fuera del control de\nPM2.** Cada intento posterior de PM2 por levantar `maximus-agent` chocaba\ncontra un puerto ya tomado — el mismo patrón de fondo que el hallazgo\noriginal de este documento, siete meses... perdón, siete párrafos atrás:\n**la migración a PM2 no impidió que naciera un proceso fuera de su control.**\nSolo hizo más fácil diagnosticarlo (`pm2 describe`, `pm2 logs`) y más rápido\nde resolver.\n\n**Arreglo:** `Stop-Process -Id 10100 -Force` seguido de `pm2 restart\nmaximus-agent`. Verificado con `{\"detail\":\"No autorizado\"}` en\n`/maximus/chat` (la ruta real, autenticada) y con un mensaje real de\nWhatsApp respondido por Maximus. **Telegram sigue sin responder** —\npendiente, Ricardo pidió revisarlo más tarde.\n\n## Lo que queda, en orden\n\n1. **Sigue sin explicarse de dónde salió el `python.exe` de las 10:45 AM.**\n   `pm2 describe` mostró que el `maximus-agent` registrado en PM2 se creó esa\n   tarde, no en la mañana — o sea, **ese zombi no lo lanzó PM2**. Candidatos:\n   una tarea programada duplicada o vieja además de `Maximus-Arranque`, algo\n   en la carpeta de inicio de Windows, o un resto de un arranque manual\n   anterior que quedó vivo tras el corte de luz. Sin encontrar esto, el\n   próximo corte de luz puede repetir exactamente lo mismo.\n2. **Telegram no responde**, a diferencia de WhatsApp — causa aún no\n   investigada (24-ago, tarde). Ricardo decidió seguir con otra cosa y\n   volver a esto después.\n3. Seguir sin activar más automatización de impresión (H-018) hasta resolver\n   el punto 1 — un arranque automático que puede repetir un zombi de puerto\n   es peor en la cola de impresión que en el chat.\n\n## Tercera vez, 25-ago-2026 por la mañana — sin corte de luz esta vez\n\nRicardo reportó `/maximus/chat` respondiendo 404 desde el cerebro.\n`netstat` mostró un único listener en el puerto 8000, PID nuevo, otra vez\n`python.exe`, arrancado a las **9:06:02 AM** — y otra vez `pm2 list` mostraba\na `maximus-agent` en bucle de caída con el mismo `SyntaxError` de Node\ninterpretando `iniciar_maximus.bat` (perdió el `--interpreter cmd.exe` de\nnuevo). Arreglado igual que las veces anteriores: matar el zombi,\n`pm2 delete` + recrear con `--interpreter cmd.exe --interpreter-args \"/c\"`.\n\n**Dato nuevo que hay que tomar en serio: esta vez NO hubo corte de luz.**\nLas dos hipótesis anteriores (corte de luz, cierre de ventana manual) no\naplican acá. Ricardo notó que el patrón coincide con **\"cada cambio hace\ncaer al cerebro y a veces al agente\"** — su hipótesis es que el zombi\naparece ligado a los despliegues (`git pull` + `pm2 restart`), no a\nreinicios de Windows. Sin confirmar todavía: puede ser coincidencia (prueba\njusto después de cada cambio, que es cuando naturalmente lo notaría) o\npuede ser real.\n\n## Causa raíz encontrada y cerrada — 26-ago-2026, misma madrugada\n\nSe investigó de inmediato: `Get-ScheduledTask` no mostró duplicados (una\nsola `Maximus-Arranque`, la hipótesis de la tarea duplicada era una mala\nlectura de pantalla, descartada). El hallazgo real estaba en otro lugar\ndonde nadie había mirado — **la carpeta de Inicio de Windows**\n(`%APPDATA%\\...\\Start Menu\\Programs\\Startup`), un mecanismo de arranque\ntotalmente distinto a las tareas programadas:\n\n- **`iniciar-agente.bat` — el culpable.** Quedó ahí desde antes de la\n  migración a `dimango-agent`, apuntando a la carpeta abandonada\n  `C:\\Users\\usuario\\Desktop\\dimango-app` (ver H-013). Lanzaba su propio\n  `python -m uvicorn agent.main:app --host 0.0.0.0 --port 8000` con `start`\n  — un proceso crudo, por fuera de PM2, cada vez que Windows arranca. Es\n  el zombi de siempre, con código viejo de una copia que ya no existe en\n  git. También levantaba su propio ngrok apuntando al dominio muerto\n  `oak-cornea-marlin.ngrok-free.dev` (ver S-019).\n- **`ServidorPlaya.bat`** — lanzaba el servidor de impresión\n  (`servidor-impresion-playa-v6.js`) por su cuenta, duplicando lo que ya\n  hace `arranque.bat` vía la tarea programada. Dos procesos de impresión\n  peleando por la misma cola es el riesgo exacto que advierte H-018.\n- **`pm2-autostart.bat`** — solo `pm2 resurrect`, inofensivo pero\n  redundante con lo que ya hace la tarea programada.\n\n**Arreglo:** los tres se movieron (no se borraron) a\n`Startup\\respaldo-25ago\\`. La carpeta de Inicio quedó solo con\n`AnyDesk.lnk`. Verificado con `Get-ChildItem` tras el movimiento.\n\n**Por qué nadie lo había encontrado en dos intentos previos:** cada\ndiagnóstico anterior miró tareas programadas y procesos de PM2 — nunca la\ncarpeta de Inicio, que es un mecanismo de arranque de Windows\ncompletamente aparte y no aparece en `Get-ScheduledTask`.\n\n**Pendiente real, y es el único que queda:** confirmar en el próximo\nreinicio de verdad (no simulado) que el zombi no vuelve a aparecer. Recién\nahí se puede reconsiderar activar más automatización de impresión\n(H-018).\n\n## Cuarta recurrencia y arreglo de raíz — 27-ago-2026, de noche\n\nEl zombi de la carpeta de Inicio no volvió (ese quedó resuelto). Pero el\n**otro** problema de este documento —PM2 perdiendo la configuración de\nintérprete de `maximus-agent`— volvió a golpear, esta vez con impacto real:\n**WhatsApp, Telegram, Instagram y Messenger dejaron de responder** durante\nun buen rato mientras se armaba y probaba la herramienta de calendario.\n\nRicardo notó primero que Instagram y Messenger no respondían y asumió que\nera por haber cambiado el webhook a `https://maximus.ngrok.app/webhook` en\nel panel de Meta. **Era una pista falsa** — el código ya soporta los tres\ncanales en el mismo endpoint (`agent/main.py`, \"elige el canal correcto\nsegún el tipo de webhook\"). El síntoma real era que **Telegram, que no\ndepende de Meta para nada, tampoco respondía** — eso fue lo que descartó\nla hipótesis de Meta y apuntó de vuelta al servidor.\n\n`pm2 logs maximus-agent-error.log` mostró exactamente el mismo error de\n`H-021`: PM2 intentando ejecutar `iniciar_maximus.bat` como JavaScript\n(`SyntaxError` en `@echo off`) — había perdido otra vez el\n`--interpreter cmd.exe --interpreter-args \"/c\"`. Se aplicó el parche de\nsiempre (`pm2 delete` + recrear con los flags) y **volvió a romperse en\nmenos de dos minutos**, confirmando que el patrón no es un accidente\naislado — es estructural: PM2 en Windows no persiste de forma confiable\nla configuración de intérprete de un `.bat` en su `dump.pm2`.\n\n**Arreglo de raíz, no otro parche:** se eliminó la capa `.bat`/`cmd.exe`\npor completo. `run_maximus.py`, un wrapper mínimo que llama a\n`uvicorn.run(\"agent.main:app\", host=\"0.0.0.0\", port=8000)` directamente,\nreemplaza a `iniciar_maximus.bat`. PM2 lo corre con\n`--interpreter python` — sin intermediario, sin argumentos de línea de\ncomando que confundir, sin `.bat` cuya configuración de intérprete se\npueda perder.\n\n```powershell\npm2 delete maximus-agent\npm2 start run_maximus.py --name maximus-agent --interpreter python --cwd C:\\dimango-agent\npm2 save\n```\n\n**Verificado con los cuatro canales reales, no solo con `pm2 list`:**\nWhatsApp, Telegram, Instagram y Messenger respondiendo, confirmado por\nRicardo después del cambio.\n\n**Por qué este arreglo debería ser el último de esta familia:** los tres\nintentos anteriores (`H-021`, y las dos recurrencias de esa madrugada)\ntodos mantuvieron el `.bat` como intermediario y solo repitieron el mismo\ncomando de registro. Este quita la pieza que fallaba, no la vuelve a\narmar igual.",
    "origen": "ServidorPlaya, sesión de diagnóstico en vivo con Ricardo por RDP, 24-ago-2026",
-   "grado": 10,
+   "grado": 12,
    "color": "#4a9eff"
   },
   {
@@ -575,7 +575,7 @@
    ],
    "cuerpo": "Ricardo reinició `ServidorPlaya` (no especificó si fue corte de luz o manual) y\nreportó: *\"no funciona impresión, casi nada se levantó solo\"*. Es la primera\nprueba real de reinicio desde que se cerró `H-021` (25-ago) y se desplegó el\nvigilante `S-023` (26-ago, el mismo día).\n\n## Lo bueno primero — H-021 se confirma cerrado para maximus-agent\n\nEl zombi de puerto 8000 **no volvió**. `pm2 list` mostró `maximus-agent online`\nsin intervención, junto con `dimango-ngrok`, `maximus-ngrok`, `server6` y\n`voiceagentkit` — los cinco arrancaron solos. La limpieza de la carpeta de\nInicio de Windows del 25-ago (mover `iniciar-agente.bat`, `ServidorPlaya.bat` y\n`pm2-autostart.bat` a respaldo) sostuvo la prueba real que `H-021` pedía como\núnico pendiente.\n\n## Lo malo — impresion-playa, crónico desde hace dos meses\n\n`impresion-playa` apareció `stopped`, con **191.151 reinicios acumulados desde\nel 2026-07-02** (fecha de creación del proceso en PM2). Son ~145 caídas por\nhora sostenidas casi dos meses — no es un evento de hoy, es un proceso que\nlleva crasheando en bucle desde julio **sin que nadie lo supiera**, porque\n`S-023` solo vigila `maximus-agent`, nunca se extendió a impresión.\n\n**Gatillo de esta noche, confirmado:** la IP del servidor cambió de\n`192.168.1.38` a `192.168.1.62` (Ricardo lo identificó de memoria). El log de\nerror mostró solo 4 líneas reales en todo el archivo — dos timeouts contra la\nimpresora (`192.168.1.132` y `192.168.1.139`, puerto 9100) y un par de\n`ECONNRESET` consultando la cola de Base44. Verificado después: `ping` y\n`Test-NetConnection -Port 9100` a `192.168.1.139` respondieron bien — la\nimpresora está sana en red. **Solo 4 errores reales no explican 191 mil\nreinicios.**\n\n## La causa real de fondo: 7 daemons de PM2 corriendo a la vez\n\n`Get-CimInstance Win32_Process -Filter \"name='node.exe'\"` mostró **al menos\nsiete procesos `lib/Daemon.js` de PM2 vivos simultáneamente** (PIDs 11700,\n9876, 1804, 7472, 5900, 8668, 4924, más dos con `CommandLine` vacío). Debería\nexistir exactamente uno. Cada uno compite por el mismo pipe con nombre\n(`\\\\.\\pipe\\rpc.sock`), lo que produjo el error intermitente `connect EPERM` al\ncorrer `pm2 list` y `pm2 restart` — a veces respondía, a veces no, sin patrón\naparente hasta que se contó cuántos daemons había.\n\n**Hipótesis, no confirmada aún:** varios \"jefes\" de PM2 disputándose la\nsupervisión de `impresion-playa` explicaría un contador de reinicios muchísimo\nmás alto que la cantidad real de crashes de la aplicación — no es una app que\nse cae sola 145 veces por hora, son varios controladores reiniciándola cada\nuno por su cuenta.\n\n## Por qué esto conecta directo con H-018\n\nMientras se diagnosticaba, el propio log de `impresion-playa` mostró la frase\nexacta que `H-018` ya documentó como la versión rota: *\"ya se imprimió en esta\nsesión (Base44 lo sigue marcando pendiente) - se omite para no duplicar\"* —\nesa frase **no existe en el código del Mall** (confirmado en `H-018`). Esto\nreconfirma que Playa sigue corriendo la versión vieja del script\n(`servidor-impresion-playa-v6.js`, comparte nombre \"v6\" con la del Mall pero no\nel contenido) y que el arreglo ya identificado en `H-018` — llevar el código\ndel Mall a Playa — sigue sin aplicarse.\n\n**Ricardo confirmó que esta vez no salió nada duplicado en papel** — pero fue\nuna respuesta rápida en medio del incidente, no una verificación en terreno.\nSigue pendiente confirmar con alguien físicamente en Playa.\n\n## Arreglo aplicado esta noche — parche, no solución\n\nSe restauró impresión corriendo el script manual, en primer plano, fuera de\nPM2:\n\n```\ncd C:\\dimango\\print-server\nnode servidor-impresion-playa-v6.js\n```\n\nVerificado: imprimió un pedido de prueba correctamente. **Frágil a propósito\n— vive mientras esa ventana de RDP siga abierta** (desconectar la sesión es\nseguro, cerrar sesión no).\n\nSe confirmó que existe `C:\\Users\\usuario\\.pm2\\dump.pm2` — hay desde dónde\nreconstruir un daemon único y limpio con `pm2 resurrect` cuando se haga la\nlimpieza real.\n\n## Lo que falta hacer, en orden — mañana, sin presión de servicio\n\n1. **Matar los 7+ daemons duplicados y dejar uno solo**, reconectando con\n   `pm2 resurrect` desde `dump.pm2`. Hacerlo fuera de horario de servicio.\n2. **Llevar el código correcto del Mall\n   (`servidor-impresion-mall-v6.js`) a Playa** — es el arreglo que `H-018` ya\n   identificó y nunca se aplicó. Esto elimina la causa raíz del problema de\n   fondo (Base44 nunca marca el job como impreso), no solo el síntoma de hoy.\n3. **Extender el vigilante `S-023` para que también monitoree\n   `impresion-playa`**, no solo `maximus-agent` — el punto ciego de dos meses\n   fue posible exactamente porque nada lo vigilaba.\n4. Confirmar en terreno con alguien de Playa si salió algo duplicado esta\n   noche, en vez de confiar en la respuesta apurada de Ricardo en medio del\n   incidente.\n5. Investigar de dónde salen los daemons duplicados de PM2 — candidato\n   principal: cada reinicio de Windows o cada `pm2 resurrect` sin matar el\n   daemon anterior deja uno vivo. Sin encontrar el origen, la limpieza de\n   mañana se repite en el próximo reinicio.\n\n## Continuación en vivo, misma madrugada — 27-ago-2026, 01:00-01:20\n\nRicardo pidió avanzar la limpieza esa misma noche en vez de esperar a la\nmañana. Se hizo paso a paso, verificando cada uno antes del siguiente — no\nse corrió `pm2 resurrect` a ciegas de una vez.\n\n**Punto 1 (daemons duplicados) — resuelto en parte, con un giro nuevo:**\nademás de los 7 daemons visibles desde una PowerShell normal, aparecieron\n**2 más con `CommandLine` vacío** (`11696`, `8432`) que la sesión normal no\npodía leer. Solo se vieron completos abriendo PowerShell **como\nAdministrador** — la sesión sin privilegio elevado no tenía permiso ni\npara leer su línea de comando ni, probablemente, para conectarse al mismo\npipe. **Lección para la próxima vez: diagnosticar PM2 en este servidor\nsiempre desde una ventana elevada, o se subestima cuántos daemons hay\nvivos.**\n\n**`pm2 resurrect` empeoró las cosas antes de mejorarlas.** Al traer de\nvuelta la lista completa desde `dump.pm2`, chocó contra túneles ngrok que\nya estaban siendo servidos por **procesos `ngrok.exe` huérfanos desde el\n26-ago a las 20:20-20:23** — más de cuatro horas antes del reinicio de\nesta noche, sobreviviendo intactos a través de él. `maximus-ngrok`,\n`dimango-ngrok` y `voiceagentkit-ngrok` entraron en bucle de reintentos\ncontra el error `ERR_NGROK_334` (\"the endpoint ... is already online\")\nhasta agotarlos y quedar `errored`/`stopped`.\n\n**Verificado antes de tocar nada más:** `https://maximus.ngrok.app`\nrespondía bien durante todo el bucle — los huérfanos de ayer seguían\nsirviendo tráfico real sin interrupción. El error era contable, de PM2\ncontra sí mismo, no una caída de servicio.\n\n**Decisión tomada ahí, no seguir escalando a la 1 AM:** se detuvieron los\ntres procesos de PM2 en bucle (`pm2 stop maximus-ngrok dimango-ngrok\nvoiceagentkit-ngrok`) sin tocar los huérfanos que sí funcionan. Se dejó la\nnoche así, con todo lo esencial sano.\n\n## Estado real al cerrar la noche, 27-ago-2026 ~01:20\n\n| Proceso | Estado en PM2 | Sirviendo de verdad |\n|---|---|---|\n| `maximus-agent` | online | sí, por PM2 |\n| `server6` | online | sí, por PM2 |\n| `voiceagentkit` | online | sí, por PM2 |\n| `dimango-ngrok` | stopped | sí, por un huérfano de ayer (26-ago 20:20) |\n| `maximus-ngrok` | stopped | sí, por un huérfano de ayer (26-ago 20:20) |\n| `voiceagentkit-ngrok` | stopped | sí, por un huérfano de ayer (26-ago 20:23) |\n| `impresion-playa` | stopped, 0 daemons duplicados activos | sí, manual, PID 4412, fuera de PM2 |\n\n**Nada crítico quedó caído**, pero el estado es frágil y engañoso: `pm2\nlist` muestra tres túneles y la impresión como `stopped` cuando en\nrealidad los cuatro están vivos y sirviendo por fuera del control de PM2.\nCualquiera que mire solo `pm2 list` sin este contexto concluiría, mal, que\nhay una caída.\n\n## Lo que falta, actualizado — de día, sin presión\n\n1. ~~Identificar los PIDs de los tres `ngrok.exe` huérfanos...~~ **Hecho,\n   27-ago-2026 por la mañana.** Los tres túneles (`dimango.ngrok.app`,\n   `maximus.ngrok.app`, `voiceagentkit.ngrok.app`) se reemplazaron uno por\n   uno, con verificación después de cada uno, sin ventana sin servicio.\n   Además apareció un cuarto huérfano muerto (`oak-cornea-marlin.ngrok-free.dev`,\n   el dominio viejo de `H-021`) — se mató sin necesitar reemplazo, no servía\n   nada.\n2. ~~Confirmar cero daemons de PM2 duplicados~~ **Hecho, con una nota:**\n   quedó en cero anoche, pero **volvió a aparecer un segundo daemon** solo\n   con el uso normal de PM2 durante la mañana (sin reinicio de por medio).\n   Se mató el sobrante y quedó uno — pero el origen de por qué aparecen\n   sigue sin encontrarse (ver punto 5).\n3. ~~Llevar el código correcto del Mall a Playa~~ **CANCELADO — era el\n   arreglo equivocado.** Se leyó el archivo real de Playa antes de copiar\n   nada: ya tiene la misma lógica de `imprimiendo`/`impreso` que el Mall, y\n   además una capa extra de blindaje en RAM que el Mall no tiene. Ver la\n   corrección completa en `H-018`. El código de impresión no se toca.\n4. **Falta:** sumar `impresion-playa` al vigilante `S-023` — ahora sí\n   confirmado que el código está bien, así que vigilar que el proceso no\n   vuelva a caer en bucle es lo único que falta de ese lado.\n5. ~~Confirmar en terreno...~~ **Hecho, 27-ago-2026 por la tarde.** Ricardo\n   confirmó que no salió nada duplicado. Cierra del todo el residual de\n   `H-018`.\n6. Investigar de dónde salen los daemons duplicados de PM2 — sigue abierto,\n   y el punto 2 de hoy lo confirma: no hace falta ni un reinicio de Windows,\n   aparecen solos con el uso normal.\n7. Nuevo, agregado por lo de esta noche: **decidir un mecanismo para que\n   ngrok no deje procesos huérfanos entre reinicios** — mismo patrón que\n   `H-021` con Windows y que los daemons de PM2. Es la tercera vez en la\n   misma semana que aparece un proceso zombi de un tipo distinto. Vale la\n   pena preguntarse si el patrón de fondo es más grande que cualquiera de\n   los tres casos individuales.\n\n## CERRADO — 27-ago-2026, sesión en vivo por la tarde\n\nPuntos 1, 2 y 4 de la lista de arriba, completados y verificados uno por\nuno, no de una vez:\n\n- **Los 3 túneles ngrok** reemplazados sin ventana sin servicio (más un\n  cuarto huérfano muerto, del dominio viejo de `H-021`, eliminado sin\n  reemplazo). Verificado: los 3 procesos activos son de hoy, ninguno de\n  ayer.\n- **Daemons de PM2:** confirmado que vuelven a aparecer solos con el uso\n  normal (no solo con reinicios de Windows) — se mantiene como pregunta\n  abierta, sin bloquear el cierre de este hallazgo.\n- **`impresion-playa` devuelto a PM2**, reemplazando la instancia manual.\n  Verificado con dos lecturas de `pm2 list` separadas en el tiempo: mismo\n  PID, `uptime` subiendo, reinicios sin aumentar.\n- **`Maximus-Vigilante` extendido** a `impresion-playa` (puerto 3001,\n  `/health`), desplegado vía `git pull` en `C:\\dimango-agent` y **probado\n  bajo ejecución real**, no solo revisado el código: `Start-ScheduledTask`\n  disparado a mano, `LastTaskResult: 0`, log sin líneas nuevas porque ambos\n  procesos estaban sanos — silencio es la señal correcta (`S-023`).\n\n**Punto 3 (código del Mall a Playa) se dio de baja, no se completó** — ver\nla corrección en `H-018`: era el arreglo equivocado, el código de Playa ya\nestaba bien.\n\n**Único pendiente que sigue abierto, y no bloquea el cierre:** confirmar en\nterreno con alguien de Playa si salió algo duplicado la noche del 26-ago.\nEs una llamada o una visita, no una tarea técnica — se resuelve aparte,\nsin sesión de diagnóstico.\n\n**Rotar `BASE44_API_KEY`** (expuesta, ver `H-018` y `H-019`) sigue\npendiente, sin fecha.",
    "origen": "ServidorPlaya, sesión de diagnóstico en vivo con Ricardo por RDP, 26-ago-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#4a9eff"
   },
   {
@@ -600,87 +600,119 @@
   },
   {
    "id": "H-024",
-   "tipo": "otro",
-   "titulo": "H-024",
+   "tipo": "hallazgo",
+   "titulo": "P-007 recerrado — cobertura de Receta ya es 99,9%; el único hueco real es que no existe dato de \"cantidad pedida\" en DimangoToGo",
    "estado": "",
-   "autoridad": 5,
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "reglainsumo",
+    "receta",
+    "checklist",
+    "bodega",
+    "dimangotogo"
+   ],
    "cuerpo": "# H-024 · Cobertura de Receta resuelta (99,9%) — el hueco real es otro\n\n## Corrección de un error propio, primero\n\nLa primera versión de esta nota (29-ago-2026, temprano) medía cobertura\ncontra `ReglaInsumo` — el sistema **viejo**, reemplazado desde el 24-ago\npor `Receta` (ver `P-007`). Esa medición decía 38,7% y recomendaba no\navanzar. **Estaba midiendo el sistema equivocado.** Se corrige acá con la\nmedición contra el sistema real, y con lectura directa del código de\nDimangoToGo, no solo de los datos.\n\n## Medición real, contra `Receta` (29-ago-2026)\n\nMuestra: 500 comandas (`Order`) más recientes de DimangoToGo (autoridad 1,\nAPI directa), 233 productos distintos, 1.202 unidades. Cruzadas contra las\n775 `Receta` existentes (autoridad 1), por `nombre_en_venta` normalizado.\n\n| Estado | Unidades | % |\n|---|---|---|\n| `vinculado` (descuenta insumo) | 967 | 80,4% |\n| `no_suma` (excluido a propósito) | 234 | 19,5% |\n| Sin ninguna `Receta` | 1 | 0,1% |\n\n**Cobertura efectiva: 99,9%.** Subió desde el 68,4% que registraba `P-007`\nel 24-ago — Ricardo ha seguido cargando `Receta` desde entonces. **El\nbloqueo de cobertura de `H-010`/`P-007` queda cerrado.**\n\n## El paso 2 de `P-007` (stock_actual/stock_minimo) no era necesario\n\nSe leyó `src/pages/checklist/ChecklistEnVivo.jsx` (código real de\nDimangoToGo) para confirmarlo: `calcularChecklist()` construye \"a reponer\"\núnicamente desde `Order.items` × `Receta.items` — **no lee\n`Insumo.stock_actual` ni `Insumo.stock_minimo` en ningún punto.** Esos\ncampos siguen en `null` en las 224 filas de `Insumo` (verificado con query\ndirecta), pero son irrelevantes para el cruce que pidió Ricardo. Sirven\npara una función distinta (alerta de stock bajo), no para esta.\n\n## El hueco real — no es de datos, es de una pieza que no existe\n\nRevisando las cuatro pestañas de `Checklist.jsx` (Vinculación, Checklist en\nvivo, Exportar, Editor de recetas): **en ninguna se captura cuánto se\npidió.** El sistema calcula \"a reponer\" (lo que la venta dice que debería\npedirse) pero no existe ningún campo, tabla o pantalla donde quede\nregistrada la cantidad que efectivamente se solicitó a bodega/proveedor.\nEl `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada` —\npero está abandonado desde marzo (ver `P-007`).\n\n**Conclusión:** no hace falta seguir cargando `Receta` ni construir nada\nsobre `Insumo`. Falta agregar, en algún punto de ToGo, un campo o tabla\nchica que capture \"cantidad pedida\" por insumo/área/día. Con eso, el cruce\ncontra \"a reponer\" (ya calculado, ya expuesto a Maximus vía\n`maximusChecklist`) es directo. Es la pieza que cierra el caso original de\nRicardo — más chica de lo que `P-007` tenía anotado.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 1,
+   "color": "#4a9eff"
   },
   {
    "id": "H-025",
-   "tipo": "otro",
-   "titulo": "H-025",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "hallazgo",
+   "titulo": "Portón sin responder por WhatsApp — el túnel maximus-ngrok llevaba 481 reintentos peleando por el mismo dominio; corregido con --pooling-enabled y restart_delay",
+   "estado": "resuelto",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "ngrok",
+    "pm2",
+    "infraestructura",
+    "porton"
+   ],
    "cuerpo": "# H-025 · maximus-ngrok en loop de 481 reintentos — resuelto con `--pooling-enabled`\n\n## Síntoma\n\nRicardo mandó \"porton\" por WhatsApp el 30-ago-2026 y no recibió respuesta —\nni siquiera un rechazo. `maximus-agent` estaba `online` y sano; el problema\nera que el mensaje nunca llegó al servidor.\n\n## Diagnóstico — misma familia que H-021/H-022, causa distinta\n\n`maximus-agent` funcionaba perfecto. El túnel ngrok con dominio fijo\n(`maximus.ngrok.app`) es el que fallaba: PM2 llevaba **481 reintentos**\nacumulados, cada uno chocando con `ERR_NGROK_334` (*\"the endpoint is\nalready online\"*). ngrok con dominio reservado solo permite una conexión\nactiva a la vez — si el proceso muere y PM2 lo reinicia de inmediato, el\nservidor de ngrok todavía no soltó la sesión anterior, y el nuevo intento\nchoca. Sin demora entre reintentos, esto se vuelve un loop infinito.\n\n**Camino de diagnóstico, para que quede el rastro:** se sospechó primero\ndel vigilante (`monitor-maximus.ps1`) — descartado, ese script no toca\nngrok en absoluto, solo `maximus-agent` e `impresion-playa`. Se sospechó de\nuna tarea programada `Ngrok-DiMango` — descartada, apunta a otro dominio\n(`dimango.ngrok.app`, puerto 3003, para impresión) y solo corre al inicio\ndel sistema. Se sospechó de un proceso `dimango-ngrok` mal configurado —\ndescartado, `pm2 describe` confirmó que apuntaba al dominio correcto. La\ncausa real era más simple de lo que parecía: PM2 reintentando sin pausa.\n\n## Corrección\n\n1. **`--pooling-enabled`** en los argumentos de ngrok: es la solución que\n   el propio mensaje de error de ngrok sugiere — si alguna vez quedan dos\n   conexiones a la vez, ngrok las reparte como balanceo de carga en vez de\n   rechazar la segunda. Cero riesgo: las dos apuntan al mismo backend\n   (`localhost:8000`).\n2. **`restart_delay: 5000`** en PM2 — si algún día vuelve a caerse, espera\n   5 segundos antes de reintentar, en vez de martillar el mismo error\n   cientos de veces por minuto.\n3. Registrado vía **archivo de configuración JSON** (`ngrok-maximus.json`,\n   `pm2 start` sobre el archivo), no por línea de comandos — el separador\n   `--` de PM2 no funcionaba bien inline en esta versión/entorno\n   (`error: unknown option '--url'`), un problema de sintaxis, no de\n   lógica. Mismo criterio que `run_maximus.py` en `H-021`: preferir un\n   archivo de configuración explícito sobre argumentos frágiles en la\n   terminal.\n\n**Verificado:** `pm2 describe maximus-ngrok` → `restarts: 0`, `online`.\n`curl https://maximus.ngrok.app/` → 200 OK. \"porton\" por WhatsApp →\nrespondido correctamente.\n\n## Incidente durante la corrección — lección de proceso\n\nAl reconstruir el proceso se hizo `pm2 delete maximus-ngrok` **antes** de\nconfirmar que el nuevo arrancaba bien, dejando el túnel completamente\ncaído por varios minutos (`ERR_NGROK_3200`, nadie sirviendo el dominio).\nRicardo lo notó de inmediato (\"me botaste mi sistema!\"). **Regla derivada,\naplicable a cualquier cambio sobre un proceso en producción:** primero\nlevantar y verificar el reemplazo, recién después borrar el original —\nnunca al revés, aunque parezca más simple. Es el mismo principio de\n`SOUL.md` (verificar → probar → respaldar → implementar → verificar de\nnuevo) aplicado a nivel de un solo comando, no solo de un despliegue\ncompleto.\n\n## Aplicado preventivamente a dimango-ngrok — 30-ago-2026\n\nMismo criterio (`--pooling-enabled` + `restart_delay: 5000`, vía\n`ngrok-dimango.json`) aplicado a `dimango-ngrok` (túnel de impresión,\npuerto 3003) aunque nunca había fallado — mismo riesgo estructural.\n\nEsta vez sí se siguió la lección de arriba: se preparó el archivo de\nconfiguración completo ANTES de tocar el proceso viejo, y el `pm2 delete`\n+ `pm2 start` se hicieron seguidos, minimizando el corte a ~13 segundos\n(verificado con `uptime: 13s` en el `pm2 describe` posterior). Nadie\nreportó problemas de impresión durante ese lapso.\n\n**Verificado:** `restarts: 0`, `curl https://dimango.ngrok.app/health` →\n200 OK, `{\"status\":\"ok\"}`.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 5,
+   "color": "#4a9eff"
   },
   {
    "id": "H-026",
-   "tipo": "otro",
-   "titulo": "H-026",
+   "tipo": "hallazgo",
+   "titulo": "P-014 cerrado — la voz clonada de ElevenLabs no era un bug, era un permiso faltante en la clave de API",
    "estado": "",
-   "autoridad": 5,
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "voz",
+    "elevenlabs",
+    "resuelto"
+   ],
    "cuerpo": "# H-026 · Voz clonada de ElevenLabs resuelta — faltaba el permiso \"Text to Speech\"\n\n`P-014` quedó abierto desde el 28-ago-2026 como diagnóstico a medias\n(\"no se sabe si el problema es real o si fue una sesión de prueba\ncontaminada\"). Retomado el 31-ago-2026 con una prueba limpia (nota de voz\nreal por Telegram + log completo, sin filtrar), y esta vez sí se vio la\ncausa exacta en el log:\n\n```\n[VOZ] ElevenLabs 401: \"The API key you used is missing the permission\ntext_to_speech to execute this operation.\"\n[VOZ] ElevenLabs falló, cayendo a edge-tts\n[VOZ] edge-tts (es-CL-LorenzoNeural) — 17424 bytes\n```\n\n**No era un bug de código.** `agent/voz.py` funcionaba exactamente como\nestá diseñado: detectó el 401, lo logueó con el motivo exacto, y cayó al\nmotor gratuito sin perder la respuesta — la lógica de respaldo hizo su\ntrabajo. La causa real: la clave de API de ElevenLabs (`maximus`, en\nClaves de API → Restringir clave) tenía **\"De texto a voz: Sin acceso\"**\n— una clave restringida a la que nunca se le había dado el permiso que\njustamente hacía falta usar.\n\n**Corregido:** Ricardo activó \"Acceso\" en \"De texto a voz\" para esa clave\ny guardó cambios. Sin tocar el `.env` ni el código — la clave y el\n`ELEVENLABS_VOICE_ID` ya estaban bien puestos desde el 28-ago.\n\n**Verificado:** nota de voz por Telegram → respuesta en la voz clonada de\nRicardo, confirmado por él mismo.\n\n## Lección — no siempre es el código\n\nLas dos hipótesis previas de `P-014` (sesión de prueba contaminada por un\n`pip install` a medias, o un bug en `voz.py`) eran razonables pero\napuntaban al lugar equivocado. La causa estaba en un panel externo\n(ElevenLabs) que nunca se había revisado con calma. Cuando un log deja\nver el error exacto (como acá, el 401 con el mensaje de permiso\nfaltante), confiar en ese mensaje literal ahorra tiempo — no hacía falta\nteorizar, el log ya decía qué faltaba.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 3,
+   "color": "#4a9eff"
   },
   {
    "id": "H-027",
-   "tipo": "otro",
-   "titulo": "H-027",
+   "tipo": "hallazgo",
+   "titulo": "editar_mesa_dimango fallaba con mesas del Mall por comparación exacta de texto — corregido con búsqueda flexible y lista de mesas disponibles",
    "estado": "",
-   "autoridad": 5,
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "maximus",
+    "dimangotogo",
+    "mesas",
+    "mall"
+   ],
    "cuerpo": "# H-027 · Búsqueda de mesa por texto exacto fallaba en el Mall\n\nRicardo reportó que Maximus \"no conoce bien las mesas del Mall\" — varias\nveces tuvo que hacerlo manual. Con capturas reales: pidió \"cortesía mesas\n5 y 24\", Maximus preguntó el motivo y la clave, y al ejecutar respondió\nque **ninguna de las dos tenía comanda abierta en el Mall** — ni con \"5\"\nni con \"5M\", pese a que Ricardo confirmaba que estaban en uso.\n\n## Causa\n\n`maximusEditarMesa` (la función de escritura agregada en `S-028`) buscaba\nla orden con `Order.filter({ mesa_numero: mesaNumero, ... })` — **igualdad\nexacta de texto.** El formato real guardado en `mesa_numero` para el Mall\nno calzaba con lo que Ricardo escribía a mano (mayúsculas, espacios, o el\nsufijo \"M\" en una posición distinta). Como Maximus no ve la pantalla de\nCaja, no tenía forma de saber el formato exacto — y el error que devolvía\n(\"ninguna tiene comanda abierta\") sonaba a que la mesa estaba libre,\ncuando en realidad el dato sí existía, solo no calzaba el texto.\n\n## Corrección\n\n1. **Comparación normalizada** (mayúsculas, sin espacios) en vez de\n   igualdad exacta — trae todas las órdenes pendientes del local y\n   compara en memoria.\n2. **Si no encuentra ninguna, lista las mesas realmente abiertas** en ese\n   local en ese momento, para que Maximus se lo diga a Ricardo en vez de\n   seguir adivinando el número entre mensajes.\n3. El texto real de `mesa_numero` (tal como está guardado, no lo que\n   Ricardo escribió) se reutiliza para las consultas siguientes\n   (`CuentaMesa`, `Mesa`) dentro de la misma llamada — mismo problema,\n   mismo arreglo, aplicado en todos los puntos donde se repetía.\n\n**Pendiente de verificar:** Ricardo todavía no probó esta corrección en\nvivo — se dejó desplegada al cierre de la sesión del 31-ago-2026.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 3,
+   "color": "#4a9eff"
   },
   {
    "id": "H-028",
-   "tipo": "otro",
-   "titulo": "H-028",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "hallazgo",
+   "titulo": "Las credenciales de SimpleFactura están en texto plano en el código — cuarto caso del mismo patrón, y el más caro",
+   "estado": "abierto",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "seguridad",
+    "credenciales",
+    "sii",
+    "dte",
+    "simplefactura"
+   ],
    "cuerpo": "# H-028 · Credenciales de SimpleFactura en texto plano (8-sep-2026)\n\nEncontrado leyendo `base44/functions/emitirBoletaV2/entry.ts` de DimangoToGo\npara responder otra pregunta. En el código, sin variable de entorno:\n\n```\nSF_EMAIL    = 'presupuestodimango@gmail.com'\nSF_PASSWORD = 'Dimango2026'\nSF_RUT      = '76056870-8'\n```\n\nEstá igual en `emitirBoleta` y en `emitirFacturaV2`.\n\n**Qué habilita:** cualquiera con acceso al repositorio puede **emitir documentos\ntributarios con el RUT de DiMango** o quemar el rango de folios. No es un panel\ninterno ni un token de conveniencia: es la emisión tributaria de la empresa.\n\n**Es el cuarto caso del mismo patrón** — `H-014` (Twilio), `H-019` (panel /admin\ncon clave por defecto y token de Maximus en una captura), y ahora este. La\nconstante no es el descuido: **es que el sistema arranca igual con la credencial\nescrita al lado del código**, y lo que funciona no se cambia.\n\nLa regla derivada de `H-019` aplica sin cambios: **ningún componente debe\narrancar con la credencial en el código — si falta la variable de entorno, que\nno arranque.**\n\n**Pendiente:** rotar la clave en SimpleFactura y moverla a variable de entorno en\nlas tres funciones. No basta con borrarla del archivo: queda en el historial de\ngit, así que **la clave hay que cambiarla en el proveedor**.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 4,
+   "color": "#4a9eff"
   },
   {
    "id": "H-029",
-   "tipo": "otro",
-   "titulo": "H-029",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "hallazgo",
+   "titulo": "Playa y el Mall operan al revés — Playa es un mostrador con mesas, el Mall es un restaurante con mesas",
+   "estado": "verificado",
+   "autoridad": 2,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "operacion",
+    "caja",
+    "playa",
+    "mall",
+    "datos"
+   ],
    "cuerpo": "# H-029 · Los dos locales usan la caja al revés (9-sep-2026)\n\nSalió de consultar `VentaCaja` para decidir el orden de tres botones. No se\nbuscaba esto.\n\n**Muestra: 500 ventas, 6 al 8 de septiembre de 2026.** Corta —tres días, con fin\nde semana— así que sirve para ordenar prioridades, no para afinar cifras.\n\n| | Playa | Mall |\n|---|---|---|\n| Mostrador (`V-*`) | **293 — 75%** | 26 — 25% |\n| Mesa numerada | 72 — 18% | **74 — 73%** |\n| Kiosko | 33 — 8% | 2 — 2% |\n| **Total** | 398 (~133/día) | 102 (~34/día) |\n\n**Playa es un mostrador que además tiene mesas. El Mall es un restaurante.**\n\nPlaya hace **4 veces más transacciones** que el Mall (133 vs 34 al día), y las\nhace de otra forma: rápidas, sin mesa, sin garzón asignado.\n\n## Por qué importa más allá de la pantalla\n\n1. **Cualquier diseño, proceso o capacitación pensado \"para los dos locales\"\n   probablemente sirve bien en uno y mal en el otro.** Se aplicó de inmediato en\n   `S-034`: la barra de la caja ordena sus acciones según el local.\n2. **Cruza con `H-015`** (el arriendo del Mall es el 37,4% de su venta neta). El\n   Mall no solo vende menos: vende con un formato más caro de operar —mesa,\n   garzón, más tiempo por ticket— sobre el metro cuadrado más caro de los dos.\n3. **Pregunta abierta que esto deja:** ¿cuál es el ticket promedio de cada\n   formato? Si el mostrador de Playa tiene ticket bajo y alto volumen, y la mesa\n   del Mall ticket alto y bajo volumen, la palanca de cada local es distinta y\n   hoy se están tratando igual.\n\n## Caveat\n\n`mesa_numero` que empieza con `V-` se contó como mostrador. Es la convención que\nusa el propio sistema (`V-CAJA`), pero no fue verificada contra la operación real\ndel Mall — si allá usan alguna mesa virtual para otra cosa, el 25% de mostrador\ndel Mall podría estar inflado.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 5,
+   "color": "#4a9eff"
   },
   {
    "id": "L-001",
@@ -751,7 +783,7 @@
    ],
    "cuerpo": "Existían dos `MEMORY.md` divergentes: uno en `~/harvey/` y otro en\n`~/Downloads/` (más avanzado). Trabajar sobre el equivocado habría significado\nrepetir decisiones ya tomadas y perder los hallazgos financieros.\n\n**Es el mismo error que D-008 acaba de eliminar en el POS**, replicado en el\nsistema que existe para evitar ese error.\n\n**Regla derivada:** la memoria vive en `~/harvey/`, versionada en git. Los\narchivos que salen a otra carpeta son exportaciones de solo lectura y mueren\nahí. Toda sesión arranca con `cd ~/harvey`.",
    "origen": "observado directamente el 20-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#27c93f"
   },
   {
@@ -769,7 +801,7 @@
    ],
    "cuerpo": "Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**,\npor encima de todo lo demás, y lo repitió cinco veces.\n\nEl número era una construcción propia: asumía que DiMangoToGo emitía por sí\nmisma y que no había alternativa. La realidad —proveedor certificado, emisión\nmanual que los encargados saben usar, folios al día, cero fallas en julio— lo\ndesmintió.\n\n**La estimación tenía autoridad 5 y se presentó con el peso de un hecho.**\nRegla: todo riesgo cuantificado debe declarar de qué arquitectura depende, y\nverificarla antes de priorizar sobre ella.",
    "origen": "error propio de Maximus, corregido el 20-ago-2026",
-   "grado": 5,
+   "grado": 7,
    "color": "#27c93f"
   },
   {
@@ -788,7 +820,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 7,
+   "grado": 10,
    "color": "#27c93f"
   },
   {
@@ -811,8 +843,8 @@
   },
   {
    "id": "L-008",
-   "tipo": "otro",
-   "titulo": "L-008",
+   "tipo": "leccion",
+   "titulo": "Un chequeo de seguridad que falla en silencio es peor que uno que falla con error visible",
    "estado": "",
    "autoridad": 5,
    "fuente": "",
@@ -820,8 +852,8 @@
    "tags": [],
    "cuerpo": "# L-008 · Fallar en silencio en un control de acceso es peor que fallar con error\n\nEn `S-027` (portón por WhatsApp), un JSON corrupto en `config/porton.json`\nhizo que `cargar_config()` fallara y logueara el error del lado del servidor\n— pero `procesar_mensaje_porton()` interpretaba \"no hay config válida\" como\n\"no es la palabra clave\" y devolvía `None` en silencio. El mensaje \"porton\"\nseguía de largo hacia Maximus sin que Ricardo, mirando solo WhatsApp, tuviera\nninguna pista de que el problema era la configuración y no la lógica del\nportón. Costó varias rondas de prueba a ciegas hasta revisar el log del\nservidor directamente.\n\n**Regla derivada:** en un sistema que controla acceso físico o dinero, un\nerror de configuración debe ser tan ruidoso como un rechazo legítimo — nunca\ndegradar a \"silencio\" o \"sigue el flujo normal\". Si `porton.py` no puede\ncargar su config, la respuesta correcta no es \"no reconocí la palabra\", es\navisar explícitamente que el sistema está mal configurado.\n\n**Misma familia que `L-006`** (la primera línea del error manda) y `L-005`\n(un riesgo sin verificar la arquitectura real vale tan poco como uno\ninventado): en los tres casos, la falla estaba a la vista en un log, pero el\ndiagnóstico se demoró porque el síntoma visible (WhatsApp, un mensaje\ncortado, un riesgo estimado) no coincidía con la causa real.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 4,
+   "color": "#27c93f"
   },
   {
    "id": "M-001",
@@ -1062,7 +1094,7 @@
    ],
    "cuerpo": "**Respuestas de Ricardo:**\n- DiMangoToGo **no emite**: emite **SimpleFactura**, proveedor certificado.\n- Contingencia: emisión manual desde la web del proveedor.\n- Folios CAF al día. **Cero fallas de emisión en julio.**\n- **Los encargados de ambos locales saben emitir manual** → cumple P3.\n\n**Error de Maximus, conservado a propósito:** se clasificó como riesgo #1 del\nnegocio a $5,5M/día, y se repitió cinco veces. Ese número asumía que DiMangoToGo\nemitía por sí misma y que no había alternativa. Era una construcción propia\n(autoridad 5) presentada con el peso de un hecho. Ver L-005.",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 9,
+   "grado": 11,
    "color": "#ff5f56"
   },
   {
@@ -1169,7 +1201,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 16,
+   "grado": 17,
    "color": "#ff5f56"
   },
   {
@@ -1244,7 +1276,7 @@
    ],
    "cuerpo": "## Actualización 31-ago-2026 — riesgo de acceso reducido, la separación física sigue pendiente\n\nSe encontró y corrigió un hueco real mientras se atendía esto (ver `S-030`):\n`es_privada()` no reconocía el Telegram de Ricardo (su canal principal desde\n`D-010`), así que sus conversaciones ahí sí eran visibles con la clave\ncompartida de `/admin`. Corregido. Además se construyó `/maximus/historial`,\nun visor propio protegido con su token, separado de `/admin`.\n\n**Esto NO es la separación física que sigue abajo** — sigue siendo la misma\ntabla de la base de datos, solo con el filtro de privacidad ahora completo y\nuna puerta de acceso propia. Si alguien tuviera acceso directo al `.db` del\nservidor (no al panel web), seguiría pudiendo leer todo. Ese riesgo de fondo\nno cambió con esto.\n\nHoy las conversaciones de Ricardo con Maximus están **ocultas** del panel, no\nseparadas: siguen en el mismo archivo de base de datos que los chats de clientes\n(S-018). Quien tenga acceso al `.db` del servidor las lee.\n\n**La versión buena ya está escrita** — guardaba el historial privado en una base\naparte, imposible de exponer aunque mañana alguien agregue una consulta y olvide\nfiltrar. Está en el commit `4eea4a1` de `titicheo65/dimango-agent`, y se puede\nrecuperar de ahí.\n\n**Por qué no está desplegada:** se subió un domingo con los locales operando, el\nagente no levantó y se atribuyó la caída a ese código. **Después se comprobó que\nla causa era un puerto tomado por un proceso zombi (L-006), no la segunda base.**\nO sea que probablemente funcionaba y se descartó por un diagnóstico errado.\n\n**Cómo retomarlo, y esta vez en orden:**\n1. Un día de semana, **nunca un domingo con los locales abiertos**.\n2. Probar el arranque en el servidor **antes** de dejarlo corriendo: en Windows,\n   con Python 3.14, que es donde no se probó.\n3. Verificar que el puerto 8000 está libre antes de arrancar (L-006).\n4. Recuperar `migrar_privado.py` del mismo commit para mover lo ya guardado. El\n   script simula por defecto y solo mueve con `--aplicar`; copia primero y borra\n   después.\n\n**Prioridad honesta: baja.** El riesgo real —el panel abierto a internet con\ncontraseña por defecto— ya se cerró con H-019. Esto es endurecer algo que hoy\nfunciona, no tapar un agujero abierto.",
    "origen": "despliegue del 23-ago-2026, revertido por un diagnóstico errado",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff5f56"
   },
   {
@@ -1307,17 +1339,24 @@
   },
   {
    "id": "P-016",
-   "tipo": "otro",
-   "titulo": "P-016",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "pendiente",
+   "titulo": "REFUTADO — la boleta impresa SÍ lleva el timbre electrónico; el hallazgo salió de leer un archivo desactualizado",
+   "estado": "cerrado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "sii",
+    "dte",
+    "boleta",
+    "impresion",
+    "cumplimiento",
+    "error-propio"
+   ],
    "cuerpo": "# P-016 · REFUTADO — la boleta impresa sí lleva timbre (8/9-sep-2026)\n\n**Lo que afirmé el 8-sep:** que el ticket imprime el folio como texto pero **no**\nel código PDF417, y que había que preguntarle al contador si eso dejaba expuesta\na la empresa.\n\n**Era falso.** Al día siguiente Ricardo trajo el archivo real del servidor que\ncorre en ServidorPlaya (`DIMANGO PRINT SERVER v6.0`) y ahí está la función\n`buildBoletaWithTimbre`: convierte el `timbreBase64` a raster ESC/POS con la\nlibrería `jimp` y lo imprime centrado antes del corte. **El timbre se imprime.**\n\n**De dónde salió el error:** leí `src/LOCAL_SERVER/printer-server.js` del\nrepositorio, que está desactualizado respecto de lo que efectivamente corre en\nel local. Esa copia no tiene ni la dirección, ni el teléfono, ni el título\n\"CUENTA\", ni el turno — ni el timbre.\n\n**Es `L-005` repetido, con el mismo mecanismo:** una conclusión de peso\n—posible incumplimiento tributario— construida sobre una arquitectura que no\nverifiqué. La diferencia con la vez anterior es que esta vez el error duró\nmenos de un día, porque se pidió el archivo real en vez de seguir iterando.\n\n**Y es `L-004` en una carpeta nueva:** dos fuentes de verdad para el mismo\ncomponente. El servidor de impresión que manda es el del disco del Windows; el\ndel repositorio es una copia vieja que nadie sincronizó. **Mientras eso siga\nasí, cualquier lectura de ese archivo puede producir otra conclusión falsa.**\n\n**Cerrado el 9-sep-2026:** el archivo real se subió al repositorio como\n`src/LOCAL_SERVER/printer-server-v6-playa.js`, con los secretos movidos a\nvariables de entorno y una nota en `INSTALACION.md` que aclara cuál de los dos\narchivos es el que corre. **Es una foto, no un espejo:** si el archivo del\nWindows se edita, la copia del repo queda vieja de nuevo. La sincronización\nautomática no existe.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 3,
+   "color": "#ff5f56"
   },
   {
    "id": "R-001",
@@ -1825,7 +1864,7 @@
    ],
    "cuerpo": "# S-025 · Advisor diario — 27/28-ago-2026\n\nIdea tomada de un documento externo (\"How to Build a Personal Jarvis with\nClaude\", material de marketing de una comunidad de pago) — la mayoría del\ndocumento no aplicaba a DiMango (RevenueCat, Meta Ads, Buffer), pero un\npatrón sí: **Scout** (junta datos, solo lectura), **Operator** (hace\ntrabajo, escala lo que no sabe), **Advisor** (lee lo de los dos y dice qué\nhacer, con evidencia, y recuerda qué se recomendó y sigue sin resolverse).\n\nMaximus ya tenía Scout (`gastos_dimango`, `bodega_dimango`,\n`indicadores_chile` — todo lectura) y algo de Operator (`S-024`, el\nchecklist). Faltaba el Advisor.\n\n**Construido:** `scripts/advisor_diario.py`. Reutiliza exactamente la\nmisma memoria que ya carga Maximus (los 6 archivos de `~/harvey`, vía\n`cargar_memoria()` importada de `agent.maximus` — no duplica lógica).\nLlama a Claude una vez, con un prompt que pide exactamente 3\nrecomendaciones rankeadas (acción concreta + evidencia citando el\nhallazgo/decisión/prioridad por nombre + qué pasa si se ignora), y al\nfinal lista qué de los últimos 7 días sigue sin resolverse — guarda cada\nrespuesta del día en `advisor_historial/` para que el día siguiente pueda\ncomparar.\n\n**Distinto a todo lo demás construido hoy:** es el primer script de la\nnoche que **sí llama a Claude** (costo real, aunque bajo — una vez al\ndía). Todo lo demás (`S-023`, `check_correo.py`, `calendario_ricardo`) es\ndeterminista, sin costo de IA.\n\n**Automatizado el 29-ago-2026.** Tarea Programada de Windows\n`Maximus-Advisor` en `ServidorPlaya`, vía `ejecutar_advisor.bat` (fija el\ndirectorio de trabajo en `C:\\dimango-agent` antes de llamar al script, para\nque `load_dotenv()` encuentre el `.env`), corre todos los días a las\n**11:30** hora de Chile. Probada con `schtasks /run` antes de dejarla\ndesatendida — llegó el aviso por Telegram. Mismo patrón de despliegue que\n`Maximus-Correo` (P-013).\n\nReemplaza al ventilador holográfico como \"rutina matutina\" — se descartó\nesa idea porque el dispositivo no tiene API ni se puede automatizar, solo\ncarga manual de contenido vía su app. El Advisor sí es automático de\nverdad.",
    "origen": "",
-   "grado": 2,
+   "grado": 3,
    "color": "#ff8c42"
   },
   {
@@ -1844,134 +1883,188 @@
    ],
    "cuerpo": "# S-026 · Maximus Display — 28-ago-2026, madrugada\n\nRicardo pidió una pantalla independiente (accesible desde cualquier\ndispositivo en su Wi-Fi — Smart TV, tablet, mini PC) que muestre en tiempo\nreal qué está haciendo Maximus, **sin duplicar el cerebro**. Pidió\nexplícitamente investigar la arquitectura primero, no construir a ciegas.\n\n**Investigación antes de tocar código:** `agent/main.py` era puro\nrequest/response HTTP — sin WebSocket, sin SSE, sin bus de eventos. El\nnúcleo real vive en `responder()` (`agent/maximus.py:947`): llama a\nClaude, y si pide una herramienta, la ejecuta en un loop hasta la\nrespuesta final. `/maximus/chat` (lo que ya usa `cerebro.html`) es una\ncaja negra — no había nada intermedio que observar mientras \"piensa\".\n\n**Construido, cuatro piezas, ninguna toca la lógica de decisión:**\n\n1. `agent/eventos.py` — bus de eventos en memoria, multi-suscriptor.\n   Regla de diseño explícita: `publicar()` nunca bloquea ni lanza — si\n   nadie mira la pantalla, el evento se pierde sin más, nunca se arriesga\n   una respuesta real de Maximus por esto.\n2. 3 líneas en `responder()`: publica `pensando` (al entrar), `ejecutando:\n   {herramienta}` (antes de cada llamada a `ejecutar_herramienta`), y\n   `respondiendo` (con el texto final).\n3. 2 líneas en `main.py`: publica `escuchando` en `/maximus/chat` y en\n   `/telegram/webhook`.\n4. `GET /maximus/eventos` (Server-Sent Events, no WebSocket — más simple\n   en FastAPI y soportado nativo por el navegador) y `GET\n   /maximus/display` (la página, autocontenida, en\n   `agent/static/maximus_display.html`).\n\n**Protegido con el mismo `MAXIMUS_CHAT_TOKEN`** que ya usa `cerebro.html`\n— como parámetro de URL, porque `EventSource` del navegador no permite\nmandar headers personalizados.\n\n**Honesto sobre lo que falta:** el panel de \"Conexiones\" (DiMangoToGo,\nDiMangoWorking, Telegram, base de datos) quedó con placeholders (`—`), no\ncon datos inventados — verificar esas conexiones de verdad es trabajo\naparte, no se fingió que ya estaba resuelto.\n\n**Verificado en la red real, no solo `localhost`:** abierto desde otro\ndispositivo con la IP local del servidor, mensaje real por Telegram, y\nRicardo confirmó que pasó por los cuatro estados (ESCUCHANDO → PENSANDO →\nRESPONDIENDO, con EJECUTANDO cuando corresponde) en vivo.\n\n**Modo Kiosk — pendiente, es configuración del dispositivo, no del\nservidor.** Chrome con `--kiosk`, o Fully Kiosk Browser en una Smart TV\nAndroid (mismo que ya usan los tótems, `D-006`) apuntando a la URL con el\ntoken.\n\n**Origen de la idea:** clasificada esta noche como proyecto nuevo que\ncompite con las prioridades reales de DiMango — se avisó explícitamente\nantes de construir, y Ricardo decidió conscientemente avanzar igual.",
    "origen": "",
-   "grado": 1,
+   "grado": 2,
    "color": "#ff8c42"
   },
   {
    "id": "S-027",
-   "tipo": "otro",
-   "titulo": "S-027",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Apertura del portón por WhatsApp — construido, desplegado y verificado con apertura física real (29-ago-2026)",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "porton",
+    "tuya",
+    "whatsapp",
+    "seguridad-fisica"
+   ],
    "cuerpo": "# S-027 · Portón por WhatsApp — verificado con apertura física real\n\nFeature pedida por Ricardo: 5 números autorizados (Ricardo, Alejandra, Verónica,\n\"playa cel\", Osorio) pueden abrir el portón mandando la palabra \"porton\" por\nWhatsApp, solo dentro de una ventana horaria configurada (producción:\n09:55–10:05). Cero interpretación de IA: número contra lista explícita +\nhora contra ventana, después llamada a la API de Tuya. Cada intento —abierto,\ndenegado por número, denegado por horario, error— queda en `porton_log`.\n\n**Verificado el 29-ago-2026, madrugada:** mensaje \"porton\" → \"Portón abierto ✅\"\n→ confirmado por Ricardo que el portón **se abrió físicamente**. Ciclo completo\nverificado, no solo el mensaje de texto.\n\n## Los dos bugs reales que costó destrabar esto — no fue el servidor\n\n**Bug 1 — orden del webhook (el importante, de lógica, no de infraestructura).**\nEl chequeo del portón se escribió DESPUÉS del bloque de Maximus en\n`webhook_handler`. Como Ricardo es a la vez el dueño (`MAXIMUS_OWNER_PHONES`)\ny uno de los autorizados del portón, su propio número entraba siempre al\nbloque de Maximus primero y hacía `continue` — el chequeo del portón nunca se\nalcanzaba para él. Toda la persecución de procesos zombie de esa noche fue\nsobre un síntoma real (había un proceso viejo compitiendo por el puerto 8000),\npero no explicaba por qué el mensaje iba a la IA: la causa era de orden de\ncódigo. **Corregido:** el portón, por ser una puerta física, intercepta antes\nque cualquier otra rama, incluida Maximus.\n\n**Bug 2 — JSON corrupto al editar a mano en Notepad.**\nAl editar `config/porton.json` directo en el servidor para las pruebas, quedó\ncon un error de sintaxis (`Expecting ',' delimiter`) — probablemente un\ncarácter invisible al escribir en Notepad de Windows. `cargar_config()` lo\ncapturaba y logueaba el error, pero como `procesar_mensaje_porton()` devuelve\n`None` en silencio cuando la config no carga, el mensaje seguía de largo hacia\nMaximus **sin ningún indicio visible en WhatsApp** de que algo estaba roto.\nSe resolvió reescribiendo el archivo completo en vez de editarlo campo por\ncampo, y verificando con `python -c \"import json; json.load(...)\"` antes de\ncada prueba — un paso que faltaba en el protocolo original.\n\n## Lección derivada — ver L-008\n\nUn fallo silencioso (`None` sin log) en un chequeo de seguridad es peor que un\nerror visible: dos veces esa noche el sistema \"no hizo nada\" cuando debía\nhaber dicho por qué. Corregido el hábito de verificación (JSON válido antes\nde probar), pero el código mismo podría loguear más fuerte cuando la config\nno carga — no se tocó esta noche, queda como mejora futura si vuelve a fallar.\n\n## `horario_libre` por persona — 30-ago-2026\n\nRicardo y \"playa cel\" necesitaban poder abrir a cualquier hora, mientras\nel resto sigue limitado a la ventana. Se agregó un campo `horario_libre`\n(booleano, por defecto ausente/false) a cada entrada de `autorizados` en\n`config/porton.json` — si es `true`, `procesar_mensaje_porton()` salta el\nchequeo de horario para esa persona. Sin tocar la ventana de nadie más.\n\n**Incidente durante el despliegue:** el JSON que Ricardo dijo haber\nguardado en el servidor **no coincidía** con lo que había subido —\nseguía con el horario de prueba (`09:50`, no `09:55`) y sin los campos\nnuevos. Se detectó pidiendo `type config\\porton.json` en vez de confiar\nen lo que el usuario recordaba haber guardado. **Regla derivada:**\ndespués de pedir una edición manual de config en el servidor, verificar\nsiempre el contenido real del archivo antes de asumir que el cambio\nestá aplicado — \"lo edité\" y \"el archivo lo tiene\" no son lo mismo.\n\n**Verificado:** Ricardo y \"playa cel\" abren fuera de la ventana; el\nresto (Alejandra, Verónica, Osorio, y \"latin\", agregado después) sigue\nlimitado a 09:55–10:05.\n\n## Pendiente, no bloqueante\n\n- Confirmar con Alejandra, Verónica, \"playa cel\" y Osorio que también pueden\n  abrir dentro de la ventana — solo se probó con el número de Ricardo.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 8,
+   "color": "#ff8c42"
   },
   {
    "id": "S-028",
-   "tipo": "otro",
-   "titulo": "S-028",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Maximus obtiene sus primeras herramientas de escritura sobre DimangoToGo — cortesía, quitar ítem, descuento parcial, stock por local, y egreso de caja",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "maximus",
+    "escritura",
+    "cortesia",
+    "stock",
+    "dimangotogo",
+    "seguridad"
+   ],
    "cuerpo": "# S-028 · Primeras herramientas de escritura de Maximus — 30-ago-2026\n\nHasta hoy todo lo que Maximus podía hacer sobre DimangoToGo era **leer**\n(`ventas_dimango`, `checklist_dimango`). Hoy se agregaron las primeras dos\ncapacidades de **escritura** — mutan datos reales del negocio, no solo los\nconsultan.\n\n## 1 · `editar_mesa_dimango` — cortesía y quitar ítem\n\nPedido de Ricardo: poder decirle a Maximus \"mesa 24 del Mall, cortesía\" o\n\"quítale 1 [producto] a la mesa X\" sin tener que meterse él mismo al\ncelular o PC.\n\n**Diseño, no inventado — replicado del código real de DimangoToGo:**\n- Se leyó `Caja.jsx` + `ModalCortesia.jsx` + `PanelMesasAdmin.jsx` para\n  copiar exactamente lo que Ricardo hace a mano, en vez de construir una\n  lógica nueva y paralela que pudiera divergir.\n- **Cortesía** cierra la mesa completa: marca las órdenes pagadas/entregadas\n  con `motivo_sin_cobro: \"cortesia\"`, cierra la `CuentaMesa` en $0, libera\n  la `Mesa`, crea un registro de `VentaCaja` en $0 para el cuadre del turno,\n  y avisa por Telegram al grupo de administración — igual que el flujo\n  manual.\n- **Quitar ítem** busca el producto por nombre (Maximus no ve la pantalla,\n  no puede usar el índice visual), reduce o elimina la cantidad, y\n  recalcula el total de la orden y de la `CuentaMesa`.\n\n**El control central, pedido explícito de Ricardo (no una sugerencia mía):**\nMaximus **exige la misma clave dinámica de Modo Jefe** (o el PIN de admin)\nque pide el panel de Caja — reimplementada la validación exacta de\n`verificarPinModoJefe.js` (dos caminos: PIN de admin vía `loginPersonal`,\no clave temporal de `ConfigLocal`). Maximus nunca la inventa ni la\nreutiliza de un pedido anterior — Ricardo se la da en cada conversación.\n\n**Otras salvaguardas:**\n- Si no hay turno de caja abierto en el local, la cortesía se **rechaza y\n  no genera nada** — igual que el sistema real (pedido explícito #2 de\n  Ricardo).\n- El motivo de la cortesía es obligatorio.\n- Si \"quitar ítem\" no encuentra el producto, o el nombre es ambiguo, no\n  adivina: pide aclaración.\n\n**Verificado en producción, 30-ago-2026:** probado primero SIN clave (la\npidió, no ejecutó nada — correcto); después con clave real en una mesa de\nbajo riesgo — cortesía aplicada, mesa liberada, aviso a Telegram recibido.\n\n## 2 · `stock_dimango` — activar/desactivar/cantidad\n\nPedido de Ricardo: que Maximus pueda tocar `/StockEnVivo` y\n`/StockEnVivoMall` (activar o desactivar el control de stock de un\nproducto, o cambiarle la cantidad), por local.\n\n**Menor riesgo que lo anterior** — no toca dinero cobrado ni un turno de\ncaja, solo disponibilidad de catálogo. Por eso **no exige clave de\nsupervisor** (Ricardo no la pidió acá). Sí replica exacto\n`StockEnVivo.jsx`/`StockEnVivoMall.jsx` (`handleToggleStockActivo` /\n`handleCambiarStock`), incluida la regla de que al desactivar el producto\nvuelve a estar disponible sin límite.\n\n**Mejora sobre el sistema manual, no pedida pero de bajo costo:** cada\ncambio queda en `AuditLog` — el panel de Stock En Vivo hoy **no audita\nnada**, cualquiera que desbloquee el PIN local puede cambiar stock sin\ndejar rastro de quién ni cuándo. Vía Maximus, sí queda.\n\n**Verificado en producción, 30-ago-2026:** probado con un producto real,\nconfirmado el cambio reflejado en `/StockEnVivo`.\n\n## 2.5 · `descuento` agregado a `editar_mesa_dimango`, y bug de mesas del Mall corregido\n\n31-ago-2026, pedido de Ricardo: agregar un **descuento parcial** (no solo\ncortesía al 100%) — réplica de `ModalDescuento` en `PanelMesasAdmin.jsx`.\n**Sin clave de supervisor**, por decisión explícita suya, igual que el\nbotón manual (a diferencia de cortesía/quitar_item, que sí la exigen).\n\nEn el mismo momento se encontró y corrigió un bug real: la búsqueda de\nmesa comparaba texto exacto y fallaba sistemáticamente con las mesas del\nMall (formato distinto al que Ricardo escribe a mano). Detalle completo\nen `H-027`. Pendiente de verificación en vivo por Ricardo.\n\n## 3 · `egreso_caja_dimango` — retiro de efectivo\n\nPedido de Ricardo, aprovechando el mismo mecanismo de clave que cortesía:\nque Maximus pueda registrar un egreso de caja (pago a proveedor en\nefectivo, vuelto, compra menor) igual que el botón 💸 Egreso de `Caja.jsx`.\n\n**Réplica exacta de `ModalEgreso.jsx`** — más simple que cortesía, solo\ncrea un registro `EgresoCaja` (no toca mesas ni órdenes): exige turno de\ncaja abierto (si no hay, rechaza), monto > 0, motivo obligatorio, y la\nmisma clave dinámica de Modo Jefe/admin. Se descuenta del efectivo\nesperado en la cuadratura, no afecta la venta del día. Avisa por\nTelegram, igual que el flujo manual.\n\n**Decisión explícita de Ricardo: sin tope de monto.** Existe una regla\npropuesta y nunca aprobada (`R-001`, del caso de un egreso de $10.550 que\nescaló hasta él en agosto) — $50.000 por egreso, $200.000 diarios por\nlocal. Se le ofreció aplicarla acá y **la rechazó explícitamente**\n(\"sí, sube y sin tope\") — queda registrado como decisión suya, no como\nomisión. Si en el futuro hay un abuso o un egreso injustificado vía\nMaximus, este es el punto donde se decidió no ponerle límite.\n\n**Verificado en producción, 30-ago-2026:** probado con clave real y un\nmonto de prueba, confirmado registrado.\n\n## Funciones nuevas en DimangoToGo (Base44)\n\n- `base44/functions/maximusEditarMesa/entry.ts`\n- `base44/functions/maximusStock/entry.ts`\n- `base44/functions/maximusEgreso/entry.ts`\n\nAmbas siguen el patrón ya establecido (`x-maximus-secret`, falla cerrado\nsin el secreto — ver `H-014`/`H-019`). Publicadas manualmente por Ricardo\nen el editor de Base44, como exige `L-007` (editar el código no las activa\nsolo).\n\n## Lección de diseño para la próxima vez que Maximus escriba algo\n\n**Nunca inventar la lógica de una escritura sobre un sistema que ya\nexiste — leer el código real primero.** En este caso, la primera versión\nmental de \"cortesía\" (un descuento del 100% en `CuentaMesa`) era\nrazonable pero **equivocada**: el mecanismo real cierra la mesa entera y\ntoca el cuadre del turno de caja. Se corrigió antes de escribir código\ngracias a que Ricardo describió cómo lo hace él mismo (\"Caja → mesa →\ncortesía → clave\") y eso llevó a leer `ModalCortesia.jsx` en vez de\nasumir.",
    "origen": "",
-   "grado": 1,
-   "color": "#888"
+   "grado": 9,
+   "color": "#ff8c42"
   },
   {
    "id": "S-029",
-   "tipo": "otro",
-   "titulo": "S-029",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Riego de la parcela personal de Ricardo por WhatsApp (\"agua\"/\"no agua\"), y cliente Tuya compartido con el portón",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "tuya",
+    "riego",
+    "whatsapp",
+    "personal"
+   ],
    "cuerpo": "# S-029 · Riego de la parcela por WhatsApp — 30-ago-2026\n\nProyecto **personal** de Ricardo (su parcela, no DiMango) — no compite con\nprioridades del negocio, se construyó aprovechando la infraestructura\nTuya que ya existía para el portón (`S-027`).\n\n**Diseño, mismo criterio que el portón — determinístico, sin IA:**\n- Palabra exacta **\"agua\"** → enciende el riego.\n- Palabra exacta **\"no agua\"** → apaga.\n- **Sin ventana horaria** — pedido explícito de Ricardo, este dispositivo\n  es libre a cualquier hora.\n- 5 autorizados: Ricardo, Consu, Fran, Lisbeth, Giorgi.\n- Registro de auditoría propio (`riego_log`), igual que el portón.\n\n**Refactor de paso:** se sacó el cliente de la API de Tuya (firma HMAC,\ntoken, envío de comando) de `agent/porton.py` a un módulo compartido\n`agent/tuya_client.py`. El portón se reescribió para usarlo, sin cambiar\nsu comportamiento — evita mantener la misma firma HMAC duplicada en dos\narchivos.\n\n**Enganche del dispositivo:** el primer intento falló con `permission\ndeny` (código 1106 de Tuya) — el dispositivo nuevo no estaba vinculado al\nCloud Project, solo a la app Tuya Smart. Se resolvió vinculando la cuenta\nde la app al proyecto (`Link Tuya App Account`, con el UID de la cuenta).\n\n**Verificado en producción, 30-ago-2026:** \"agua\" y \"no agua\" probados\npor WhatsApp, encendido y apagado confirmados.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 2,
+   "color": "#ff8c42"
   },
   {
    "id": "S-030",
-   "tipo": "otro",
-   "titulo": "S-030",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Visor privado de Ricardo para su historial con Maximus (/maximus/historial), y hueco de privacidad cerrado en Telegram",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "privacidad",
+    "telegram",
+    "admin",
+    "maximus"
+   ],
    "cuerpo": "# S-030 · Historial privado de Maximus, separado de /admin\n\nRicardo preguntó cómo revisar sus conversaciones con Maximus sin\nexponerlas a quien tiene la clave compartida de `/admin` (Caja). Al\nrevisar el código para responder eso, se encontró un hueco real, no\nsolo la pregunta original.\n\n## El hueco encontrado — Telegram no estaba filtrado\n\n`es_privada()` en `agent/memory.py` reconocía el WhatsApp de Ricardo y el\ncerebro web (`web:`), pero **no su Telegram** (`tg:{chat_id}`) — el canal\nprincipal desde `D-010`, justamente porque WhatsApp tiene la limitación\nde ventana de 24h. Cualquiera con la clave de `/admin` podía leer esas\nconversaciones. Causa: `es_maximus()` compara contra el número de\nWhatsApp (`MAXIMUS_OWNER_PHONES`), y el chat_id de Telegram normalizado a\ndígitos nunca calza con ese número — nadie lo notó porque las pruebas de\n`P-011`/`H-019` se hicieron mirando el WhatsApp, no el Telegram.\n\n**Corregido:** `es_privada()` ahora reconoce el prefijo `tg:` y valida\ncontra `TELEGRAM_OWNER_CHAT_IDS` (`agent.telegram_maximus.es_owner()`).\nAnte cualquier error, una clave `tg:` se trata como privada por defecto\n(fail closed) — al revés que el resto de la función, porque una clave con\nese prefijo nunca puede ser un cliente real.\n\n## El visor nuevo — `/maximus/historial`\n\nPágina HTML simple, protegida con `MAXIMUS_CHAT_TOKEN` (mismo token que\n`/maximus/display`, acepta `?token=` en la URL para abrir directo del\nnavegador) — no la clave compartida de `/admin`. Lista las tres\nconversaciones privadas de Ricardo (WhatsApp, Telegram, cerebro web) y\nel detalle de cada una. El endpoint de detalle vuelve a chequear\n`es_privada()` del lado del servidor — nunca sirve una conversación de\ncliente aunque alguien adivine la clave.\n\n**No resuelve `P-011` completo** (separación física de la base de datos)\n— sigue siendo la misma tabla, solo con dos puertas de acceso distintas.\nSuficiente para el riesgo real de hoy (alguien con la clave de Caja\nleyendo los chats de Ricardo); la separación física sigue pendiente,\nprioridad baja, para cuando se pueda probar con calma.\n\n**Verificado en producción, 31-ago-2026** (con una demora por confusión\nde token — Ricardo probó primero un placeholder literal y después un\ntoken con un punto pegado al final por error de copiado; se resolvió\nverificando el valor exacto en el `.env` del servidor).",
    "origen": "",
-   "grado": 1,
-   "color": "#888"
+   "grado": 4,
+   "color": "#ff8c42"
   },
   {
    "id": "S-031",
-   "tipo": "otro",
-   "titulo": "S-031",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Maximus puede abrir mesa y mandar pedido a cocina/bar (pedido_mesa_dimango) — primera pieza del flujo de garzón, verificada en producción",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "maximus",
+    "dimangotogo",
+    "pedido",
+    "mesas",
+    "garzon"
+   ],
    "cuerpo": "# S-031 · Abrir mesa + pedido vía Maximus — primera pieza del flujo de garzón\n\nPedido de Ricardo (31-ago-2026): que Maximus pueda operar el flujo\ncompleto de garzón — abrir mesa, mandar pedido, precuenta, cerrar con\npago y propina. Es la pieza más grande construida en toda la sesión.\n**Se dividió a propósito**, en vez de construirla entera de una vez:\nhoy solo \"abrir mesa + pedido\". Precuenta y cierre con pago quedan para\notra sesión — son las partes más delicadas (cierre tiene pago dividido,\nboleta, propina; precuenta tiene un mecanismo real que no se llegó a\nidentificar del todo, distinto del `CreadorPrecuenta.jsx` manual que se\ninvestigó primero por error).\n\n## `pedido_mesa_dimango` — réplica de `WaiterNuevaOrden.jsx`\n\nMismo criterio de toda la noche: se leyó el código real\n(`confirmarPedido()`) antes de escribir nada. Abre la mesa (o reutiliza\nuna orden pendiente existente), busca cada producto pedido en el\ncatálogo del local correspondiente, arma la comanda, descuenta stock,\nactualiza `CuentaMesa`, y la manda a cocina/bar con el mismo mapeo de\ncategoría → pantalla (`DISPLAY_FALLBACK`) que usa la app real.\n\n**Dos límites explícitos, declarados en el tool y en el código — no se\nintentan resolver solos:**\n1. Productos con modificadores (sabor, tamaño, proteína) — Maximus no\n   elige por el cliente, avisa que hay que agregarlo desde el POS.\n2. Sin identificación de socio Club DiMango — eso lo sigue haciendo el\n   garzón físico.\n\nBúsqueda de mesa y de producto flexibles (mismo criterio que `H-027`):\nsin coincidencia exacta, no exacta = ambigua, sin adivinar.\n\n## El bug real, y por qué la primera explicación de Maximus no era mentira\n\nPrimer intento: Maximus dijo *\"el sistema requiere un garzón asignado y\nno tengo cómo saberlo\"*. Sonaba a otra alucinación (como el caso del\n\"agente de reposición\"), pero **esta vez era cierto, solo que con sus\npropias palabras en vez del error textual**. Causa real, encontrada\nrevisando el esquema de `CuentaMesa`: `waiter_id` es un campo\n**obligatorio** (`required`), y el código mandaba `null` cuando la mesa\nno tenía garzón asignado — que es siempre el caso cuando abre Maximus,\nporque no hay una sesión de garzón física detrás.\n\n**Corregido:** cuando no hay `waiter_id` real, se usa el string fijo\n`\"maximus\"` en vez de `null` — el campo es solo texto libre, sin\nvalidación de referencia contra la tabla de personal, así que no hace\nfalta crear un \"garzón Maximus\" de verdad en el sistema.\n\n**Lección para el diagnóstico:** el log real (`pm2 logs`) mostraba el\nmensaje de error de Base44 cortado justo en `\"Error in field waiter_\"` —\ncostó varias vueltas (findstr, Notepad, buscar continuación) sin\nencontrar el resto. Se resolvió más rápido leyendo el **esquema de la\nentidad** directamente que persiguiendo el log truncado. Cuando un log\nse corta sin explicación aparente, revisar la fuente de datos (esquema,\ntipo, validaciones) puede ser más rápido que insistir en verlo completo.\n\n## Verificado en producción, 31-ago/1-sep-2026\n\n\"Abre la mesa 608 en Playa y manda una Coca Light\" → mesa abierta, ítem\nagregado, comanda enviada. Confirmado por Ricardo.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 2,
+   "color": "#ff8c42"
   },
   {
    "id": "S-032",
-   "tipo": "otro",
-   "titulo": "S-032",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Interruptor \"voz clonada on/off\" para controlar el costo de ElevenLabs — verificado en WhatsApp, Telegram y el cerebro web",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "voz",
+    "elevenlabs",
+    "costo",
+    "whatsapp",
+    "telegram"
+   ],
    "cuerpo": "# S-032 · Interruptor de voz clonada — costo controlable al instante\n\nCon `H-026` resuelto (la voz clonada de ElevenLabs ya funcionaba),\nRicardo preguntó si cada respuesta en su voz tiene costo — sí, ElevenLabs\ncobra por carácter sintetizado. Pidió dos cosas: bajar el tope de\ncaracteres, y poder prender/apagar la voz clonada al toque, sin tocar el\nservidor.\n\n## Lo construido\n\n- **`config/voz.json`** — límite bajado de 1.200 a **500 caracteres**, y\n  un interruptor `elevenlabs_activo`.\n- **`agent/voz_control.py`** — mismo criterio determinístico que\n  portón/riego: palabra clave exacta, sin interpretación de IA. **\"voz\n  clonada on\"** / **\"voz clonada off\"** cambian el archivo al instante.\n  Con \"off\", `agent/voz.py` usa siempre la voz gratis (`edge-tts`) aunque\n  la clave de ElevenLabs siga configurada — cero costo hasta que se\n  reactive.\n\n## El bug real — faltaba un tercer canal\n\nEnganchado primero solo en WhatsApp (`webhook_handler`) y Telegram\n(`telegram_webhook`). Ricardo probó desde **el cerebro visual**\n(`/maximus/chat`, canal \"web\") y el comando no interceptaba — pasaba\ndirecto a Claude, que respondía (razonablemente, sin conocer la función\nnueva) que no tenía esa herramienta y ofrecía editar código.\n\n**No era un problema de despliegue** — el log mostró `[MAXIMUS/WEB]`, la\npista de que el mensaje entró por un tercer endpoint que no se había\ntocado. Corregido agregando el mismo chequeo a `/maximus/chat`.\n\n**Lección:** Maximus responde desde tres puntos de entrada distintos\n(WhatsApp, Telegram, cerebro web), cada uno con su propio código. Un\ninterceptor determinístico nuevo tiene que agregarse a los tres, o\nfalla en silencio en el que se olvide — sin ningún error visible, porque\nsimplemente cae al camino normal (Claude) y responde con algo plausible.\n\n## Verificado\n\n\"voz clonada off\" / \"voz clonada on\" probados y confirmados en los tres\ncanales (WhatsApp, Telegram, cerebro web) — 1-sep-2026.\n\nTambién se corrigió un ID de voz nuevo que Ricardo generó con acento\nargentino en vez de chileno — resuelto directo en ElevenLabs, sin\ntocar código.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 2,
+   "color": "#ff8c42"
   },
   {
    "id": "S-033",
-   "tipo": "otro",
-   "titulo": "S-033",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Estación de caja iMin Swan 2 con impresión y gaveta locales — imprime y cobra aunque se caiga la red o el PC de Windows",
+   "estado": "parcial",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "caja",
+    "impresion",
+    "dimangotogo",
+    "imin",
+    "independencia",
+    "dte"
+   ],
    "cuerpo": "# S-033 · Caja independiente en terminal iMin — imprime sin red\n\nRicardo compró un terminal **iMin Swan 2 (modelo I24D03)** para Playa Chinchorro:\nAndroid 13, pantalla táctil, **impresora térmica y gaveta integradas**. Pidió que\nfuera un punto de venta que imprimiera **sin depender del servidor de Windows**.\n\n## La pregunta de fondo que hizo primero, y su respuesta\n\n*\"¿Se puede generar ticket y DTE en otro punto independiente?\"*\n\n**Sí, y ya era posible sin construir nada.** Verificado leyendo el código: la\nemisión del DTE ocurre **100% en la nube** — la función `emitirBoletaV2` (Base44)\nle pega directo a `api.simplefactura.cl` y **SimpleFactura devuelve el folio**.\nEl servidor Windows **solo imprime, no emite**.\n\nConsecuencias: cualquier equipo con navegador e internet puede emitir; no hay\nlicencia por terminal ni rango de folios local; **no hay riesgo de folios\nduplicados** porque los asigna SimpleFactura del lado servidor.\n\nLos dos problemas quedaron separados: **emisión = nube (ya independiente)**,\n**impresión = local (lo que había que construir)**.\n\n## Cómo funciona la impresión local\n\niMin publica un **SDK de JavaScript** (`imin-printer` v1.4.0, MIT). La página\ncarga un archivo de 29 KB y se conecta por **WebSocket a `ws://127.0.0.1:8081`**,\nun servicio que corre **dentro de la tablet**. No sale a la red en ningún momento.\n\n- SDK descargado de `https://oss-sg.imin.sg/docs/demo/iMinJSPrinterSDK.zip` y\n  servido desde `public/imin-printer.min.js` del propio dominio.\n- `src/lib/iminPrinter.js` — adaptador: detecta, conecta, imprime, abre gaveta.\n- `src/lib/printQueue.js` — **punto único**: todo el sistema imprime por\n  `encolarImpresion()` (20 llamadas). Ahí se intercepta una sola vez: si hay iMin\n  imprime local y **no encola**; si no, sigue la cola de siempre.\n\n**Riesgo cero para el resto:** en Playa, Mall y tótems `disponible()` da false,\nel SDK ni se descarga, y ningún flujo cambia.\n\n## Verificado en producción (8-sep-2026)\n\nImprime **con el WiFi apagado**. Abre gaveta. Tres ventas reales probadas:\nefectivo con DTE, efectivo sin DTE, tarjeta sin DTE — todas correctas.\n\n**Control de la gaveta, a pedido de Ricardo:** en una venta se abre sola **solo\nsi el medio de pago es efectivo**; fuera de una venta, el botón **exige clave de\nModo Jefe**. Una caja que se abre sin control no es una caja.\n\n## Tres defectos propios, y lo que enseñan\n\n1. **`openCashBox()` después del corte de papel no funciona** — el comando se\n   pierde mientras la impresora sigue ocupada. La gaveta va **antes** de imprimir.\n2. **`printText()` agrega el salto de línea solo.** Pasarle además `\"\\n\"` produce\n   doble interlineado y rompe la alineación. Se leyó en el código del SDK, no se\n   adivinó desde la foto.\n3. **Mayúsculas inconsistentes en `medio_pago`** (`\"efectivo\"` en unos caminos,\n   `\"TARJETA\"` en otro). Una comparación estricta habría dejado la gaveta cerrada\n   en una venta en efectivo legítima. Normalizado.\n\n## El formato del ticket — resuelto\n\nFalta igualar el formato al del servidor. **La causa de que no calce: la copia de\n`printer-server.js` que está en el repositorio NO es la que corre en producción**\n—el ticket real tiene dirección, teléfono, \"CUENTA\", \"TURNO #\" y \"Local:\", y nada\nde eso existe en el archivo del repo—. Es `L-004` otra vez: dos fuentes de verdad,\nahora en la impresión. **Hay que sacar el archivo real del disco del Windows antes\nde seguir**, o cada iteración queda parecida pero no igual.\n\n**Resuelto el 9-sep:** Ricardo trajo el archivo real (`PRINT SERVER v6.0`). El\nformato quedó replicado desde ahí — título **\"CUENTA\"** siempre, folio al pie como\n*\"BOLETA ELECTRONICA N 123\"*, sin línea de medio de pago, sin cartel de\ncomprobante interno (el servidor ignora esos campos aunque la app los mande), y\n**con el timbre PDF417 impreso como imagen** vía `printSingleBitmap`. Ver `P-016`,\ndonde quedó registrado un error propio: había afirmado que el timbre no se\nimprimía, leyendo la copia vieja del repositorio.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 6,
+   "color": "#ff8c42"
   },
   {
    "id": "S-034",
-   "tipo": "otro",
-   "titulo": "S-034",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Panel de Caja simplificado de 13 botones a 4, ordenados según cómo opera cada local, e instalable como app en la tablet",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "caja",
+    "ux",
+    "dimangotogo",
+    "tablet",
+    "pwa"
+   ],
    "cuerpo": "# S-034 · Panel de Caja: de 13 botones a 4 (9-sep-2026)\n\nRicardo lo planteó así: *\"está demasiado complejo, quiero algo simple, rápido...\nno sé si es mejor tener despliegue o 3 botones\"*. Usuario: el cajero. Equipo: la\ntablet. Problema declarado: demasiados botones, y hay que bajar mucho para llegar\na uno.\n\n## Lo que se hizo, y por qué no fue una decisión de gusto\n\n**La pregunta que hizo era la chica.** \"¿Botones o desplegable?\" se responde\nsolo: en una caja, esconder la acción más usada detrás de un menú cuesta un toque\nen cada venta — con 133 ventas diarias en Playa, ~800 toques semanales.\n\n**La pregunta grande era cuáles son los tres**, y esa se contestó con datos, no\ncon intuición: se consultó `VentaCaja` y salió `H-029`. Los dos locales usan la\ncaja al revés.\n\n**Resultado:** tres acciones grandes y fijas + un menú \"Más\", con el orden\ndecidido por el campo `local`:\n\n| | Playa | Mall |\n|---|---|---|\n| 1º (más grande) | ⚡ Venta Rápida | 🟡 Mesas Abiertas |\n| 2º | 🍽️ Nuevo Pedido | 🍽️ Nuevo Pedido |\n| 3º | 🟡 Mesas Abiertas | ⚡ Venta Rápida |\n\nEs el mismo panel ordenado distinto, no dos diseños.\n\nLos otros 11 botones (Historial, Editar Ítems, Modo Jefe, Solicitar Clave,\nLlamar Garzón, Cortesía, Cigarros, Egreso, Cerrar Turno, Bloquear, Salir) viven\nen \"Más\". **Ninguna acción se eliminó.**\n\n\"Nuevo Pedido\" y \"Mesas Abiertas\" fijan el filtro de la vista de mesas — filtros\nque ya existían pero estaban en unos chips chicos bajo el encabezado.\n\n**El encabezado ya era fijo** (`sticky`): lo de \"bajar mucho\" no era falta de\nscroll fijo, era que 13 botones no cabían.\n\n## Instalable como app en la tablet\n\nEl `<link>` del manifiesto tenía un `id` preparado para cambiarlo desde hace\ntiempo, pero **nadie lo cambiaba nunca**, así que instalar la app siempre habría\nabierto en `/`. Se agregó `public/manifest-caja.json` (`start_url: \"/Caja\"`) y el\nconmutador en `index.html`. Ahora el ícono abre directo en Caja, a pantalla\ncompleta. Verificado: venta real e impresión funcionan desde la app instalada.\n\n**Alternativa más dura si algún día hace falta:** Fully Kiosk Browser, que ya se\nusa en los tótems (`D-006`). La PWA no arranca sola tras un corte de luz ni\nimpide salir de la app; Fully hace las dos.\n\n## Método, que es lo reutilizable\n\nAntes de tocar la pantalla principal de la operación se creó un **punto de\nrestauración en Base44**, para que Ricardo pueda revertir en pleno servicio sin\ndepender de mí. Y se le pidió probar los 11 botones del menú uno por uno: se\nreconectaron a mano y es justo donde el compilador no ve un error.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 5,
+   "color": "#ff8c42"
   },
   {
    "id": "S-035",
-   "tipo": "otro",
-   "titulo": "S-035",
-   "estado": "",
-   "autoridad": 5,
+   "tipo": "sistema",
+   "titulo": "Los kioskos preguntan servir o llevar y la cocina lo ve en pantalla — con para llevar por defecto, decisión de Ricardo con un riesgo medible",
+   "estado": "verificado",
+   "autoridad": 1,
    "fuente": "",
    "fecha": "",
-   "tags": [],
+   "tags": [
+    "kiosko",
+    "cocina",
+    "dimangotogo",
+    "playa",
+    "mall",
+    "ux"
+   ],
    "cuerpo": "# S-035 · Servir o llevar en los kioskos (9-sep-2026)\n\nPedido de Ricardo: que el kiosko pregunte si el pedido es para servir o para\nllevar cuando el cliente pide **cualquier categoría que no sea helados**.\n\n**Por qué los helados quedan fuera** (razón suya, y es sólida): el helado se\nretira en la vitrina y nunca se sirve a mesa. Preguntarlo ahí es un toque de más\nsin información.\n\n## Lo que se construyó\n\n- **`src/lib/tipoConsumo.js`** — la regla en un solo lugar. Existe porque hay\n  **dos implementaciones distintas de kiosko**: Playa 1/2/3 usan\n  `KioskoAutoatencionPlayaBase`, el Mall usa `MenuPedido`. Con la regla escrita\n  en los dos lados, tarde o temprano dejan de coincidir y nadie se entera hasta\n  que la cocina recibe algo mal.\n- Dos botones grandes en la pantalla de confirmar, arriba del nombre.\n- Verificado en producción en Playa y en el Mall.\n\n## La trampa que casi lo deja decorativo\n\nSe escribió primero la etiqueta en **`observation`** —el nombre lógico— y\nresulta que **ninguna de las 10 pantallas lo lee**. Todas leen `notes` (y un\n`observations` en plural que no existe como campo: código muerto).\n\n**La convención real de la app es escribir en `notes` Y en `observation` a la\nvez**, y así lo hacen caja, el kiosko moderno y el retiro. Se detectó revisando\ncómo dibujan las pantallas *antes* de dar el trabajo por terminado, no después.\n\n**Lección aplicable a cualquier cosa que deba llegar a cocina:** el campo que\nmanda es `notes`. Escribir solo en `observation` es escribir en un cajón que\nnadie abre.\n\n## La decisión de Ricardo, y el riesgo que trae\n\nPrimera versión: elección obligatoria, botón de pagar bloqueado hasta elegir.\nTras probarla, Ricardo pidió **\"para llevar\" preseleccionado**, sin obligar.\n\n**Riesgo declarado:** un valor por defecto es invisible. Si una parte relevante\nde los clientes come en el local, van a pagar sin fijarse y la cocina va a\nempaquetar pedidos que debían ir en plato. Antes el cliente decidía; ahora\ndecide el sistema por él.\n\n**Es medible y no hay que discutirlo:** la etiqueta queda escrita en `notes` de\ncada pedido. Contar cuántos dicen \"PARA SERVIR\" contra \"PARA LLEVAR\" en el\nkiosko resuelve la discusión con datos. **Pendiente: medirlo tras una semana de\nuso (desde el 9-sep-2026).** Si \"servir\" resulta marginal, la decisión de\nRicardo fue la correcta; si es un tercio, conviene volver a obligar.\n\n## Alcance acotado a propósito\n\n`MenuPedido` sirve **tres canales**: kiosko, menú digital (`/Menu`) y retiro\nlocal. La pregunta se limitó a `channel === \"kiosko\"`: el retiro es para llevar\npor definición y el menú digital no genera pedidos. Verificado que el retiro\nsigue igual. `/Menu` no lo usa nadie —los QR de las mesas abren `/Carta`—, así\nque ese riesgo era teórico.",
    "origen": "",
-   "grado": 0,
-   "color": "#888"
+   "grado": 2,
+   "color": "#ff8c42"
   },
   {
    "id": "T-001",
@@ -2540,6 +2633,81 @@
    "rel": "corrige"
   },
   {
+   "de": "H-024",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-025",
+   "a": "H-021",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-025",
+   "a": "H-022",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-025",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-025",
+   "a": "S-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-026",
+   "a": "S-025",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-026",
+   "a": "S-026",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-027",
+   "a": "S-028",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-028",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-028",
+   "a": "H-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-028",
+   "a": "S-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-028",
+   "a": "P-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-029",
+   "a": "H-015",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-029",
+   "a": "H-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-029",
+   "a": "S-034",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -2627,6 +2795,21 @@
   {
    "de": "L-007",
    "a": "S-021",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-008",
+   "a": "S-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-008",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-008",
+   "a": "L-005",
    "rel": "relacionado"
   },
   {
@@ -3060,6 +3243,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "P-016",
+   "a": "S-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-016",
+   "a": "L-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-016",
+   "a": "L-004",
+   "rel": "relacionado"
+  },
+  {
    "de": "R-001",
    "a": "E-001",
    "rel": "deriva_de"
@@ -3450,6 +3648,126 @@
    "rel": "relacionado"
   },
   {
+   "de": "S-027",
+   "a": "H-021",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-027",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-027",
+   "a": "L-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-028",
+   "a": "S-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-028",
+   "a": "H-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-028",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-028",
+   "a": "H-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-029",
+   "a": "S-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-029",
+   "a": "H-025",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-030",
+   "a": "P-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-030",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-030",
+   "a": "S-028",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-031",
+   "a": "S-028",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-031",
+   "a": "H-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-032",
+   "a": "H-026",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-032",
+   "a": "S-027",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-033",
+   "a": "H-018",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-033",
+   "a": "P-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-033",
+   "a": "S-028",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-034",
+   "a": "S-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-034",
+   "a": "H-029",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-034",
+   "a": "D-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-035",
+   "a": "S-034",
+   "rel": "relacionado"
+  },
+  {
+   "de": "S-035",
+   "a": "H-029",
+   "rel": "relacionado"
+  },
+  {
    "de": "T-001",
    "a": "E-001",
    "rel": "se_resuelve_con"
@@ -3466,24 +3784,9 @@
   }
  ],
  "generado": "2026-09-08",
- "huerfanos": [
-  "H-024",
-  "H-025",
-  "H-026",
-  "H-027",
-  "H-028",
-  "H-029",
-  "L-008",
-  "P-016",
-  "S-027",
-  "S-029",
-  "S-031",
-  "S-032",
-  "S-033",
-  "S-034",
-  "S-035"
- ],
+ "huerfanos": [],
  "enlaces_rotos": [
+  "H-024 --relacionado--> H-010",
   "P-015 --relacionado--> H-010",
   "S-025 --relacionado--> MEMORY"
  ]
