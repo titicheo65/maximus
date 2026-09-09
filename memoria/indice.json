@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 15,
+   "grado": 16,
    "color": "#f5a623"
   },
   {
@@ -735,6 +735,26 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-031",
+   "tipo": "hallazgo",
+   "titulo": "Instagram dejó de responder el 30-ago: la migración al flujo nuevo de Meta exigía revisión; se volvió al camino por Página y quedó resuelto",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "",
+   "fecha": "",
+   "tags": [
+    "instagram",
+    "meta",
+    "webhook",
+    "agente",
+    "clientes"
+   ],
+   "cuerpo": "# H-031 · Instagram recuperado (8/9-sep-2026)\n\nDurante días el agente no respondía por Instagram, mientras Messenger y WhatsApp\nfuncionaban perfecto. Se revisó —y se descartó— casi todo: proveedores activos,\nmodo de la app, permisos, suscripción de la Página, cuenta conectada como activo\ndel negocio, URL del webhook, token de verificación, túnel ngrok.\n\n## La pregunta que reordenó todo, y llegó tarde\n\nDespués de dos sesiones diagnosticando la instalación como si fuera algo nuevo,\nRicardo mencionó al pasar: **\"estaba funcionando bien el agente, de la nada se\ncayó\"**.\n\nEso invalidó de un golpe la hipótesis que se venía persiguiendo (que faltaba\ncompletar la revisión de Meta para acceso avanzado). **Si alguna vez funcionó,\nno faltaba un trámite: algo se rompió.**\n\n**Lección de método:** preguntar *\"¿esto alguna vez funcionó, y cuándo dejó de\nhacerlo?\"* debe ser de las primeras preguntas, no de las últimas. Cambia el\nproblema de \"configurar\" a \"encontrar qué cambió\", que es una búsqueda mucho\nmás acotada.\n\n## Los dos datos que cerraron el caso\n\n1. **La fecha exacta**, sacada de la base del agente, no de la memoria de nadie:\n   el último mensaje de Instagram fue el **30 de agosto**.\n2. **El registro de actividad de la app en Meta**: no había ningún cambio el 29,\n   30 ni 31 — pero el **27 de agosto** Ricardo había reconfigurado los webhooks\n   de Instagram (callback_uri + campos `messages` y `messaging_postbacks`).\n\nEs decir: **no se cayó solo. Se migró al flujo nuevo el 27 y dejó de entregar\ntres días después.** El flujo \"API de Instagram con inicio de sesión de empresa\"\nexige revisión de Meta para atender clientes reales; funcionó unos días con lo\nque quedaba de la autorización previa y se apagó.\n\n## La prueba que partió el problema en dos\n\nSe le mandó al servidor un webhook de Instagram **falso, desde el propio\nservidor**:\n\n```\npython -c \"...POST http://localhost:8000/webhook con object=instagram...\"\n```\n\nRespondió **200 OK** y generó la respuesta completa. Eso demostró que el código,\nel túnel, el endpoint y el parser estaban sanos, y que el problema era\nexclusivamente que **Meta no estaba entregando**. Sin esa prueba se habrían\nseguido tocando cosas del lado equivocado.\n\n## La solución\n\nVolver al **camino por Página** (Messenger → Configuración de Instagram), que usa\nlos permisos **ya aprobados y funcionando para Messenger**, en vez de esperar la\nrevisión de Meta:\n\n1. Conectar la Página *Dimango Arica* ahí y conceder todos los permisos,\n   incluido *administrar y acceder a los mensajes de la cuenta de Instagram*.\n   Estaba con el aviso **\"No se concedieron permisos de página\"**.\n2. Generar el token de la Página y ponerlo en `IG_ACCESS_TOKEN`.\n3. **Cambio de código:** `agent/providers/instagram.py` respondía por\n   `graph.instagram.com`. Con el token de Página hay que responder por\n   **`graph.facebook.com`**, igual que Messenger. Sin eso, el mensaje del cliente\n   llegaba y la respuesta moría con `401 Cannot parse access token`. Se puede\n   volver atrás con `IG_VIA_PAGINA=0`.\n\nVerificado el 9-sep-2026: entra el mensaje, se ve en el panel y el cliente\nrecibe la respuesta.\n\n## Detalle que costó una vuelta extra\n\nTras subir el cambio, el log seguía mostrando `POST graph.instagram.com`. **No se\nhabía hecho `git pull` en el servidor.** Por eso se agregó al arranque la línea\n`Proveedor de Instagram: ... (responde por graph.facebook.com)`: ahora el log\ndice explícitamente qué camino está usando, y no hay que deducirlo de un error.\n\n## Pendiente\n\n- El flujo de \"Instagram Login\" quedó a medias en el panel (pasos 3 y 4\n  incompletos) y ya no se usa. No estorba, pero confunde a quien lo mire.\n- **Los tokens de Página también caducan.** Conviene vigilar que esto no se\n  repita en 60 días sin que nadie se entere: el síntoma es silencioso —el\n  cliente escribe y nadie contesta— y no genera ninguna alerta.",
+   "origen": "",
+   "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -821,7 +841,7 @@
    ],
    "cuerpo": "Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**,\npor encima de todo lo demás, y lo repitió cinco veces.\n\nEl número era una construcción propia: asumía que DiMangoToGo emitía por sí\nmisma y que no había alternativa. La realidad —proveedor certificado, emisión\nmanual que los encargados saben usar, folios al día, cero fallas en julio— lo\ndesmintió.\n\n**La estimación tenía autoridad 5 y se presentó con el peso de un hecho.**\nRegla: todo riesgo cuantificado debe declarar de qué arquitectura depende, y\nverificarla antes de priorizar sobre ella.",
    "origen": "error propio de Maximus, corregido el 20-ago-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#27c93f"
   },
   {
@@ -840,7 +860,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 12,
+   "grado": 13,
    "color": "#27c93f"
   },
   {
@@ -1259,7 +1279,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.\n\n## Segunda caída, 24-ago-2026 — con tarea programada puesta y aun así falló\n\nVer `H-021.md`. Corte de luz, Windows reinició, la tarea `Maximus-Arranque` SÍ\ncorrió (verificado), PM2 SÍ resucitó sus procesos — y aun así `start /min\npython -m uvicorn` no dejó nada escuchando en el puerto 8000. **La tarea\nprogramada que este pendiente pedía ya existía, y no bastó.** El punto 1 de\nesta lista queda redefinido: no es \"falta arranque automático\", es \"el\narranque automático tiene un paso (`start /min` para uvicorn) que falla en\nsilencio y sin PM2 detrás para reintentar\".\n\n## Punto 1 — cerrado esa misma madrugada, migrado a PM2\n\n`maximus-agent` quedó dentro de PM2 (`server6`, `voiceagentkit` y ahora\ntambién el agente), lanzado vía `iniciar_maximus.bat` con `--interpreter\ncmd.exe --interpreter-args \"/c\"`. `arranque.bat` ya no usa `start /min` para\nel agente — `pm2 resurrect` lo trae junto con los demás. Verificado con\n`pm2 list` (`online`) y `POST /maximus/chat` sin token → `401`. Detalle\ncompleto de los tres intentos fallidos antes de este, en `H-021.md`.\n\n**Sigue pendiente:** verlo pasar por un corte de luz real (no simulado) antes\nde darlo por blindado del todo — y solo entonces reconsiderar activar más\nautomatización de impresión (H-018).\n\n## La prueba real llegó ese mismo día — y no pasó limpia\n\nHubo un segundo corte de luz el 24-ago por la tarde. PM2 en sí no falló, pero\nun `python.exe` zombi — nacido en el reinicio de esa mañana, **por fuera del\ncontrol de PM2** — llevaba horas ocupando el puerto 8000. Ningún restart de\nPM2 podía tomar el puerto mientras el zombi siguiera vivo. Se resolvió a mano\n(`Stop-Process -Force` + `pm2 restart`), verificado con WhatsApp real\nrespondiendo. **Telegram sigue sin responder, pendiente de revisar.**\n\nDetalle completo en `H-021.md`. Migrar a PM2 resolvió el problema de\nconfiguración, pero no explicaba ni evitaba que naciera un proceso fuera\nde PM2 en el arranque — esa fuente faltaba encontrar.\n\n## Punto 1 — cerrado de verdad, 26-ago-2026\n\nTercera repetición del zombi (25-ago por la mañana, sin corte de luz esta\nvez) llevó a mirar donde nadie había mirado: la **carpeta de Inicio de\nWindows**, no las tareas programadas. Ahí vivía `iniciar-agente.bat`,\nresto de la carpeta abandonada `C:\\Users\\usuario\\Desktop\\dimango-app`\n(H-013) — lanzaba su propio Python en el puerto 8000 en cada arranque,\npor fuera de PM2. Junto con dos scripts más redundantes\n(`ServidorPlaya.bat`, `pm2-autostart.bat`). Los tres movidos a\n`Startup\\respaldo-25ago\\` — detalle completo en `H-021.md`.\n\n**Único pendiente real:** confirmarlo en el próximo reinicio de verdad.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 19,
+   "grado": 20,
    "color": "#ff5f56"
   },
   {
@@ -2763,6 +2783,26 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-031",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-031",
+   "a": "L-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-031",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-031",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -3853,7 +3893,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-09-08",
+ "generado": "2026-09-09",
  "huerfanos": [],
  "enlaces_rotos": [
   "H-024 --relacionado--> H-010",
