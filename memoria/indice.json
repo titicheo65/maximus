@@ -420,7 +420,7 @@
    ],
    "cuerpo": "GitHub bloqueó un push: Account SID y API Key de Twilio en texto plano dentro\nde `.claude/settings.local.json`.\n\n**No llegaron al repositorio.** El archivo quedó en `.gitignore`.\n\n**Pendiente:** las credenciales **siguen en el disco del Mac**. Riesgo bajo hoy\nporque el agente migró a Meta y Twilio ya no se usa, pero deben **rotarse o\neliminarse en el panel de Twilio** — borrarlas del archivo no las desactiva.",
    "origen": "push protection de GitHub",
-   "grado": 5,
+   "grado": 6,
    "color": "#4a9eff"
   },
   {
@@ -516,7 +516,7 @@
    ],
    "cuerpo": "El panel `/admin` del agente —que lista **todas** las conversaciones— se publica\npor el túnel de ngrok, o sea que es alcanzable desde internet. Estaba protegido\ncon la contraseña que venía **escrita en el código**:\n\n```python\nADMIN_USER = os.getenv(\"ADMIN_USER\", \"admin\")\nADMIN_PASSWORD = os.getenv(\"ADMIN_PASSWORD\", \"dimango2026\")\n```\n\nEl `.env` no la sobreescribía. Cualquiera con la URL y esa clave —publicada en\nel repositorio— leía los chats de clientes y las conversaciones de Ricardo con\nMaximus: sueldos, márgenes, la inviabilidad del Mall.\n\n**Segunda credencial, el mismo día:** el token de `/maximus/chat` quedó visible\nen una captura de pantalla que Ricardo mandó para diagnosticar otra cosa. Ese\ntoken da acceso al chat con toda la memoria del negocio.\n\n**Ambas rotadas y verificadas el 23-ago-2026**, no dadas por buenas:\n\n| Verificación | Resultado |\n|---|---|\n| Clave vieja del panel (`admin`/`dimango2026`) | **401** |\n| Token viejo del chat | **401** |\n| Agente operativo después de rotar | 200 |\n\n**Es el tercer caso del mismo patrón** — después de H-014 (credenciales de Twilio\nen `.claude/settings.local.json`). La constante no es el descuido: es que el\nsistema **trae valores por defecto que funcionan**. Un default que funciona nunca\nse cambia, porque nada obliga a hacerlo.\n\n**Regla derivada:** ningún componente de DiMango debe arrancar con una credencial\npor defecto. Si falta la variable, que **no arranque** — falla ruidosa en vez de\nseguridad falsa.\n\n**Lo que sigue abierto:** el panel `/admin` no debería estar expuesto a internet.\nLa contraseña buena tapa el agujero; sacarlo del túnel lo cierra.",
    "origen": "leído del código y verificado contra el servidor el 23-ago-2026",
-   "grado": 10,
+   "grado": 11,
    "color": "#4a9eff"
   },
   {
@@ -792,7 +792,7 @@
    ],
    "cuerpo": "# H-033 · El Club capta, pero no registra consumo (9-sep-2026)\n\nRicardo pidió potenciar **DiMango Club**: ver clientes frecuentes, sus productos\nmás pedidos, e incorporarlos a las comandas de garzones — como el CRM de\nComeBack Loyalty.\n\nAntes de diseñar nada se miraron los datos, y cambian la pregunta.\n\n## Los números\n\n| | |\n|---|---|\n| Clientes registrados | **375** (siguen entrando a diario) |\n| Visitas registradas, histórico | **59** |\n| Sellos (`Stamp`) | ~15 |\n| Clientes con puntos | ~12 de 375 |\n| **Ventas de DimangoToGo asociadas a un cliente del club** | **14, en cinco meses** |\n| Última de todas | **18 de agosto de 2026** |\n\nContra ~5.000 ventas al mes, las 14 son el **0,3%**.\n\n## Qué pasó el 18 de agosto: nada\n\nSe investigó esa fecha esperando una falla. **No hay ninguna.** Fue,\nsimplemente, la última vez que alguien us��� el kiosco identificándose.\n\nLas 14 ventas asociadas vienen **solo de `kiosko` y `retiro_local`**. **Ninguna\nde `caja` ni de `waiter`.**\n\n## El diagnóstico\n\n- **Registrarse es automático** — el cliente lo hace solo, y funciona: 375\n  personas y sumando.\n- **Registrar el consumo es manual y solo existe en autoatención**, que es ~10%\n  de las ventas, y solo si el cliente se identifica por su cuenta.\n- **En caja y mesa el Club no existe:** no hay forma de identificar al cliente,\n  y ahí ocurre el **96%** de la venta (`H-029`: 64% mostrador + mesas).\n\n**Resultado: 375 personas entregaron nombre, teléfono y cumpleaños y no\nrecibieron nada a cambio** — ni un punto ni un reconocimiento. Desde su lado, no\npasó nada. Por eso no vuelven.\n\n## Por qué importa el orden\n\nConstruir el CRM —clientes frecuentes, productos favoritos, comandas con nombre—\nsobre 59 visitas sería **un tablero sobre una bodega vacía**. El panel no falla\npor diseño: falla porque no hay qué mostrar.\n\n**El instinto de Ricardo era correcto y el orden estaba invertido.** Pidió meter\na los clientes en las comandas de garzones: eso *es* el agujero. Pero lo pidió\ncomo consecuencia del CRM, cuando es su condición previa.\n\n## Lo que sigue\n\nPoder **identificar al cliente al cobrar en caja y al abrir mesa**. Con eso cada\nventa queda asociada a una persona y en un mes hay datos reales.\n\n**La decisión de fondo, que es de Ricardo y no técnica:** *cómo* se identifica\nsin hacer más lento el cobro —teléfono, RUT, buscar por nombre—. En una caja que\nhace **133 ventas al día**, cada segundo agregado se multiplica por 133. Un club\nque enlentece la fila se desactiva solo en una semana.",
    "origen": "",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -813,7 +813,28 @@
    ],
    "cuerpo": "# H-034 · La pantalla que Ricardo pidió construir ya existe (9-sep-2026)\n\nRicardo pidió \"ingresar a los clientes frecuentes a las comandas de garzones\"\n(`H-033`). Antes de diseñarlo se leyó el código.\n\n**Ya está hecho, y está en producción.** `src/pages/WaiterNuevaOrden.jsx` —la\npágina ruteada en `App.jsx` para tomar un pedido de mesa— tiene un modal\nobligatorio antes de confirmar:\n\n```\nClub DiMango — ¿El cliente es socio?\n  [ No es socio ]        [ ⭐ Sí, identificar socio ]\n```\n\nSi se elige identificar, pide **teléfono**, busca el socio por CRM, muestra su\nnombre y sus puntos, y graba en la Order `is_club_member`, `club_customer_id`,\n`club_customer_name` y `club_customer_phone`. Todo el camino está construido.\n\n**Y produce cero.** `H-033`: 14 ventas asociadas a un socio en cinco meses,\n**ninguna de `waiter`**. La última, del 18 de agosto, vino del kiosco.\n\n## Lo que eso cambia\n\nEl diagnóstico de `H-033` era correcto en el dónde y equivocado en el qué. En la\nmesa **no falta la funcionalidad: falta que se use.** Construir un CRM encima\nsería construir sobre una pantalla que el equipo ya está saltándose todos los\ndías.\n\nY el motivo probable está a la vista en el propio diseño: el modal aparece en\n**cada** pedido, la salida rápida (\"No es socio\") está a un toque, e\nidentificar cuesta teclear un teléfono completo mientras el cliente espera.\nEntre las dos, el garzón elige siempre la misma. Es la misma lógica de `H-032`:\nuna pregunta que aparece el 100% de las veces deja de ser una pregunta.\n\n## Caja, en cambio, no lo tiene\n\n`src/pages/Caja.jsx`: **cero apariciones de \"club\"**. Ahí el cliente es anónimo\npor ausencia, no por costumbre. Y caja es el 64% de las ventas (`H-029`).\n\n## Las dos preguntas para Ricardo, en este orden\n\n1. **¿Por qué los garzones no lo usan?** Es una pregunta para Alejandra y\n   Verónica, no para el código, y se responde en una conversación de diez\n   minutos. Sin esa respuesta, cualquier cosa que se construya en caja va a\n   fracasar por el mismo motivo.\n2. Recién después: **cómo se identifica en caja sin frenar la fila.** 133 ventas\n   al día en Playa; cada segundo agregado se multiplica por 133.\n\n**Lo que NO hay que hacer todavía:** copiar el modal del garzón a la caja. Sería\nreplicar en el 64% de las ventas un flujo que en el 36% ya demostró dar cero.",
    "origen": "",
-   "grado": 4,
+   "grado": 5,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-035",
+   "tipo": "hallazgo",
+   "titulo": "Una sola api-key con permiso de escritura sobre productos, órdenes y los 375 clientes, publicada en el bundle del sitio",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "2026-09-09",
+   "tags": [
+    "seguridad",
+    "credenciales",
+    "dimangotogo",
+    "club",
+    "crm",
+    "base44"
+   ],
+   "cuerpo": "# H-035 · La llave que abre las dos aplicaciones está en el sitio público (9-sep-2026)\n\nBuscando por qué el Club no capta consumo se encontró la api-key\n`cf05dc9e…` escrita en **diez** lugares del repositorio de DiMangoToGo, **ocho\nde ellos en el frontend**.\n\nFrontend significa que viaja al navegador. **No es inferencia: se compiló el\nproyecto y la llave está dentro de `dist/assets/index-*.js`**, el archivo que\nsirve dimangotogo.com.\n\n## Qué abre esa llave\n\nEs **la misma llave para las dos aplicaciones**:\n\n| App | Entidades alcanzables |\n|---|---|\n| `69e6d36c…` DiMango Club | `Customer`, `Visit` — los 375 socios, con nombre, teléfono, cumpleaños y puntos |\n| `69b4f4b6…` DiMangoToGo | **`Product`** y **`Order`** — carta, precios, stock y ventas de los dos locales |\n\nCon permiso de escritura: `ClubSocioModal` la usaba para hacer `POST` de\nclientes y `FotosView` para `PUT` sobre `Product`.\n\n**Cualquiera que abra el sitio y mire el código de la página obtiene eso.** No\nhace falta ser empleado ni entrar al servidor.\n\nDeja chico el fraude de puntos que se estaba discutiendo esa misma mañana —un\ngarzón tecleando un teléfono ajeno— y que motivó todo el análisis.\n\n## Dónde estaba\n\n| Archivo | |\n|---|---|\n| `src/pages/WaiterNuevaOrden.jsx` | frontend · CRM |\n| `src/components/ClubSocioModal.jsx` | frontend · CRM |\n| `src/components/ClubDiMangoModal.jsx` | frontend · CRM · **corre en los kioscos** |\n| `src/pages/AdminCarta.jsx` | frontend · Product |\n| `src/pages/StockEnVivo.jsx` | frontend · Product |\n| `src/pages/StockEnVivoMall.jsx` | frontend · Product |\n| `src/components/admin/FotosView.jsx` | frontend · Product |\n| `src/pages/DisplayHelados.jsx` | frontend · Order |\n| `base44/functions/asignarPuntosClub/entry.ts` | backend |\n| `base44/functions/debugCRM/entry.ts` | backend |\n\n## Lo grave no es el descuido: es que ya se había detectado y se dejó a medias\n\n`crmProxy` —la función que guarda la llave del lado del servidor— existe desde\nantes, y su propia cabecera decía:\n\n> \"NUNCA debe estar en el frontend (antes estaba hardcodeada en\n> WaiterCuenta.jsx)… **ROTA la llave anterior** (la vieja viajó al navegador y\n> hay que darla por comprometida).\"\n\nSe migró **un** archivo. Los otros siete quedaron atrás y **la rotación nunca se\nhizo**: la misma llave que ese comentario declaraba comprometida siguió\npublicada meses.\n\n**La lección no es \"hay una credencial expuesta\" —eso ya es H-014 y H-019—. Es\nque una migración de seguridad a medias es peor que no haberla empezado: deja\nun comentario que dice \"esto ya está resuelto\" sobre un agujero abierto.**\nRegla derivada: una rotación de credencial no se cierra hasta que la llave\nvieja está revocada y verificada como muerta.\n\n## Lo hecho el 9-sep-2026 (sandbox, pendiente de publicar)\n\n- `crmProxy` ampliado con `buscar_socio`, `contar_visitas` y `crear_socio`. Además\n  del secreto, cierra una fuga de datos: los modales se traían la **lista completa\n  de clientes** al navegador para buscar uno por teléfono; ahora el filtro ocurre\n  en el servidor y vuelve solo el socio consultado.\n- `src/lib/clubCRM.js`: único camino permitido del frontend al CRM.\n- Llave fuera de los tres archivos del Club y de las dos funciones backend\n  (ahora `Deno.env.get(\"CRM_API_KEY\")`, falla cerrado).\n- `debugCRM` dejó de devolver una muestra con nombre y teléfono de 5 clientes\n  **sin ninguna autenticación**. Candidata a borrarse entera.\n- Campo **`club_identificado_por`** + `club_identificado_en` en `Order` y\n  `CuentaMesa`: queda escrito quién asoció el consumo a cada socio. Decisión de\n  Ricardo: la identificación sigue siendo rápida —el control es que no sea\n  anónima, no que sea lenta.\n- Build y eslint limpios. Checkpoint de rollback: `6aa163341b9e76b467d6a4c4`.\n\n## Pendiente, y no se cierra hasta que esté\n\n1. **Los cinco archivos que quedan** (`AdminCarta`, `StockEnVivo`,\n   `StockEnVivoMall`, `FotosView`, `DisplayHelados`) — son los que tocan\n   `Product` y `Order`, o sea los más peligrosos.\n2. **Rotar la llave**, fuera de horario y verificando las ocho pantallas. Hasta\n   que eso ocurra, todo lo anterior es preparación: **la llave publicada sigue\n   viva**.\n3. Confirmar que la variable `CRM_API_KEY` está configurada. Si nunca lo estuvo,\n   `crmProxy` viene fallando desde que se creó — y eso explicaría por sí solo\n   que ninguna venta de mesa haya sumado puntos (`H-033`).",
+   "origen": "Auditoría del Club, 9-sep-2026",
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -849,7 +870,7 @@
    ],
    "cuerpo": "Cada componente que Ricardo agrega —Base44, DiMangoToGo, DiMangoWorking,\nservidor de impresión, tótem, cuatro medios de pago— es una pieza más que\n**solo él entiende**. Está reemplazando dependencia de personas por dependencia\nde sistemas que dependen de una sola persona.\n\n**Regla derivada:** automatización que solo Ricardo puede mantener no es\nautomatización, es una dependencia nueva con mejor interfaz. Toda iniciativa\ntécnica debe pasar el test de D-002.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 19,
+   "grado": 20,
    "color": "#27c93f"
   },
   {
@@ -2918,6 +2939,31 @@
   {
    "de": "H-034",
    "a": "L-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-035",
+   "a": "H-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-035",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-035",
+   "a": "H-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-035",
+   "a": "H-034",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-035",
+   "a": "L-002",
    "rel": "relacionado"
   },
   {
