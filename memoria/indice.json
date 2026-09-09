@@ -711,7 +711,7 @@
    ],
    "cuerpo": "# H-029 · Los dos locales usan la caja al revés (9-sep-2026)\n\nSalió de consultar `VentaCaja` para decidir el orden de tres botones. No se\nbuscaba esto.\n\n**Muestra: 500 ventas, 6 al 8 de septiembre de 2026.** Corta —tres días, con fin\nde semana— así que sirve para ordenar prioridades, no para afinar cifras.\n\n| | Playa | Mall |\n|---|---|---|\n| Mostrador (`V-*`) | **293 — 75%** | 26 — 25% |\n| Mesa numerada | 72 — 18% | **74 — 73%** |\n| Kiosko | 33 — 8% | 2 — 2% |\n| **Total** | 398 (~133/día) | 102 (~34/día) |\n\n**Playa es un mostrador que además tiene mesas. El Mall es un restaurante.**\n\nPlaya hace **4 veces más transacciones** que el Mall (133 vs 34 al día), y las\nhace de otra forma: rápidas, sin mesa, sin garzón asignado.\n\n## Por qué importa más allá de la pantalla\n\n1. **Cualquier diseño, proceso o capacitación pensado \"para los dos locales\"\n   probablemente sirve bien en uno y mal en el otro.** Se aplicó de inmediato en\n   `S-034`: la barra de la caja ordena sus acciones según el local.\n2. **Cruza con `H-015`** (el arriendo del Mall es el 37,4% de su venta neta). El\n   Mall no solo vende menos: vende con un formato más caro de operar —mesa,\n   garzón, más tiempo por ticket— sobre el metro cuadrado más caro de los dos.\n3. **Pregunta abierta que esto deja:** ¿cuál es el ticket promedio de cada\n   formato? Si el mostrador de Playa tiene ticket bajo y alto volumen, y la mesa\n   del Mall ticket alto y bajo volumen, la palanca de cada local es distinta y\n   hoy se están tratando igual.\n\n## Caveat\n\n`mesa_numero` que empieza con `V-` se contó como mostrador. Es la convención que\nusa el propio sistema (`V-CAJA`), pero no fue verificada contra la operación real\ndel Mall — si allá usan alguna mesa virtual para otra cosa, el 25% de mostrador\ndel Mall podría estar inflado.",
    "origen": "",
-   "grado": 7,
+   "grado": 8,
    "color": "#4a9eff"
   },
   {
@@ -792,7 +792,28 @@
    ],
    "cuerpo": "# H-033 · El Club capta, pero no registra consumo (9-sep-2026)\n\nRicardo pidió potenciar **DiMango Club**: ver clientes frecuentes, sus productos\nmás pedidos, e incorporarlos a las comandas de garzones — como el CRM de\nComeBack Loyalty.\n\nAntes de diseñar nada se miraron los datos, y cambian la pregunta.\n\n## Los números\n\n| | |\n|---|---|\n| Clientes registrados | **375** (siguen entrando a diario) |\n| Visitas registradas, histórico | **59** |\n| Sellos (`Stamp`) | ~15 |\n| Clientes con puntos | ~12 de 375 |\n| **Ventas de DimangoToGo asociadas a un cliente del club** | **14, en cinco meses** |\n| Última de todas | **18 de agosto de 2026** |\n\nContra ~5.000 ventas al mes, las 14 son el **0,3%**.\n\n## Qué pasó el 18 de agosto: nada\n\nSe investigó esa fecha esperando una falla. **No hay ninguna.** Fue,\nsimplemente, la última vez que alguien us��� el kiosco identificándose.\n\nLas 14 ventas asociadas vienen **solo de `kiosko` y `retiro_local`**. **Ninguna\nde `caja` ni de `waiter`.**\n\n## El diagnóstico\n\n- **Registrarse es automático** — el cliente lo hace solo, y funciona: 375\n  personas y sumando.\n- **Registrar el consumo es manual y solo existe en autoatención**, que es ~10%\n  de las ventas, y solo si el cliente se identifica por su cuenta.\n- **En caja y mesa el Club no existe:** no hay forma de identificar al cliente,\n  y ahí ocurre el **96%** de la venta (`H-029`: 64% mostrador + mesas).\n\n**Resultado: 375 personas entregaron nombre, teléfono y cumpleaños y no\nrecibieron nada a cambio** — ni un punto ni un reconocimiento. Desde su lado, no\npasó nada. Por eso no vuelven.\n\n## Por qué importa el orden\n\nConstruir el CRM —clientes frecuentes, productos favoritos, comandas con nombre—\nsobre 59 visitas sería **un tablero sobre una bodega vacía**. El panel no falla\npor diseño: falla porque no hay qué mostrar.\n\n**El instinto de Ricardo era correcto y el orden estaba invertido.** Pidió meter\na los clientes en las comandas de garzones: eso *es* el agujero. Pero lo pidió\ncomo consecuencia del CRM, cuando es su condición previa.\n\n## Lo que sigue\n\nPoder **identificar al cliente al cobrar en caja y al abrir mesa**. Con eso cada\nventa queda asociada a una persona y en un mes hay datos reales.\n\n**La decisión de fondo, que es de Ricardo y no técnica:** *cómo* se identifica\nsin hacer más lento el cobro —teléfono, RUT, buscar por nombre—. En una caja que\nhace **133 ventas al día**, cada segundo agregado se multiplica por 133. Un club\nque enlentece la fila se desactiva solo en una semana.",
    "origen": "",
-   "grado": 3,
+   "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-034",
+   "tipo": "hallazgo",
+   "titulo": "Identificar al socio en la mesa YA está construido y da cero: el problema del Club no es de software, es de adopción",
+   "estado": "verificado",
+   "autoridad": 1,
+   "fuente": "",
+   "fecha": "",
+   "tags": [
+    "club",
+    "fidelizacion",
+    "crm",
+    "caja",
+    "garzones",
+    "adopcion"
+   ],
+   "cuerpo": "# H-034 · La pantalla que Ricardo pidió construir ya existe (9-sep-2026)\n\nRicardo pidió \"ingresar a los clientes frecuentes a las comandas de garzones\"\n(`H-033`). Antes de diseñarlo se leyó el código.\n\n**Ya está hecho, y está en producción.** `src/pages/WaiterNuevaOrden.jsx` —la\npágina ruteada en `App.jsx` para tomar un pedido de mesa— tiene un modal\nobligatorio antes de confirmar:\n\n```\nClub DiMango — ¿El cliente es socio?\n  [ No es socio ]        [ ⭐ Sí, identificar socio ]\n```\n\nSi se elige identificar, pide **teléfono**, busca el socio por CRM, muestra su\nnombre y sus puntos, y graba en la Order `is_club_member`, `club_customer_id`,\n`club_customer_name` y `club_customer_phone`. Todo el camino está construido.\n\n**Y produce cero.** `H-033`: 14 ventas asociadas a un socio en cinco meses,\n**ninguna de `waiter`**. La última, del 18 de agosto, vino del kiosco.\n\n## Lo que eso cambia\n\nEl diagnóstico de `H-033` era correcto en el dónde y equivocado en el qué. En la\nmesa **no falta la funcionalidad: falta que se use.** Construir un CRM encima\nsería construir sobre una pantalla que el equipo ya está saltándose todos los\ndías.\n\nY el motivo probable está a la vista en el propio diseño: el modal aparece en\n**cada** pedido, la salida rápida (\"No es socio\") está a un toque, e\nidentificar cuesta teclear un teléfono completo mientras el cliente espera.\nEntre las dos, el garzón elige siempre la misma. Es la misma lógica de `H-032`:\nuna pregunta que aparece el 100% de las veces deja de ser una pregunta.\n\n## Caja, en cambio, no lo tiene\n\n`src/pages/Caja.jsx`: **cero apariciones de \"club\"**. Ahí el cliente es anónimo\npor ausencia, no por costumbre. Y caja es el 64% de las ventas (`H-029`).\n\n## Las dos preguntas para Ricardo, en este orden\n\n1. **¿Por qué los garzones no lo usan?** Es una pregunta para Alejandra y\n   Verónica, no para el código, y se responde en una conversación de diez\n   minutos. Sin esa respuesta, cualquier cosa que se construya en caja va a\n   fracasar por el mismo motivo.\n2. Recién después: **cómo se identifica en caja sin frenar la fila.** 133 ventas\n   al día en Playa; cada segundo agregado se multiplica por 133.\n\n**Lo que NO hay que hacer todavía:** copiar el modal del garzón a la caja. Sería\nreplicar en el 64% de las ventas un flujo que en el 36% ya demostró dar cero.",
+   "origen": "",
+   "grado": 4,
    "color": "#4a9eff"
   },
   {
@@ -846,7 +867,7 @@
    ],
    "cuerpo": "Tótems, autoservicio y reducción de cajas se justifican con un ahorro de costo\nlaboral que era inmedible.\n\n**Parcialmente resuelto:** con H-011 ya existe el costo laboral por local y por\npuesto. Ahora sí se puede medir si un tótem ahorró o costó.\n\nY sin ese número, Aurexgroup tampoco tiene caso de venta: no se puede vender un\nROI que no se midió en el propio laboratorio.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 5,
+   "grado": 6,
    "color": "#27c93f"
   },
   {
@@ -882,7 +903,7 @@
    ],
    "cuerpo": "Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**,\npor encima de todo lo demás, y lo repitió cinco veces.\n\nEl número era una construcción propia: asumía que DiMangoToGo emitía por sí\nmisma y que no había alternativa. La realidad —proveedor certificado, emisión\nmanual que los encargados saben usar, folios al día, cero fallas en julio— lo\ndesmintió.\n\n**La estimación tenía autoridad 5 y se presentó con el peso de un hecho.**\nRegla: todo riesgo cuantificado debe declarar de qué arquitectura depende, y\nverificarla antes de priorizar sobre ella.",
    "origen": "error propio de Maximus, corregido el 20-ago-2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#27c93f"
   },
   {
@@ -1422,20 +1443,21 @@
   {
    "id": "P-015",
    "tipo": "pendiente",
-   "titulo": "Stock: contador del Command Center no calza con la realidad, y hay ítems en negativo",
-   "estado": "abierto",
-   "autoridad": 2,
-   "fuente": "OBSERVADO",
+   "titulo": "Stock del Command Center: los dos hallazgos eran falsos — se compararon dos sistemas distintos como si fueran uno",
+   "estado": "cerrado",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
    "fecha": "2026-09-01",
    "tags": [
     "stock",
-    "bug",
     "bodega",
-    "dimangotogo"
+    "dimangotogo",
+    "dimangoworking",
+    "falso-positivo"
    ],
-   "cuerpo": "**Dos hallazgos, encontrados revisando el badge \"ALERTAS\" del Command Center:**\n\n1. **El contador no coincide con la realidad.** El panel mostraba \"ALERTAS 67\"\n   (viene de `stock_bajo_minimo` en `/maximus/panel/ventas`, sumando Playa +\n   Mall). Al pedirle a Maximus la lista real vía `ventas_dimango`, salieron\n   **222 ítems** bajo mínimo — más de 3x lo que mostraba el panel. Las dos\n   cifras deberían salir de la misma fuente y no calzan. No se investigó la\n   causa esa noche — puede ser caché, un filtro distinto, o que el panel\n   solo cuenta un subconjunto (ej. solo un local, o solo cierto tipo de\n   producto).\n\n2. **Hay ítems con stock en negativo** (ej. \"Porción bolognesa: -8 unid,\n   mínimo 10\"). Esto no debería ser posible si el control de stock\n   funcionara como control real: el sistema debería frenar la venta o\n   avisar al llegar a cero, no seguir restando y quedar en negativo. Sugiere\n   que `stock_activo` hoy es más un contador informativo que un bloqueo\n   real de venta en algunos flujos.\n\n**Lista completa, para referencia** (críticos reportados por Maximus la\nnoche del hallazgo):\n- Proteínas en 0: Asado de Tira, Filete, Filetillo de pollo, Empanaditas\n  de queso, Porción bolognesa (-8)\n- Pastelería en 0: Brownie, Cheesecake Arándano, 4 Quesos Porción\n- Heladería en 0: Cono Maxy Super 80, Cono 1 Sabor 240 Mall\n- Bar en 0: Absolut Apech, Coñac Tres Palos, Descafeinado Cialda\n- Bodega general en 0: Aceite de Oliva Bidón (Mall), Belcolade 65,\n  Citrato de Sodio\n\n**Pendiente, en orden:**\n1. Investigar por qué el contador del panel (67) no coincide con la\n   lista real (222) — revisar `agent/paneles.py` (`alertas_panel`/\n   `ventas_panel`) contra la lógica real de `maximusVentas`.\n2. Investigar por qué el stock puede quedar negativo — ¿el descuento de\n   stock en `pedido_mesa_dimango` (y el resto de los flujos de venta) no\n   frena en cero?\n3. Con lo anterior resuelto, armar el pedido real agrupado por proveedor\n   — es trabajo de compras, no de código, mejor en horario de trabajo con\n   calma, no de madrugada.\n\nNo se tocó nada de esto la noche del hallazgo — se dejó documentado para\nretomar con tiempo.",
-   "origen": "Command Center, sesión 31-ago/1-sep-2026",
-   "grado": 3,
+   "cuerpo": "# P-015 · Cerrado: no había ni contador roto ni stock negativo por venta (9-sep-2026)\n\n## Hallazgo 1 — \"67 vs 222\": falso. Eran dos universos distintos.\n\nEl badge del Command Center cuenta **productos de venta con control de stock\nactivo** (`Product` en DiMangoToGo). Hoy hay **77** con control activo, y bajo\nmínimo hay **73**:\n\n| | |\n|---|---|\n| Playa (`stock_activo` y cantidad < mínimo) | 32 |\n| Mall (`stock_activo_mall` y cantidad < mínimo) | 41 |\n| **Total que mostraría el panel** | **73** |\n\nVerificado por consulta directa a la entidad, no estimado. El 67 del 31-ago es\ndel mismo orden de magnitud. **El contador funciona.**\n\nLos 222 salieron de otra parte. La prueba está en la propia lista que quedó\nregistrada esa noche: \"Aceite de Oliva Bidón\", \"Belcolade 65\", \"Citrato de\nSodio\", \"Porción bolognesa mínimo 10\". **Ninguno de esos es un `Product` de\nDiMangoToGo** — son ítems de `BodegaGeneral` en **DiMangoWorking**, que tiene\nmás de 500 registros y mínimos propios. Además, *todos* los productos de venta\ntienen mínimo 2; ninguno tiene mínimo 10.\n\nSe comparó el stock de la **carta** contra el stock de la **bodega** y se\nconcluyó que un contador estaba roto.\n\n## Hallazgo 2 — \"stock negativo\": falso en el sistema que vende.\n\nSe revisaron los dos flujos vivos de DiMangoToGo, y los dos frenan en cero:\n\n- `Caja.jsx` (líneas 846 y 1067): `Math.max(0, cantidad - qty)`.\n- `WaiterNuevaOrden.jsx` (el que está ruteado en `App.jsx`): `Math.max(0, ...)`,\n  y además distingue local — usa `stock_cantidad_mall` en el Mall.\n\nConsulta a la base: **cero productos con stock negativo**. Cero en `BodegaMall`.\n\nEl único negativo de todo el sistema es **`porcion bolognesa: -8`, en\n`BodegaGeneral` de DiMangoWorking** — un conteo de inventario manual, donde un\nnegativo significa que el conteo quedó atrasado respecto del consumo. No es una\nventa que pasó sin frenarse.\n\n**Nota aparte:** `src/pages/WaiterOrder.jsx` sí tiene el descuento sin\n`Math.max` y sin distinguir local — pero **es código muerto**: no aparece en\nninguna ruta de `App.jsx` y nada lo importa. No corregirlo; borrarlo cuando\ntoque limpieza.\n\n## La lección, que es la de siempre\n\nEsa noche ambas cifras se leyeron como si midieran lo mismo, y de ahí salió un\n\"bug\" que nunca existió. Es exactamente `L-005`: una comparación construida\nsobre un supuesto de arquitectura que nadie verificó, presentada con el peso de\nun hecho. La verificación costó media hora.\n\n## Lo que sí queda vivo, y no es código\n\nEl punto 3 del pendiente original sigue en pie y es trabajo de compras, no de\nsoftware: **73 ítems de carta bajo mínimo** y una bodega con más de 500\nregistros que nadie cruza contra la venta. Eso es `P-007`, no `P-015`.",
+   "origen": "Command Center, sesión 31-ago/1-sep-2026; verificado el 9-sep-2026",
+   "grado": 4,
    "color": "#ff5f56"
   },
   {
@@ -2143,7 +2165,7 @@
    ],
    "cuerpo": "# S-034 · Panel de Caja: de 13 botones a 4 (9-sep-2026)\n\nRicardo lo planteó así: *\"está demasiado complejo, quiero algo simple, rápido...\nno sé si es mejor tener despliegue o 3 botones\"*. Usuario: el cajero. Equipo: la\ntablet. Problema declarado: demasiados botones, y hay que bajar mucho para llegar\na uno.\n\n## Lo que se hizo, y por qué no fue una decisión de gusto\n\n**La pregunta que hizo era la chica.** \"¿Botones o desplegable?\" se responde\nsolo: en una caja, esconder la acción más usada detrás de un menú cuesta un toque\nen cada venta — con 133 ventas diarias en Playa, ~800 toques semanales.\n\n**La pregunta grande era cuáles son los tres**, y esa se contestó con datos, no\ncon intuición: se consultó `VentaCaja` y salió `H-029`. Los dos locales usan la\ncaja al revés.\n\n**Resultado:** tres acciones grandes y fijas + un menú \"Más\", con el orden\ndecidido por el campo `local`:\n\n| | Playa | Mall |\n|---|---|---|\n| 1º (más grande) | ⚡ Venta Rápida | 🟡 Mesas Abiertas |\n| 2º | 🍽️ Nuevo Pedido | 🍽️ Nuevo Pedido |\n| 3º | 🟡 Mesas Abiertas | ⚡ Venta Rápida |\n\nEs el mismo panel ordenado distinto, no dos diseños.\n\nLos otros 11 botones (Historial, Editar Ítems, Modo Jefe, Solicitar Clave,\nLlamar Garzón, Cortesía, Cigarros, Egreso, Cerrar Turno, Bloquear, Salir) viven\nen \"Más\". **Ninguna acción se eliminó.**\n\n\"Nuevo Pedido\" y \"Mesas Abiertas\" fijan el filtro de la vista de mesas — filtros\nque ya existían pero estaban en unos chips chicos bajo el encabezado.\n\n**El encabezado ya era fijo** (`sticky`): lo de \"bajar mucho\" no era falta de\nscroll fijo, era que 13 botones no cabían.\n\n## Instalable como app en la tablet\n\nEl `<link>` del manifiesto tenía un `id` preparado para cambiarlo desde hace\ntiempo, pero **nadie lo cambiaba nunca**, así que instalar la app siempre habría\nabierto en `/`. Se agregó `public/manifest-caja.json` (`start_url: \"/Caja\"`) y el\nconmutador en `index.html`. Ahora el ícono abre directo en Caja, a pantalla\ncompleta. Verificado: venta real e impresión funcionan desde la app instalada.\n\n**Alternativa más dura si algún día hace falta:** Fully Kiosk Browser, que ya se\nusa en los tótems (`D-006`). La PWA no arranca sola tras un corte de luz ni\nimpide salir de la app; Fully hace las dos.\n\n## Método, que es lo reutilizable\n\nAntes de tocar la pantalla principal de la operación se creó un **punto de\nrestauración en Base44**, para que Ricardo pueda revertir en pleno servicio sin\ndepender de mí. Y se le pidió probar los 11 botones del menú uno por uno: se\nreconectaron a mano y es justo donde el compilador no ve un error.",
    "origen": "",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff8c42"
   },
   {
@@ -2879,6 +2901,26 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-034",
+   "a": "H-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-034",
+   "a": "H-029",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-034",
+   "a": "S-034",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-034",
+   "a": "L-003",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -3426,6 +3468,11 @@
   {
    "de": "P-015",
    "a": "H-016",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-015",
+   "a": "L-005",
    "rel": "relacionado"
   },
   {
