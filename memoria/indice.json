@@ -224,6 +224,26 @@
    "color": "#f5a623"
   },
   {
+   "id": "D-013",
+   "tipo": "decision",
+   "titulo": "Gestión Financiera es el control único del local: utilidad = ventas del cierre de caja − gastos − sueldos de la planilla − envíos",
+   "estado": "vigente",
+   "autoridad": 4,
+   "fuente": "INFORMADO",
+   "fecha": "",
+   "tags": [
+    "dimangoworking",
+    "gestion-financiera",
+    "utilidad",
+    "sueldos",
+    "compras"
+   ],
+   "cuerpo": "# D-013 · Reglas de la utilidad por local (10-sep-2026)\n\nPedido de Ricardo: *\"necesito el control de mi local: ventas menos gastos =\nutilidad\"*, todo concentrado en **Gestión Financiera** de DimangoWorking, y\n**partir septiembre a la perfección**.\n\n| Pieza | Decisión |\n|---|---|\n| **Ventas** | Del **Cierre de Caja de DimangoWorking** (`CuadraturaDiaria`). Maximus recomendó DimangoToGo como venta oficial; Ricardo eligió el cierre de caja |\n| **Sueldos** | **Una sola fuente: la planilla** que Ricardo sube en *Planilla Sueldos* (`PlanillaSueldo`). Las otras tablas de sueldos dejan de alimentar la utilidad |\n| **Empleados de \"ambos\"** | **Mitad y mitad** entre Playa y Mall |\n| **Envíos al Mall** | Costo de mercadería enviada desde Playa, restado al Mall |\n| **ANA MARIA (producción)** | Local **Mall** (la planilla decía \"m\") |\n| **Planilla de septiembre** | Es un **adelanto**, copia de agosto: no se carga como definitiva |\n\n**Orden acordado:** primero la utilidad por local (A), después la estadística de\ncompras por proveedor e ítem (B).\n\n**Sobre B:** carga manual por **Ricardo y Verónica Colindres**; lectura por foto\ncuando esté sólido. Advertencias dejadas: (1) Verónica ya pide y despacha\n(`P-007`), así que la carga la revisa Ricardo; (2) la bodega tiene ítems\nrepetidos con nombres casi iguales, que hay que limpiar antes de sacar\nestadísticas por ítem; (3) hoy la pantalla de ingreso guarda el proveedor como\ntexto dentro de una nota, no como dato.",
+   "origen": "Ricardo, 10-sep-2026",
+   "grado": 6,
+   "color": "#f5a623"
+  },
+  {
    "id": "E-001",
    "tipo": "escalamiento",
    "titulo": "Noemi — autorizar egreso de caja de $10.550",
@@ -346,7 +366,7 @@
    ],
    "cuerpo": "**Flujo confirmado:** los pedidos se envían todos los días — se despacha desde\n**Playa Chinchorro** y se entrega en el **Mall**. El Mall no produce nada.\n\n**Consecuencia:** si el traspaso no se registra valorizado, el costo de\nmercadería por local no existe — solo existe la venta por local.\n\n**Son dos controles distintos, no uno:**\n1. Pedido del Mall vs venta del Mall — ¿piden de más?\n2. Despachado en Playa vs recibido en el Mall — ¿llega todo?\n\nEl segundo es el punto de fuga clásico en operaciones de dos locales, y es el\nque nadie mira porque \"es de la casa\".",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#4a9eff"
   },
   {
@@ -365,7 +385,7 @@
    ],
    "cuerpo": "**Julio 2026: $30.271.531 líquido · 45 personas.**\n\n| Local | Personas | Líquido | % |\n|---|---|---|---|\n| Playa Chinchorro | 30 | $21.411.531 | 70,7% |\n| Mall | 11 | $6.600.000 | 21,8% |\n| Ambos | 3 | $2.260.000 | 7,5% |\n\nPor puesto: garzones $7,62M · cocina $6,80M · heladeros $4,69M ·\nadministración $3,75M · aseo $3,21M · producción $1,95M.\n\n**Verificación:** `quincena + extras + fin de mes = TOTAL2` cuadra en el 100%\nde las filas de los tres meses revisados.\n\n**Serie:** junio $25,93M (37) → julio $30,27M (45) → agosto $28,91M (43).\n\n**Alerta:** de junio a julio entraron 8 personas (+21,6%), el costo subió 16,8%\ny la venta solo 7,5%. Como % de la venta: 17,0% → **18,5%**.\n\n**Cargado:** Ricardo informó **$37M con imposiciones** (autoridad 4), dentro de\nla banda estimada de $36-42M.\n\n**No asignable por local (H-008):** Playa tiene 30 de 45 porque produce para los\ndos locales.",
    "origen": "suelgo_working.xlsx, hojas mar-26 a ago-26, entregado por Ricardo",
-   "grado": 15,
+   "grado": 16,
    "color": "#4a9eff"
   },
   {
@@ -442,7 +462,7 @@
    ],
    "cuerpo": "| | Playa | Mall | Total |\n|---|---|---|---|\n| Venta bruta | $119.455.935 | $40.464.040 | $159.919.975 |\n| Venta c/IVA | $119.044.684 | $40.433.220 | $159.477.904 |\n| **Venta neta** | **$100.037.550** | **$33.977.496** | $134.015.045 |\n| Propinas (aparte) | $7.260.449 | $3.455.478 | $10.715.927 |\n| **% del total** | **74,65%** | **25,35%** | 100% |\n\n**Estado de resultados por local (ARITMÉTICA; supone mercadería 28,7% pareja):**\n\n| | Mall | Playa |\n|---|---|---|\n| Arriendo | **37,4%** | 0% (propio) |\n| Mercadería | 28,7% | 28,7% |\n| Laboral directo | 19,4% | 21,4% |\n| Medios de pago | 2,6% | 2,6% |\n| **Queda** | **11,8%** | **47,3%** |\n\n**El arriendo del Mall es 37,4% de su venta neta. El umbral de viabilidad es 20%.**\n\nY ese 11,8% no descuenta todavía: la mano de obra de Playa que produce para el\nMall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni\nadministración. **El Mall está en el borde o bajo el agua.**\n\n**Playa subsidia al Mall.** Ya no es hipótesis.\n\n**Para llegar a un arriendo del 20%:** vender $63,6M netos (crecer **87%**) o\nrenegociar el arriendo a $6,8M (**bajar 47%**). La tercera opción es cerrar.\n\n**Antes de decidir:** leer el contrato de Plaza Oeste — reajuste, componente\nvariable, vencimiento y multa por salida anticipada.",
    "origen": "DiMangoToGo /AdminVentas, resumen contable julio filtrado por local",
-   "grado": 17,
+   "grado": 18,
    "color": "#4a9eff"
   },
   {
@@ -894,9 +914,9 @@
     "gestion-financiera",
     "utilidad"
    ],
-   "cuerpo": "# H-038 · El importador de sueldos leía encabezados exactos (10-sep-2026)\n\nRicardo pidió dejar Gestión Financiera como control único: **ventas − gastos =\nutilidad por local**, con los sueldos cargados desde una sola planilla.\n\nLa pantalla **\"Planilla Sueldos\"** de DimangoWorking leía columnas con un nombre\nexacto: `extras`, `fin de mes`, `TOTAL2`, `SUELDO`. La planilla oficial de\nRicardo (`Sueldos Oficial.xlsx`) usa `EXTRA`, `FIN DE MES`, `TOTAL 2` y\n`Suelo Base`. Con ese archivo:\n\n| Local | Real (TOTAL 2) | Lo que se habría cargado |\n|---|---|---|\n| Playa | $19.413.600 | $7.150.000 |\n| Mall | $9.736.126 | $4.025.000 |\n| Ambos | $750.000 | $0 |\n\n**Se habría guardado solo la quincena, sin ningún aviso**, y la utilidad por\nlocal habría salido inflada en ~$18M al mes. Además leía siempre la primera hoja,\ny la planilla trae **Septiembre primero y Agosto después**: subir agosto cargaba\nseptiembre.\n\n**Corregido (sandbox, 10-sep-2026):** encabezados tolerantes (mayúsculas,\nespacios, tildes, \"Suelo\" con error), hoja elegida según el mes seleccionado, y\naviso si en alguna fila QUINCENA + EXTRA + FIN DE MES no da el TOTAL 2.\nVerificado simulando la lectura con el archivo real: agosto da 45 personas y\n$29.899.726, igual que la planilla.\n\n**Observación abierta:** las hojas de agosto y septiembre son **idénticas al\npeso** (mismos 45 nombres, mismos montos). Puede ser sueldo fijo, o una copia aún\nsin actualizar. Consistente con julio (`H-011`: 45 personas, $30,27M).",
+   "cuerpo": "# H-038 · El importador de sueldos leía encabezados exactos (10-sep-2026)\n\nRicardo pidió dejar Gestión Financiera como control único: **ventas − gastos =\nutilidad por local**, con los sueldos cargados desde una sola planilla.\n\nLa pantalla **\"Planilla Sueldos\"** de DimangoWorking leía columnas con un nombre\nexacto: `extras`, `fin de mes`, `TOTAL2`, `SUELDO`. La planilla oficial de\nRicardo (`Sueldos Oficial.xlsx`) usa `EXTRA`, `FIN DE MES`, `TOTAL 2` y\n`Suelo Base`. Con ese archivo:\n\n| Local | Real (TOTAL 2) | Lo que se habría cargado |\n|---|---|---|\n| Playa | $19.413.600 | $7.150.000 |\n| Mall | $9.736.126 | $4.025.000 |\n| Ambos | $750.000 | $0 |\n\n**Se habría guardado solo la quincena, sin ningún aviso**, y la utilidad por\nlocal habría salido inflada en ~$18M al mes. Además leía siempre la primera hoja,\ny la planilla trae **Septiembre primero y Agosto después**: subir agosto cargaba\nseptiembre.\n\n**Corregido (sandbox, 10-sep-2026):** encabezados tolerantes (mayúsculas,\nespacios, tildes, \"Suelo\" con error), hoja elegida según el mes seleccionado, y\naviso si en alguna fila QUINCENA + EXTRA + FIN DE MES no da el TOTAL 2.\nVerificado simulando la lectura con el archivo real: agosto da **46 personas y\n$30.589.726**. La simulación destapó **una fila con `LOCAL` = \"m\"** ($690.000),\nque el cálculo por local habría dejado fuera de Playa y del Mall. Se agregó al\nimportador un aviso para cualquier local que no sea playa, mall o ambos.\n\n**Observación abierta:** las hojas de agosto y septiembre son **idénticas al\npeso** (mismos 45 nombres, mismos montos). Puede ser sueldo fijo, o una copia aún\nsin actualizar. Consistente con julio (`H-011`: 45 personas, $30,27M).\n\n*(Corregido el mismo día: una primera lectura informaba 45 personas y $29.899.726\nporque descartó la fila con local \"m\".)*",
    "origen": "10-sep-2026, preparando la utilidad por local en Gestión Financiera",
-   "grado": 3,
+   "grado": 4,
    "color": "#4a9eff"
   },
   {
@@ -1387,7 +1407,7 @@
    ],
    "cuerpo": "**No existe sistema central de inventario.** Consecuencia directa: compras ≠\nconsumo, la merma es inmedible, y el 28,7% de H-001 es costo de *compra*, no de\n*consumo*.\n\n**Alternativa más barata (H-016):** cargar `Product.cost` en DiMangoToGo da\nmargen bruto por producto sin instalar inventario. No mide merma, pero responde\nla pregunta más útil primero.",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#ff5f56"
   },
   {
@@ -1424,7 +1444,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 17,
+   "grado": 18,
    "color": "#ff5f56"
   },
   {
@@ -2518,6 +2538,36 @@
   {
    "de": "D-012",
    "a": "P-009",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-013",
+   "a": "H-038",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-013",
+   "a": "H-015",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-013",
+   "a": "H-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-013",
+   "a": "H-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-013",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-013",
+   "a": "P-005",
    "rel": "relacionado"
   },
   {
