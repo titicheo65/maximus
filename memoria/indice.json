@@ -220,7 +220,7 @@
    ],
    "cuerpo": "# D-012 · Los tres cambios del panel de cobro (9-sep-2026)\n\nAplican a **venta rápida y venta continua**, que son la misma pantalla\n(`mesa_numero = \"V-CAJA\"`) y concentran el 64% de las ventas (`H-029`).\n\n**1 · El medio de pago arranca en TARJETA.** Antes arrancaba en efectivo. La máquina predeterminada quedó **MP Point (8611) en Playa y RD3946 en el\nMall** — el Mall venía apuntando a RD9230, que no es la que usan. Motivo: es el\nmedio más frecuente en mostrador y ahorra dos toques por venta. Con 133 ventas\nal día en Playa, cada toque se multiplica por 133.\n\n**2 · Con pago tarjeta NO se emite boleta.** Es una definición de Ricardo por\ncómo tiene establecida la situación ante el SII, no un olvido.\n\nMaximus objetó primero, apoyándose en la norma del 1-mar-2026 sobre entrega\nobligatoria de boleta en venta presencial (registrada en `P-001`). Ricardo\nrespondió con el motivo concreto y la objeción quedó cerrada. **Queda anotado\ncomo decisión suya, con su razón, no como descuido.** Si alguna vez hay que\nrevisarlo, se revisa con su contador (`N-006`, Carlos Jirón), no acá.\n\n**3 · El interruptor de DTE depende del medio de pago, y no se recuerda.**\n\n| Medio de pago | Boleta DTE |\n|---|---|\n| **Efectivo** | **ENCENDIDA** por defecto — para no emitirla hay que apagarla a propósito, en cada venta |\n| Tarjeta, transferencia y el resto | Apagada |\n\nSe recalcula en cada cambio de medio de pago y después de cada cobro. **Va\ninvertido a propósito:** en efectivo lo normal es emitir, así que el default se\npuso del lado en que *olvidarse produce el resultado correcto*. Al revés —lo que\nhabía— el olvido emitía documentos que no debían salir.\n\nPrimero se dejó apagado para todos, y Ricardo lo corrigió probando: *\"solo\nnecesitamos que en efectivo tenga siempre predeterminado DTE, que para no hacer\nDTE en efectivo haya que desactivarlo constantemente\"*.\n\nAntes se guardaba en `localStorage`: **una sola venta con folio dejaba todas las\nsiguientes emitiendo folio** hasta que alguien lo apagara. Y nadie se enteraba,\nporque el interruptor está abajo en la pantalla y el cajero no vuelve a mirarlo.\nEs el mismo patrón de `L-009` —un ajuste que queda pegado y sigue actuando\ndespués— pero en software en vez de hardware.\n\n**La factura es un camino aparte** (`facturaData` / `esFactura`) y no pasa por\neste interruptor: cuando el cliente pide factura, el folio se genera igual.\n\n**4 · La máquina vuelve siempre a la predeterminada del local.** Se eliminó la\nmemoria `ultima_maquina_caja_<cajero>`, que **le ganaba al predeterminado**: una\nvez que un cajero cobraba con RD1, le quedaba RD1 pegado y MP Point no volvía\nnunca. Ricardo lo detectó probando — pidió el predeterminado y no se lo daba.\n\nEs el **tercer caso del mismo patrón en un día**: un ajuste que sobrevive a la\nventa que lo justificó y sigue actuando cuando ya nadie lo mira —el interruptor\nde DTE, la máquina de pago, y en hardware la impresora de `L-009`—. **Regla\nderivada: un ajuste que se hace para una venta puntual no debe sobrevivir a esa\nventa.** Si conviene recordarlo, que sea una configuración explícita del local,\nno una memoria invisible que nadie sabe que existe.",
    "origen": "Ricardo, 9-sep-2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#f5a623"
   },
   {
@@ -794,7 +794,7 @@
    ],
    "cuerpo": "# H-033 · El Club capta, pero no registra consumo (9-sep-2026)\n\nRicardo pidió potenciar **DiMango Club**: ver clientes frecuentes, sus productos\nmás pedidos, e incorporarlos a las comandas de garzones — como el CRM de\nComeBack Loyalty.\n\nAntes de diseñar nada se miraron los datos, y cambian la pregunta.\n\n## Los números\n\n| | |\n|---|---|\n| Clientes registrados | **375** (siguen entrando a diario) |\n| Visitas registradas, histórico | **59** |\n| Sellos (`Stamp`) | ~15 |\n| Clientes con puntos | ~12 de 375 |\n| **Ventas de DimangoToGo asociadas a un cliente del club** | **14, en cinco meses** |\n| Última de todas | **18 de agosto de 2026** |\n\nContra ~5.000 ventas al mes, las 14 son el **0,3%**.\n\n## Qué pasó el 18 de agosto: nada\n\nSe investigó esa fecha esperando una falla. **No hay ninguna.** Fue,\nsimplemente, la última vez que alguien us��� el kiosco identificándose.\n\nLas 14 ventas asociadas vienen **solo de `kiosko` y `retiro_local`**. **Ninguna\nde `caja` ni de `waiter`.**\n\n## El diagnóstico\n\n- **Registrarse es automático** — el cliente lo hace solo, y funciona: 375\n  personas y sumando.\n- **Registrar el consumo es manual y solo existe en autoatención**, que es ~10%\n  de las ventas, y solo si el cliente se identifica por su cuenta.\n- **En caja y mesa el Club no existe:** no hay forma de identificar al cliente,\n  y ahí ocurre el **96%** de la venta (`H-029`: 64% mostrador + mesas).\n\n**Resultado: 375 personas entregaron nombre, teléfono y cumpleaños y no\nrecibieron nada a cambio** — ni un punto ni un reconocimiento. Desde su lado, no\npasó nada. Por eso no vuelven.\n\n## Por qué importa el orden\n\nConstruir el CRM —clientes frecuentes, productos favoritos, comandas con nombre—\nsobre 59 visitas sería **un tablero sobre una bodega vacía**. El panel no falla\npor diseño: falla porque no hay qué mostrar.\n\n**El instinto de Ricardo era correcto y el orden estaba invertido.** Pidió meter\na los clientes en las comandas de garzones: eso *es* el agujero. Pero lo pidió\ncomo consecuencia del CRM, cuando es su condición previa.\n\n## Causa raíz, encontrada el 9-sep-2026\n\n**`H-036`**: el modal del Club y la asignación de puntos vivían en una\naplicación de garzón que **no se podía abrir** — dos rutas chocaban por\nmayúsculas. No era conducta del equipo: era enrutamiento.\n\n## Lo que sigue\n\nPoder **identificar al cliente al cobrar en caja y al abrir mesa**. Con eso cada\nventa queda asociada a una persona y en un mes hay datos reales.\n\n**La decisión de fondo, que es de Ricardo y no técnica:** *cómo* se identifica\nsin hacer más lento el cobro —teléfono, RUT, buscar por nombre—. En una caja que\nhace **133 ventas al día**, cada segundo agregado se multiplica por 133. Un club\nque enlentece la fila se desactiva solo en una semana.",
    "origen": "",
-   "grado": 9,
+   "grado": 10,
    "color": "#4a9eff"
   },
   {
@@ -856,7 +856,7 @@
    ],
    "cuerpo": "# H-036 · La app que nadie podía abrir (9-sep-2026)\n\nRicardo probó el modal del Club en la mesa y no apareció. La captura lo\nresolvió: la URL decía `dimangotogo.base44.app/waiter`, pero lo que se abría era\n`Waiter.jsx` — \"Quincho 2\", \"Ceder\", \"Precuenta\", \"Mi Rendición\", botones que\n`WaiterPanel` no tiene.\n\n## La causa, en dos líneas de `App.jsx`\n\n```jsx\nlínea 182:  <Route path=\"/Waiter\"  element={<Waiter />} />        ← gana\nlínea 219:  <Route path=\"/waiter\"  element={<WaiterPanel />} />   ← nunca se alcanza\n```\n\n**React Router no distingue mayúsculas salvo que se le pida** (`caseSensitive`,\nque en `App.jsx` no aparece nunca). Gana la primera declarada. `/waiter`\n—adonde manda `PersonalLogin`, que es por donde entran los garzones— resolvía a\nla aplicación vieja.\n\nY como **nada fuera de `WaiterPanel`** navegaba a `/waiter-nueva-orden` ni a\n`/waiter-cuenta`, toda la rama quedó encerrada detrás de una puerta tapiada:\n\n| Página | Estado real |\n|---|---|\n| `Waiter.jsx` | la que usa todo el equipo — sin una línea de Club |\n| `WaiterPanel.jsx` | inalcanzable |\n| `WaiterNuevaOrden.jsx` | inalcanzable — ahí vivía el modal del Club |\n| `WaiterCuenta.jsx` | inalcanzable — ahí vivía la asignación de puntos vía `crmProxy` |\n| `WaiterDashboard.jsx` | inalcanzable, y nadie navegaba a ella desde ninguna parte |\n\n## Qué explica\n\n**Cierra `H-033` de verdad y corrige `H-034`.** No era fricción, ni falta de\ncapacitación, ni que los garzones apretaran \"No es socio\": **nunca vieron esa\npantalla porque no se podía abrir.** Y por eso ninguna venta de mesa sumó jamás\nun punto: la función existía, estaba bien escrita, y estaba detrás de la misma\npuerta.\n\n## El dato que más incomoda\n\n`WaiterCuenta.jsx` acumulaba **134 commits**, el último real el 27 de agosto. Se\nmantuvo durante meses una aplicación que nadie podía abrir. Eso es `T-001`\n—proyectos que se abren y no se cierran— con evidencia dura, no como tesis.\n\n## Lección de método\n\nTres sesiones dando explicaciones de conducta —\"aprietan No es socio\", \"les da\nfricción\", \"falta capacitación\"— para un problema que era de enrutamiento. Y\ntodas eran plausibles.\n\n**Antes de explicar por qué la gente no usa una función, hay que verificar que\nla función se pueda abrir.** Es la misma familia de `L-006`: se teorizó sobre la\ncausa antes de mirar el dato más básico. La captura de pantalla del usuario\nresolvió en diez segundos lo que dos horas de leer código no habían resuelto.\n\n## Lo hecho (9-sep-2026)\n\n- **El Club entró en `Waiter.jsx`**, la app que sí se usa: botón \"⭐ Socio\" en el\n  encabezado de la mesa, **opcional a propósito** —decisión de Ricardo: agregar\n  cliente no puede ser obligación, una pregunta que sale siempre se aprieta sin\n  mirar (misma lógica de `H-032`)—. Al cobrar desde el garzón se asignan los\n  puntos vía `crmProxy`, y queda escrito `club_identificado_por`.\n- **Borrada la app huérfana**: `WaiterPanel`, `WaiterNuevaOrden`, `WaiterCuenta`,\n  `WaiterDashboard` y `WaiterOrder` (esta última ni siquiera tenía ruta). Con\n  verificación previa de que nadie las importara — `WaiterPanelCobro`, que\n  contiene el mismo prefijo, **sí está vivo** y no se tocó.\n- **La colisión quedó explícita** en `App.jsx`: `/Waiter` y `/waiter` declaradas\n  juntas apuntando a lo mismo, con el comentario de por qué.\n- Build limpio. Se conservan `WaiterLogin` y `WaiterSolicitudes`, que sí son\n  alcanzables.\n\n## Las mesas cobradas en Caja — RESUELTO el 10-sep-2026\n\n`Caja.jsx` no tenía nada de Club: si el garzón identificaba al socio y la mesa se\ncobraba en caja, la identificación quedaba escrita pero **los puntos no se\nasignaban**. En el Mall, que es 73% mesa (`H-029`), ese era el caso mayoritario.\n\nLos puntos se enganchan ahora en `ModalPostCobro.crearVentaYCerrarMesa`, que es\npor donde pasa todo cierre de mesa desde caja.\n\n**Dos decisiones al hacerlo:**\n\n- **Los puntos van sobre el consumo, no sobre la propina.** La propina es del\n  garzón, no una compra del cliente.\n- **Se marca la cuenta con `club_puntos_asignados`.** Ese cobro **se reintenta**\n  si falla al cerrar la mesa —está escrito así a propósito en el PASO 1— y\n  `crmProxy` no tiene guarda de idempotencia propia, a diferencia de\n  `asignarPuntosClub`. Sin la marca, cada reintento habría sumado los puntos otra\n  vez. La misma guarda se agregó en la app del garzón, que tiene el mismo riesgo.",
    "origen": "9-sep-2026, probando el modal del Club",
-   "grado": 9,
+   "grado": 10,
    "color": "#4a9eff"
   },
   {
@@ -1560,6 +1560,25 @@
    ],
    "cuerpo": "# P-016 · REFUTADO — la boleta impresa sí lleva timbre (8/9-sep-2026)\n\n**Lo que afirmé el 8-sep:** que el ticket imprime el folio como texto pero **no**\nel código PDF417, y que había que preguntarle al contador si eso dejaba expuesta\na la empresa.\n\n**Era falso.** Al día siguiente Ricardo trajo el archivo real del servidor que\ncorre en ServidorPlaya (`DIMANGO PRINT SERVER v6.0`) y ahí está la función\n`buildBoletaWithTimbre`: convierte el `timbreBase64` a raster ESC/POS con la\nlibrería `jimp` y lo imprime centrado antes del corte. **El timbre se imprime.**\n\n**De dónde salió el error:** leí `src/LOCAL_SERVER/printer-server.js` del\nrepositorio, que está desactualizado respecto de lo que efectivamente corre en\nel local. Esa copia no tiene ni la dirección, ni el teléfono, ni el título\n\"CUENTA\", ni el turno — ni el timbre.\n\n**Es `L-005` repetido, con el mismo mecanismo:** una conclusión de peso\n—posible incumplimiento tributario— construida sobre una arquitectura que no\nverifiqué. La diferencia con la vez anterior es que esta vez el error duró\nmenos de un día, porque se pidió el archivo real en vez de seguir iterando.\n\n**Y es `L-004` en una carpeta nueva:** dos fuentes de verdad para el mismo\ncomponente. El servidor de impresión que manda es el del disco del Windows; el\ndel repositorio es una copia vieja que nadie sincronizó. **Mientras eso siga\nasí, cualquier lectura de ese archivo puede producir otra conclusión falsa.**\n\n**Cerrado el 9-sep-2026:** el archivo real se subió al repositorio como\n`src/LOCAL_SERVER/printer-server-v6-playa.js`, con los secretos movidos a\nvariables de entorno y una nota en `INSTALACION.md` que aclara cuál de los dos\narchivos es el que corre. **Es una foto, no un espejo:** si el archivo del\nWindows se edita, la copia del repo queda vieja de nuevo. La sincronización\nautomática no existe.",
    "origen": "",
+   "grado": 3,
+   "color": "#ff5f56"
+  },
+  {
+   "id": "P-017",
+   "tipo": "pendiente",
+   "titulo": "Replantear el catálogo de premios del Club: con la regla nueva la cena para dos queda a 100 visitas",
+   "estado": "abierto",
+   "autoridad": 5,
+   "fuente": "ARITMETICA",
+   "fecha": "",
+   "tags": [
+    "club",
+    "fidelizacion",
+    "promociones",
+    "premios"
+   ],
+   "cuerpo": "# P-017 · El catálogo de premios quedó descalzado de la regla de puntos\n\n**Regla vigente desde el 10-sep-2026** (Ricardo): **10 puntos por venta sobre\n$5.000**. No 10 por cada $5.000 — una boleta de $27.450 da 10 puntos, no 50.\n\nEl programa pasó a premiar **frecuencia** en vez de monto, que en un negocio\ndonde el cliente vuelve probablemente es lo correcto. Pero el catálogo\n(`src/lib/pointsRules.js` en la app del Club) se escribió con la regla vieja:\n\n| Premio | Puntos | Visitas sobre $5.000 |\n|---|---|---|\n| ☕ Café gratis | 50 | 5 |\n| 🍦 Helado simple | 80 | 8 |\n| 🍮 Postre o bajativo | 120 | 12 |\n| 🍕 2x1 Pizza | 200 | 20 |\n| 💸 Descuento $5.000 | 250 | 25 |\n| 🍽️ Cena para dos | 1.000 | **100** |\n\nCien visitas es un premio que nadie va a alcanzar. Un premio inalcanzable no\nmotiva: decora.\n\n**Decisión de Ricardo:** dejarlo para más adelante y priorizar que el ciclo\nfuncione. Queda anotado para revisarlo **con datos reales de cuántas visitas\nacumula un socio en un mes**, que hasta ahora no existían porque el Club no\ncapturaba consumo (`H-033`). Replantearlo hoy sería otra vez elegir números sin\nevidencia.",
+   "origen": "Ricardo, 10-sep-2026 — decidió dejarlo para después",
    "grado": 3,
    "color": "#ff5f56"
   },
@@ -3680,6 +3699,21 @@
   {
    "de": "P-016",
    "a": "L-004",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-017",
+   "a": "H-033",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-017",
+   "a": "H-036",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-017",
+   "a": "D-012",
    "rel": "relacionado"
   },
   {
