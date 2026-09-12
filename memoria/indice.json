@@ -538,7 +538,7 @@
    ],
    "cuerpo": "El panel `/admin` del agente —que lista **todas** las conversaciones— se publica\npor el túnel de ngrok, o sea que es alcanzable desde internet. Estaba protegido\ncon la contraseña que venía **escrita en el código**:\n\n```python\nADMIN_USER = os.getenv(\"ADMIN_USER\", \"admin\")\nADMIN_PASSWORD = os.getenv(\"ADMIN_PASSWORD\", \"dimango2026\")\n```\n\nEl `.env` no la sobreescribía. Cualquiera con la URL y esa clave —publicada en\nel repositorio— leía los chats de clientes y las conversaciones de Ricardo con\nMaximus: sueldos, márgenes, la inviabilidad del Mall.\n\n**Segunda credencial, el mismo día:** el token de `/maximus/chat` quedó visible\nen una captura de pantalla que Ricardo mandó para diagnosticar otra cosa. Ese\ntoken da acceso al chat con toda la memoria del negocio.\n\n**Ambas rotadas y verificadas el 23-ago-2026**, no dadas por buenas:\n\n| Verificación | Resultado |\n|---|---|\n| Clave vieja del panel (`admin`/`dimango2026`) | **401** |\n| Token viejo del chat | **401** |\n| Agente operativo después de rotar | 200 |\n\n**Es el tercer caso del mismo patrón** — después de H-014 (credenciales de Twilio\nen `.claude/settings.local.json`). La constante no es el descuido: es que el\nsistema **trae valores por defecto que funcionan**. Un default que funciona nunca\nse cambia, porque nada obliga a hacerlo.\n\n**Regla derivada:** ningún componente de DiMango debe arrancar con una credencial\npor defecto. Si falta la variable, que **no arranque** — falla ruidosa en vez de\nseguridad falsa.\n\n**Lo que sigue abierto:** el panel `/admin` no debería estar expuesto a internet.\nLa contraseña buena tapa el agujero; sacarlo del túnel lo cierra.",
    "origen": "leído del código y verificado contra el servidor el 23-ago-2026",
-   "grado": 12,
+   "grado": 13,
    "color": "#4a9eff"
   },
   {
@@ -1020,7 +1020,28 @@
    ],
    "cuerpo": "# H-043 · 27 problemas de seguridad, y no todos son iguales (12-sep-2026)\n\nEl panel `editor/workspace/security` de DiMangoToGo marca **27 problemas abiertos**.\nLos cinco visibles en pantalla, clasificados por riesgo real:\n\n| Problema | Riesgo real |\n|---|---|\n| **\"Los usuarios públicos pueden acceder a todos los registros de Order\"** | **ALTO.** `Order.jsonc` **no tiene bloque `rls`**: sin reglas, cualquiera que abra la carta o el kiosco —que corren sin login— puede leer **todas** las órdenes: nombre, teléfono, mesa y monto de cada cliente. Es la misma familia de `H-035` |\n| Clave de WhatsApp escrita en el código (×2) y TOKEN de `proxyColacion` | MEDIO. **Son funciones de backend**: el secreto NO viaja al navegador. Está en el código de la app y en el repo privado |\n| `MERCADO_PAGO_ACCESS_TOKEN` fuera de la lista de secretos permitidos | BAJO, es configuración |\n\n**Secretos escritos a mano, inventario:** `confirmarReservaWhatsApp`,\n`notificarPedidoTorta`, `notificarRetiroLocal` (los tres comparten un `API_SECRET`\ndel **servidor del agente en ServidorPlaya**, endpoint `/api/pedido`) y\n`proxyColacion` (TOKEN del servidor de colación por ngrok).\n\n**Advertencia dada a Ricardo: NO usar \"Corregir todos los problemas\".** Cerrar los\npermisos de `Order` de un plumazo deja sin vender al kiosco, la carta de mesa y el\nretiro, que **crean y actualizan órdenes sin usuario logueado** (en la base se ven\ncomo `created_by: anonymous`). Cualquier regla nueva tiene que permitir: crear la\norden, actualizarla con los datos del pago, y leer la propia — sin abrir la lista\ncompleta.\n\n**Orden propuesto:** (1) mover los cuatro secretos al gestor de secretos **sin\ncambiar su valor** —cero riesgo, cierra tres hallazgos—; (2) rotarlos después, con\nel inventario de quién los usa (lección de `P-018`: la rotación anterior casi deja\nlos dos locales sin imprimir); (3) diseñar el RLS de `Order` y probarlo con los\nlocales cerrados.\n\n**Pendiente:** ver los 27 completos; solo 5 son visibles en la captura.\n\n## Paso 1 hecho: los cuatro secretos salieron del código (12-sep-2026, sandbox)\n\n| Función | Antes | Ahora |\n|---|---|---|\n| `confirmarReservaWhatsApp` | `API_SECRET` escrito | `Deno.env.get(\"AGENTE_API_SECRET\")` |\n| `notificarPedidoTorta` | idem | idem |\n| `notificarRetiroLocal` | idem | idem |\n| `proxyColacion` | `TOKEN` escrito | `Deno.env.get(\"COLACION_TOKEN\")` |\n\n**Cero secretos escritos a mano** en `base44/functions`. Las cuatro **fallan\ncerrado**: si el secreto no está, devuelven `ok:false` con el motivo en texto, en\nvez de intentar la llamada y fallar sin explicación (misma corrección de `H-035`).\n**No se cambió ningún valor**: es una mudanza, no una rotación.\n\n**De dónde salen los valores:** el otro extremo es el servidor del agente en\nServidorPlaya, que los lee de `C:\\dimango-agent\\.env` como **`API_SECRET`**\n(`main.py:956`) y **`COLACION_TOKEN`** (`colacion_web.py:52`). Los valores viejos\ntambién quedaron en el historial del sandbox.\n\n**Orden obligatorio:** crear los dos secretos en Base44 **antes** de publicar. Al\nrevés, se caen los avisos de WhatsApp al cliente y la pantalla de colación hasta\nque se creen.",
    "origen": "Ricardo abrió el panel de Seguridad el 12-sep-2026",
-   "grado": 6,
+   "grado": 7,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-044",
+   "tipo": "hallazgo",
+   "titulo": "El dominio de ngrok cambió y dejó caídas cuatro integraciones sin que nadie se enterara — el WhatsApp al cliente de retiro local llevaba días sin salir",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "ngrok",
+    "whatsapp",
+    "colacion",
+    "integraciones",
+    "fallo-silencioso"
+   ],
+   "cuerpo": "# H-044 · La URL muerta que nadie vio (12-sep-2026)\n\nAl probar los secretos recién movidos al gestor de Base44 (H-043), el pedido de\nretiro local entró bien pero **el WhatsApp al cliente no llegó**. La primera\nhipótesis —el secreto mal creado— era falsa.\n\n## Lo que pasaba\n\nCuatro funciones de DiMangoToGo tenían escrita a mano la misma URL:\n\n```\nhttps://oak-cornea-marlin.ngrok-free.dev\n```\n\nEse dominio devolvía **404 con `ngrok-error-code: ERR_NGROK_3200`**: no hay\nningún túnel conectado a él. El agente estaba perfectamente vivo — `pm2 list`\nmostraba los siete procesos `online` y los tres ngrok arriba desde el 3 de\nseptiembre a las 9:52 — pero **expuesto en otro dominio**:\n`https://maximus.ngrok.app` → `localhost:8000`, verificado con un GET a\n`/api/pedido` que responde **405** (la ruta existe y espera POST).\n\nHay tres túneles ngrok en la misma máquina y solo uno de los dominios fijos\ncoincidía con lo que el código esperaba. Además `dimango-ngrok` figura `online`\nen PM2 **sin túnel detrás** y sin responder su API en el 4040: es un proceso\nzombi que además confunde el diagnóstico.\n\n## Lo que más importa: el fallo era silencioso\n\n`notificarRetiroLocal` captura el error del `fetch`, lo manda a `console.error`\ny **devuelve `ok: true`**. La app no ve ninguna falla, el pedido se registra\nnormal, y el cliente simplemente no recibe nada.\n\n**No se sabe desde cuándo.** El túnel lleva así al menos desde el 3 de\nseptiembre: hasta nueve días de retiros locales, reservas y pedidos de torta\nsin aviso al cliente, sin una sola alerta. Lo mismo con `/Colacion`, que\napuntaba al mismo host muerto.\n\nEs la misma familia que L-006 —se atribuyó la causa al cambio más reciente en\nvez de mirar el dato más básico— y el mismo patrón de P-008 punto 5: **todo\ncuelga de un túnel gratuito, y si cae nadie se entera.**\n\n## Lo hecho\n\n- Las cuatro funciones (`notificarRetiroLocal`, `notificarPedidoTorta`,\n  `confirmarReservaWhatsApp`, `proxyColacion`) leen ahora\n  `Deno.env.get(\"AGENTE_URL\")`, con `https://maximus.ngrok.app` como valor por\n  defecto. **La próxima vez que cambie el dominio se corrige en un campo, sin\n  publicar.** A diferencia de los secretos de H-043, esta variable **no** falla\n  cerrado: la URL no es un secreto y el valor por defecto debe seguir sirviendo.\n- Publicado y verificado por Ricardo: **el WhatsApp de retiro local llega.**\n\n## Lo que queda abierto\n\n1. **Nadie vigila estas integraciones.** Mientras `ok: true` tape un `fetch`\n   fallido, el próximo corte vuelve a durar días. Falta que el fallo llegue a\n   alguien — la propia función podría avisar por Telegram.\n2. **`dimango-ngrok` zombi**: sacarlo de PM2 tras confirmar que nada dependa\n   de él. Primero verificar, después borrar (L-006).\n3. **`COLACION_TOKEN` quedó visible** en una captura de pantalla al leer el\n   `.env`. Cuarto caso del patrón de H-019. Rotar en los dos lados: `.env` del\n   servidor y secreto de Base44.\n\n## Regla derivada\n\n**Una integración que solo registra su falla en un log no está monitoreada, y\nuna URL de túnel escrita en el código es una bomba de tiempo.** Antes de\nsospechar del cambio recién hecho, probar el endpoint: un `curl` de diez\nsegundos ahorró la búsqueda entera.",
+   "origen": "12-sep-2026, probando los secretos recién migrados",
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -1129,7 +1150,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 17,
+   "grado": 18,
    "color": "#27c93f"
   },
   {
@@ -1585,7 +1606,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. **La memoria del servidor no se actualiza sola.** `C:\\maximus` es un clon:\n   sin `git pull` periódico, Maximus se congela en el 20 de agosto y responde\n   datos viejos con seguridad — peor que no tenerlo.\n3. **Telegram sin token válido.** El webhook devolvió 404.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.\n\n## Segunda caída, 24-ago-2026 — con tarea programada puesta y aun así falló\n\nVer `H-021.md`. Corte de luz, Windows reinició, la tarea `Maximus-Arranque` SÍ\ncorrió (verificado), PM2 SÍ resucitó sus procesos — y aun así `start /min\npython -m uvicorn` no dejó nada escuchando en el puerto 8000. **La tarea\nprogramada que este pendiente pedía ya existía, y no bastó.** El punto 1 de\nesta lista queda redefinido: no es \"falta arranque automático\", es \"el\narranque automático tiene un paso (`start /min` para uvicorn) que falla en\nsilencio y sin PM2 detrás para reintentar\".\n\n## Punto 1 — cerrado esa misma madrugada, migrado a PM2\n\n`maximus-agent` quedó dentro de PM2 (`server6`, `voiceagentkit` y ahora\ntambién el agente), lanzado vía `iniciar_maximus.bat` con `--interpreter\ncmd.exe --interpreter-args \"/c\"`. `arranque.bat` ya no usa `start /min` para\nel agente — `pm2 resurrect` lo trae junto con los demás. Verificado con\n`pm2 list` (`online`) y `POST /maximus/chat` sin token → `401`. Detalle\ncompleto de los tres intentos fallidos antes de este, en `H-021.md`.\n\n**Sigue pendiente:** verlo pasar por un corte de luz real (no simulado) antes\nde darlo por blindado del todo — y solo entonces reconsiderar activar más\nautomatización de impresión (H-018).\n\n## La prueba real llegó ese mismo día — y no pasó limpia\n\nHubo un segundo corte de luz el 24-ago por la tarde. PM2 en sí no falló, pero\nun `python.exe` zombi — nacido en el reinicio de esa mañana, **por fuera del\ncontrol de PM2** — llevaba horas ocupando el puerto 8000. Ningún restart de\nPM2 podía tomar el puerto mientras el zombi siguiera vivo. Se resolvió a mano\n(`Stop-Process -Force` + `pm2 restart`), verificado con WhatsApp real\nrespondiendo. **Telegram sigue sin responder, pendiente de revisar.**\n\nDetalle completo en `H-021.md`. Migrar a PM2 resolvió el problema de\nconfiguración, pero no explicaba ni evitaba que naciera un proceso fuera\nde PM2 en el arranque — esa fuente faltaba encontrar.\n\n## Punto 1 — cerrado de verdad, 26-ago-2026\n\nTercera repetición del zombi (25-ago por la mañana, sin corte de luz esta\nvez) llevó a mirar donde nadie había mirado: la **carpeta de Inicio de\nWindows**, no las tareas programadas. Ahí vivía `iniciar-agente.bat`,\nresto de la carpeta abandonada `C:\\Users\\usuario\\Desktop\\dimango-app`\n(H-013) — lanzaba su propio Python en el puerto 8000 en cada arranque,\npor fuera de PM2. Junto con dos scripts más redundantes\n(`ServidorPlaya.bat`, `pm2-autostart.bat`). Los tres movidos a\n`Startup\\respaldo-25ago\\` — detalle completo en `H-021.md`.\n\n**Único pendiente real:** confirmarlo en el próximo reinicio de verdad.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 20,
+   "grado": 21,
    "color": "#ff5f56"
   },
   {
@@ -1781,7 +1802,7 @@
    ],
    "cuerpo": "# P-019 · Lo que queda pendiente (12-sep-2026, 03:10)\n\n## Listo en el sandbox, falta que Ricardo publique\n\n1. **Secretos fuera del código** (`H-043`). **Orden obligatorio:** crear en Base44\n   `AGENTE_API_SECRET` y `COLACION_TOKEN` —los valores están en\n   `C:\\dimango-agent\\.env` como `API_SECRET` y `COLACION_TOKEN`— y **recién ahí\n   publicar**. Al revés se caen los avisos de WhatsApp al cliente y `/Colacion`.\n   Probar: que cargue `/Colacion` y que llegue el WhatsApp de un retiro local.\n2. **Descuento de insumos en los canales que faltaban** (`H-042`): kioscos de Playa\n   1-2-3, kiosco y menú del Mall, retiro de los dos locales y carta de mesa.\n   Ya verificado en garzón y caja.\n\n## Para probar en la apertura\n\n- **Botón \"Ya se cobró — cerrar comanda\"** (`H-039`): usarlo en la primera mesa que\n  reaparezca y avisarle al equipo que ya no tienen que llamar a Ricardo.\n- **Caja en hora punta** (`H-041`): si vuelve el mensaje rojo, foto **con el texto\n  del error** para confirmar si es saturación (429).\n- **Kiosco**: resubir las 10 fotos (5 pesadas y 5 rotas) desde AdminCarta › Fotos.\n\n## Decisiones que dependen de Ricardo\n\n- **Lomo duplicado**: `Lomo liso no angus` (porción) vs `Lomo Liso` (kg). Mientras\n  estén los dos, el stock queda partido.\n- **Encender los otros 12 insumos** en Playa y **cargar el stock del Mall**\n  (`stock_actual_mall` está vacío).\n- **Los 27 hallazgos de seguridad**: mandar la lista completa para clasificarla. El\n  grave —`Order` sin reglas de acceso— se toca con los locales cerrados.\n- **Comisiones Mercado Pago vs Transbank** (`P-002`, ~$20,5M al año): falta que\n  pase las tablas de comisiones vigentes.\n\n## Con fecha\n\n- **13-sep:** registrar las imposiciones de agosto (35% Mall / 65% Playa).\n- **20-sep:** registrar el F29 de agosto (25% / 75%). Con los dos cargados se sabe\n  cómo cerró realmente el Mall (`D-013`) y si se abre la conversación del arriendo.\n\n## Deuda técnica anotada, sin fecha\n\n- **Cobro en una sola llamada** (`H-039`): hoy son 15-18 llamadas en serie.\n- **34 registros de mesa duplicados en Playa** y la limpieza automática que no\n  cierra comandas de cuentas ya pagadas.\n- **Por qué no corren los workflows** escritos como archivo (`H-042`): hay otros\n  que dependen de ese mecanismo, como el que registra la venta del kiosco.",
    "origen": "Cierre de la sesión del 11 y 12 de septiembre de 2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff5f56"
   },
   {
@@ -3461,6 +3482,31 @@
   {
    "de": "H-043",
    "a": "L-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-044",
+   "a": "H-043",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-044",
+   "a": "H-019",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-044",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-044",
+   "a": "P-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-044",
+   "a": "P-019",
    "rel": "relacionado"
   },
   {
