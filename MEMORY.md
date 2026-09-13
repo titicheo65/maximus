@@ -143,6 +143,7 @@ Pre-migración 1,55% → post 2,59%. **+1,04 puntos = ~$20,5M/año.** Motor: Mer
 **HIPÓTESIS PRINCIPAL:** DiMangoToGo enruta volumen hacia Mercado Pago, que cobra más que Transbank. La automatización propia estaría subiendo el costo por transacción.
 **Caveat:** un solo mes; junio distorsionado porque Transbank no facturó. Confirmar con agosto.
 **Acción pendiente:** ver P-002.
+**Hipótesis REFUTADA el 13-sep-2026:** Mercado Pago y Transbank cobran lo mismo (crédito 2,95%, débito 1,49%). Cambiar de proveedor no ahorra nada; el salto de julio queda por explicar (medición, más venta con tarjeta, mix crédito/débito, IVA o cargos fijos). Ver `memoria/H-002.md`.
 **Comparación cruda:** Toteat costaba ~$148.031/mes. Aurexgroup cobra $1.000.000/mes = **6,8x**. La transferencia interna no es fuga real; el delta de Mercado Pago sí.
 
 ### H-003 · Arriendo Plaza Oeste (Mall) — el mayor costo después de la comida
@@ -386,8 +387,8 @@ Preguntas abiertas: ¿DiMangoToGo está certificada ante el SII como sistema pro
 **20-ago, quinta vez:** Ricardo decide conscientemente posponerlo — *"sobre el DTE lo respondo después de esto, para mí es prioridad esto último"* (control de reposiciones). Queda registrado como decisión suya, con la objeción de Maximus ya planteada cinco veces. Agravante del mismo día: H-009 — Base44 sin créditos hasta ~22-ago, o sea que si la emisión falla esta semana tampoco puede tocar el código.
 *(Trazabilidad: el número P-001 se reusó. El P-001 original — "confirmar software contable, inventario y RRHH" — es ahora P-005.)*
 
-### P-002 · Comparar tasa de comisión Mercado Pago vs Transbank
-Vale ~$20,5M al año. Una tarde de trabajo. Ver H-002.
+### P-002 · Comisiones de medios de pago — reformulado el 13-sep-2026
+~~Vale ~$20,5M al año. Una tarde de trabajo.~~ Las tasas son iguales en los dos proveedores (crédito 2,95%, débito 1,49%): **no hay ahorro por cambiar**. Palancas que quedan: **negociar la tasa por volumen** (~$130-140M/mes en tarjeta; cada 0,1 punto ≈ $1,6M/año, estimación), confirmar si las tasas son + IVA y medir el mix crédito/débito. Siguiente paso: informe de liquidación de agosto de los dos. Ver `memoria/P-002.md`.
 
 ### P-003 · Venta de julio por local (desde DiMangoToGo)
 Cierra el estado de resultados por local y resuelve la pregunta del arriendo del Mall (H-003) y el residual de H-007.
@@ -529,7 +530,7 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 |---|---|---|---|
 | 3 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012). **No activar más automatización de impresión hasta ver a `maximus-agent` sobrevivir un corte de luz real bajo PM2 (ver H-021)** | **Días** |
 | 6 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
-| 7 | **P-002 — comisiones MP vs Transbank** | $20,5M/año. Una tarde | 1-2 semanas |
+| 7 | **P-002 — negociar comisiones por volumen** | Ya no es cambiar de proveedor: cobran igual (13-sep). Se negocia con el informe de liquidación en la mano; cada 0,1 punto ≈ $1,6M/año (estimación) | 1-2 semanas |
 | 8 | **Bitácora de escalamientos (skill `viernes`)** | Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
 | 9 | **Tablero de gestión** | Ya no arranca de cero: H-001…H-005 y H-015 son la primera fila | 3-4 semanas |
 | 10 | **Inventario — decidir si se instala (P-005)** | Sin esto la merma es inmedible. Antes probar la vía barata: cargar `Product.cost` (H-016) | 4-6 semanas |
