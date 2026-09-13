@@ -87,7 +87,7 @@
    ],
    "cuerpo": "\"Reducir la dependencia operativa\" con ocho subcomponentes es un programa, no\nun objetivo. No tiene métrica ni fecha de verificación.\n\n**Propuesta:**\n> Del 9 al 15 de noviembre de 2026, DiMango opera 7 días corridos sin que\n> Ricardo resuelva una sola decisión operacional.\n\n**Estado:** la bitácora fue ACEPTADA y entregada el 19-ago\n(`Bitacora_Escalamientos_DiMango.xlsx`). Primer diagnóstico completo: semana del\n14-sep-2026. **La meta de 7 días sigue pendiente de aceptación formal.**",
    "origen": "propuesta de Maximus, 19-ago-2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#f5a623"
   },
   {
@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 16,
+   "grado": 17,
    "color": "#f5a623"
   },
   {
@@ -244,6 +244,27 @@
    "color": "#f5a623"
   },
   {
+   "id": "D-014",
+   "tipo": "decision",
+   "titulo": "Cuatro personas de confianza pueden pedirle a Maximus egresos y eliminar comandas por WhatsApp, con clave propia y tope",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "delegacion",
+    "dimangotogo",
+    "maximus",
+    "whatsapp",
+    "caja",
+    "autoridad"
+   ],
+   "cuerpo": "# D-014 · La clave del jefe deja de circular (12-sep-2026)\n\nHasta hoy, cada egreso de caja y cada comanda a eliminar terminaba en una\nllamada a Ricardo pidiéndole la clave dinámica de Modo Jefe. **Carlos,\nAlejandra, Angélica y Noemi** ahora se lo piden a Maximus por WhatsApp con su\npropia clave.\n\n| | Local | Tope |\n|---|---|---|\n| Carlos | playa | R-001 |\n| Alejandra | mall | R-001 |\n| Angélica | **ambos** | R-001 |\n| Noemi | playa | R-001 |\n\n**Formato fijo, sin interpretación de IA:**\n\n```\nEGRESO LOCAL PLAYA 12000 encomienda clave 3592\nELIMINAR LOCAL MALL 3F2A9C clave 4592\n```\n\nDeliberado: una acción que borra una comanda definitivamente no se decide\nadivinando qué quiso decir el mensaje. El LLM no participa en esta ruta.\n\n## Las objeciones que se plantearon y cómo se resolvieron\n\n1. **Las cuatro claves originales eran los últimos 4 dígitos del propio\n   teléfono** (Carlos 2181 ← ...962181). Cualquiera con el número tenía la\n   clave. Ricardo las cambió a 3592/4592/5592/6592 — que siguen compartiendo\n   el sufijo, así que **lo que realmente las protege es el bloqueo a los 3\n   intentos fallidos**, con aviso a Telegram en cada fallo. Cuarto caso del\n   patrón de [[H-019]]: la credencial fácil de deducir.\n2. **\"Eliminar ítem\" es la forma clásica de robar en un restaurante** — se\n   cobra, se elimina el ítem, la caja cuadra. Por eso el alcance quedó acotado\n   a **comanda** (se dejó fuera borrar ventas cerradas), cada eliminación avisa\n   a Telegram con monto y mesa, y **si la comanda estaba marcada como pagada el\n   aviso lo dice con una advertencia aparte**. No es desconfianza: sin registro,\n   el día de un descuadre no se puede distinguir un error de un robo, y eso\n   también perjudica a quien no hizo nada.\n3. **El local es obligatorio en toda orden** — decisión de Ricardo, y es la\n   correcta: un egreso en la caja equivocada descuadra las dos. Además el local\n   declarado tiene que ser el suyo; cambiarlo lo hace Ricardo, no el mensaje.\n\n## Cómo lo administra Ricardo\n\nDesde su propio WhatsApp, determinístico y antes de Claude:\n`autorizados` · `clave de Noemi 7821` · `bloquear a Carlos` · `quitar a Carlos`\n\n**Ricardo no puede probar el flujo desde su número**: su WhatsApp entra por el\nbloque de Maximus, que va antes. La prueba la hace uno de los cuatro.\n\n## Verificado en producción el mismo día\n\n- `EgresoCaja` real: **$5.000, \"SENCILLO\", local playa, `autorizado_por: Noemi`,\n  21:24 de Arica**, en el turno correcto. Telegram llegó.\n- 19 casos probados antes de desplegar: autorización, bloqueo a los 3 intentos,\n  tope unitario, tope diario exacto en $200.000, local obligatorio, local\n  ajeno rechazado, minúsculas.\n\n## Por qué pasa el filtro\n\nEs de los pocos trabajos del período que ataca la dependencia **de frente**:\nno mejora una pantalla, elimina una interrupción recurrente que solo Ricardo\npodía atender. Ver [[E-001]] y [[R-001]].\n\n## Deuda propia declarada\n\n- El commit se quedó **sin push** y el script no aparecía en el servidor. Media\n  hora perdida en un diagnóstico que no era del código.\n- Falta saber **qué rechazó el primer intento de Noemi**. Ella concluyó \"era\n  con mayúscula\" y eso es falso —el parser ignora mayúsculas—, así que la causa\n  real sigue sin identificarse y les va a pasar a los otros tres.",
+   "origen": "pedido de Ricardo el 12-sep-2026, construido y probado el mismo día",
+   "grado": 9,
+   "color": "#f5a623"
+  },
+  {
    "id": "E-001",
    "tipo": "escalamiento",
    "titulo": "Noemi — autorizar egreso de caja de $10.550",
@@ -258,7 +279,7 @@
    ],
    "cuerpo": "Autorizar egreso de caja para pago de encomienda. **$10.550. 1 minuto**\n(entrar al sistema y poner clave).\n\nOrigen: operación normal · ¿Podía resolverlo otro? **Sí, con autoridad** ·\nNivel propuesto: 1 (decide y actúa) · Responsable: encargado de local.\n\n**Contexto:** $10.550 = 1,4 minutos de venta de DiMango; 0,006% de la\nfacturación mensual.",
    "origen": "bitácora de escalamientos",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff79c6"
   },
   {
@@ -538,7 +559,7 @@
    ],
    "cuerpo": "El panel `/admin` del agente —que lista **todas** las conversaciones— se publica\npor el túnel de ngrok, o sea que es alcanzable desde internet. Estaba protegido\ncon la contraseña que venía **escrita en el código**:\n\n```python\nADMIN_USER = os.getenv(\"ADMIN_USER\", \"admin\")\nADMIN_PASSWORD = os.getenv(\"ADMIN_PASSWORD\", \"dimango2026\")\n```\n\nEl `.env` no la sobreescribía. Cualquiera con la URL y esa clave —publicada en\nel repositorio— leía los chats de clientes y las conversaciones de Ricardo con\nMaximus: sueldos, márgenes, la inviabilidad del Mall.\n\n**Segunda credencial, el mismo día:** el token de `/maximus/chat` quedó visible\nen una captura de pantalla que Ricardo mandó para diagnosticar otra cosa. Ese\ntoken da acceso al chat con toda la memoria del negocio.\n\n**Ambas rotadas y verificadas el 23-ago-2026**, no dadas por buenas:\n\n| Verificación | Resultado |\n|---|---|\n| Clave vieja del panel (`admin`/`dimango2026`) | **401** |\n| Token viejo del chat | **401** |\n| Agente operativo después de rotar | 200 |\n\n**Es el tercer caso del mismo patrón** — después de H-014 (credenciales de Twilio\nen `.claude/settings.local.json`). La constante no es el descuido: es que el\nsistema **trae valores por defecto que funcionan**. Un default que funciona nunca\nse cambia, porque nada obliga a hacerlo.\n\n**Regla derivada:** ningún componente de DiMango debe arrancar con una credencial\npor defecto. Si falta la variable, que **no arranque** — falla ruidosa en vez de\nseguridad falsa.\n\n**Lo que sigue abierto:** el panel `/admin` no debería estar expuesto a internet.\nLa contraseña buena tapa el agujero; sacarlo del túnel lo cierra.",
    "origen": "leído del código y verificado contra el servidor el 23-ago-2026",
-   "grado": 13,
+   "grado": 14,
    "color": "#4a9eff"
   },
   {
@@ -1077,7 +1098,7 @@
    ],
    "cuerpo": "Cada componente que Ricardo agrega —Base44, DiMangoToGo, DiMangoWorking,\nservidor de impresión, tótem, cuatro medios de pago— es una pieza más que\n**solo él entiende**. Está reemplazando dependencia de personas por dependencia\nde sistemas que dependen de una sola persona.\n\n**Regla derivada:** automatización que solo Ricardo puede mantener no es\nautomatización, es una dependencia nueva con mejor interfaz. Toda iniciativa\ntécnica debe pasar el test de D-002.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 23,
+   "grado": 24,
    "color": "#27c93f"
   },
   {
@@ -1808,20 +1829,20 @@
   {
    "id": "R-001",
    "tipo": "regla",
-   "titulo": "Caja chica por local — propuesta",
-   "estado": "propuesto",
-   "autoridad": 5,
-   "fuente": "HIPOTESIS",
+   "titulo": "Caja chica por local — APROBADA y en producción",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
    "fecha": "2026-08-19",
    "tags": [
     "delegacion",
     "caja",
     "autoridad",
-    "pendiente-de-aprobacion"
+    "vigente"
    ],
-   "cuerpo": "**Propuesta, pendiente de aprobación:**\n- El encargado autoriza egresos de caja hasta **$50.000 por egreso** y\n  **$200.000 diarios acumulados**\n- Registra con su usuario y adjunta respaldo\n- Sobre $50.000, consulta\n- Rendición semanal\n\n**Origen:** E-001 — un egreso de $10.550 escaló hasta Ricardo. Eso es 1,4 minutos\nde venta de DiMango.",
-   "origen": "propuesta de Maximus a partir de E-001",
-   "grado": 5,
+   "cuerpo": "**Aprobada por Ricardo el 12-sep-2026**, 24 días después de propuesta, y el\nmismo día implementada y verificada en producción:\n\n- El personal autorizado registra egresos de caja hasta **$50.000 por egreso**\n  y **$200.000 diarios acumulados por persona**\n- Queda registrado con su nombre y el motivo es obligatorio\n- Sobre $50.000, consulta a Ricardo\n- Cada egreso avisa a Ricardo por Telegram al instante\n\n**Ya no es una regla en un documento: está escrita en el código** — en\n`agent/personal_autorizado.py` (`EGRESO_MAX`, `EGRESO_DIA_MAX`) y repetida en\n`base44/functions/maximusEgreso/entry.ts`, para que no dependa de una sola\npieza. Ver [[D-014]].\n\n**Origen:** E-001 — un egreso de $10.550 escaló hasta Ricardo. Eso es 1,4\nminutos de venta de DiMango.\n\n**Primer uso real:** 12-sep-2026, 21:24 en Arica. Noemi registró $5.000\n(\"SENCILLO\") en la caja de Playa desde su WhatsApp, sin pedirle la clave a\nRicardo. Verificado en `EgresoCaja`: `autorizado_por: \"Noemi\"`, turno correcto,\nlocal correcto, y el aviso llegó a Telegram.",
+   "origen": "propuesta de Maximus a partir de E-001; aprobada por Ricardo el 12-sep-2026",
+   "grado": 8,
    "color": "#8be9fd"
   },
   {
@@ -1839,7 +1860,7 @@
    ],
    "cuerpo": "Cuatro niveles, por área y por monto:\n\n1. **Decide y actúa** — no informa\n2. **Decide e informa** — actúa y deja registro\n3. **Consulta antes** — no actúa sin respuesta\n4. **Escala siempre** — nunca decide\n\n**El problema de Ricardo no es que nadie decida: es que nadie sabe hasta dónde\npuede decidir.**\n\nCada entrada de la bitácora de escalamientos se clasifica en un nivel y se asigna\na un responsable. Esa clasificación acumulada *es* el procedimiento de delegación.",
    "origen": "marco M5 de MENTORS.md, pendiente de aprobación",
-   "grado": 6,
+   "grado": 7,
    "color": "#8be9fd"
   },
   {
@@ -2529,7 +2550,7 @@
    ],
    "cuerpo": "Un observador competente diría que el problema de Ricardo no es falta de\nestructura sino exceso de iniciativas simultáneas — él mismo escribió\n\"probablemente tengo más proyectos de los que debería ejecutar\".\n\nUn #2 cuesta $2-3M/mes y tarda 6 meses en ser útil. Cortar la cartera de\nproyectos a la mitad es gratis y funciona el lunes siguiente.\n\n**Criterio de veredicto fijado el 19-ago:** si en la bitácora \"Proyecto iniciado\npor Ricardo\" supera el **40% de los minutos**, gana la tesis rival y la prioridad\npasa a cerrar proyectos antes que a buscar un #2.",
    "origen": "tesis rival planteada por Maximus, 19-ago-2026",
-   "grado": 11,
+   "grado": 13,
    "color": "#bd93f9"
   }
  ],
@@ -2732,6 +2753,46 @@
   {
    "de": "D-013",
    "a": "P-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-014",
+   "a": "E-001",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "D-014",
+   "a": "R-001",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "D-014",
+   "a": "R-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-014",
+   "a": "D-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-014",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-014",
+   "a": "T-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-014",
+   "a": "L-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-014",
+   "a": "H-019",
    "rel": "relacionado"
   },
   {
@@ -4197,6 +4258,16 @@
   {
    "de": "R-001",
    "a": "D-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "R-001",
+   "a": "D-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "R-001",
+   "a": "T-001",
    "rel": "relacionado"
   },
   {
