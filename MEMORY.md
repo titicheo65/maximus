@@ -528,7 +528,7 @@ Ordenadas por **valor en riesgo**, no por orden de aparición.
 
 | # | Qué | Por qué acá | Plazo |
 |---|---|---|---|
-| 3 | **H-018 — reimpresión masiva por cola fantasma** | La lista anti-duplicados vive en RAM. Un corte de luz reimprime boletas viejas en pleno servicio, y el Mall ya tiene el arranque automático puesto (S-012). **No activar más automatización de impresión hasta ver a `maximus-agent` sobrevivir un corte de luz real bajo PM2 (ver H-021)** | **Días** |
+| ~~3~~ | ~~**H-018 — reimpresión masiva por cola fantasma**~~ | **CERRADO el 16-sep-2026.** Tres candados: la limpieza de la nube caduca pendientes viejos, los dos servidores ignoran trabajos de +30 min, y la causa real (`PrintJobConsumer`) ya estaba desmontada. Probado en los dos locales | ✔ |
 | 6 | **P-007 — control de reposiciones** | Pedido explícito de Ricardo. Primero medir la cobertura de `ReglaInsumo`; sin eso la alerta miente | 1-2 semanas |
 | 7 | **P-002 — negociar comisiones por volumen** | Ya no es cambiar de proveedor: cobran igual (13-sep). Se negocia con el informe de liquidación en la mano; cada 0,1 punto ≈ $1,6M/año (estimación) | 1-2 semanas |
 | 8 | **Bitácora de escalamientos (skill `viernes`)** | Corriendo. Clasificación los viernes. Veredicto de T-001 el 14-sep | Corriendo |
