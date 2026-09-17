@@ -143,7 +143,7 @@
    ],
    "cuerpo": "Desde el 1-jul-2026 DiMango opera 100% sobre DiMangoToGo. Aurexgroup —también\nde Ricardo— le factura el servicio: **$1.000.000 en julio**.\n\n**Motivo real (informado por Ricardo, 20-ago):** Toteat era un sistema plano y\n**cobraba por ventas**. Ricardo prefiere pagarse a sí mismo y tener un sistema\nsólido que controla.\n\n**Lo bueno:** desaparece el problema de dos fuentes de verdad.\n**Lo malo:** desaparece la red. Ya no hay sistema alternativo si falla.",
    "origen": "informado por Ricardo",
-   "grado": 12,
+   "grado": 13,
    "color": "#f5a623"
   },
   {
@@ -320,7 +320,7 @@
    ],
    "cuerpo": "Autorizar egreso de caja para pago de encomienda. **$10.550. 1 minuto**\n(entrar al sistema y poner clave).\n\nOrigen: operación normal · ¿Podía resolverlo otro? **Sí, con autoridad** ·\nNivel propuesto: 1 (decide y actúa) · Responsable: encargado de local.\n\n**Contexto:** $10.550 = 1,4 minutos de venta de DiMango; 0,006% de la\nfacturación mensual.",
    "origen": "bitácora de escalamientos",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff79c6"
   },
   {
@@ -856,7 +856,7 @@
    ],
    "cuerpo": "# H-032 · La venta rápida podía salir sin cobro y sin rastro (9-sep-2026)\n\nRicardo lo detectó probando: mandó una Coca light a preparación desde una venta\nrápida, no la pagó, volvió atrás — **y el pedido desapareció de la caja**,\nmientras en DisplayBar quedaba como \"entregada\".\n\nProducto que sale, sin cobro y sin registro. Y no es un caso de borde: **la venta\nrápida es el 64% de las ventas y el 75% en Playa** (`H-029`).\n\n## Los dos mecanismos\n\n**1. La orden quedaba huérfana.** En `Caja.jsx` la CuentaMesa —lo que hace que\nuna venta aparezca como \"abierta\"— se crea solo si es mesa real:\n\n```js\nif (mesaActual?.id && !mesaActual.es_virtual) { ...crear CuentaMesa... }\n```\n\nEn una venta rápida `mesaActual` es virtual, así que **nunca se creaba la\ncuenta**. La Order sí se creaba (`pendiente_pago`) y se mandaba a los displays.\nAl volver atrás, el código solo limpiaba la pantalla: la Order seguía viva en la\nbase, en `pendiente_pago`, sin nada que la mostrara.\n\n**2. La evidencia se autodestruía — esto es lo grave.** Al cerrar cualquier\ncobro, el sistema hacía:\n\n```js\nOrder.filter({ payment_status: \"pendiente_pago\", mesa_numero: mesaNum })\n// y las marcaba todas como pagadas\n```\n\nEn una venta rápida `mesaNum` es **siempre el mismo string, `V-CAJA`**. Entonces\ncobrar *cualquier* venta rápida marcaba como pagadas **todas las ventas rápidas\npendientes que existieran**, incluidas las abandonadas de días anteriores, **sin\nque entrara un peso**.\n\nPor eso la base mostraba **cero órdenes huérfanas**: no es que no ocurriera, es\nque se borraban solas. **Cuánto costó esto históricamente es imposible de\nreconstruir** — el dato se destruía a medida que ocurría.\n\nCasi lo reporto al revés: se consultó la base, salieron cero huérfanas y la\nconclusión iba a ser \"no hubo fuga\". Leer el código de limpieza antes de afirmar\nevitó una conclusión falsa. Es la misma disciplina de `L-005` y `P-016`.\n\n## Lo que se construyó, en capas\n\n1. **Visibilidad** — bloque rojo \"Ventas sin cobrar\" en la vista de mesas, con\n   las órdenes virtuales pendientes que no tienen cuenta que las respalde. El\n   dato ya se cargaba en `VistaMesasRefactor` y nadie lo dibujaba.\n2. **Advertencia al salir** — si mandaste a preparar y no cobraste, hay que\n   confirmar. Se puede salir igual, pero no en silencio.\n3. **Resolución con cuatro salidas** (`ModalResolverVentaSinCobrar`): **cobrar**\n   (sin clave, reabre el flujo normal), **cortesía**, **merma** y **cancelar**.\n   Las tres últimas piden clave de Modo Jefe: son plata que no entra.\n   - Cortesía y merma usan los dos únicos valores que acepta el esquema:\n     `cortesia` y `error_merma`. Queda escrito **por qué** no se cobró.\n   - Cancelar pone la orden en `cancelado` —con lo que **desaparece sola de las\n     10 pantallas**, que solo dibujan pendiente/preparando/listo/entregado— y\n     **devuelve el stock** descontado al enviar a cocina.\n4. **Aviso a la cocina** — al abandonar, la orden queda con la nota\n   **\"⚠️ SIN COBRAR\"**, que las pantallas ya muestran en su banda roja.\n5. **El arreglo de fondo** — al cobrar una venta rápida ahora solo se cierran\n   **las órdenes de esa venta**, no todas las que compartan el nombre `V-CAJA`.\n   Sin esto, todo lo anterior se borraba igual al siguiente cobro.\n\n## Una decisión de diseño que conviene recordar\n\nRicardo pidió que la TV avisara \"pendiente de pago\" para que no prepararan. **Se\nrechazó a propósito:** en esta caja lo normal es mandar a preparar y cobrar\ndespués, así que ese aviso saldría en el **100%** de los pedidos y en dos días\nnadie lo miraría. Se marca solo lo **abandonado**, que es cuando de verdad pasa\nalgo raro. Una alerta que suena siempre no es una alerta.\n\n## Lo que NO se tocó, a propósito\n\nNo se crea CuentaMesa para las ventas rápidas. Habría sido el arreglo \"obvio\",\npero el cobro las ignora por virtuales (`if (!esVirtual)`) y crea una cuenta ya\ncerrada: habrían quedado **cuentas abiertas fantasma acumulándose**. El problema\nse habría invertido en vez de resolverse.",
    "origen": "",
-   "grado": 6,
+   "grado": 7,
    "color": "#4a9eff"
   },
   {
@@ -1308,6 +1308,28 @@
    ],
    "cuerpo": "# H-054 · El puente de la memoria estaba cortado por los dos lados (17-sep-2026)\n\nRicardo preguntó cómo funciona Maximus. Al revisarlo aparecieron dos cosas, una\npeor que la otra.\n\n## 1. El Mac tenía 128 commits sin subir\n\n`~/harvey` estaba en `ac625b3`; `origin/main` en `d51ff0f` (**H-033**). Toda la\nmemoria desde entonces —H-034 a H-053, D-013, D-015, el cierre de H-018, el Club\npor QR, el Wallet, las tortas, el stock— **existía únicamente en el disco del\nMac**. Sin respaldo, y sin forma de que ningún otro Maximus la leyera.\n\nEs **L-004 otra vez**, invertido: antes el problema eran dos fuentes de verdad;\nahora era una sola fuente sin copia. El sistema que existe para no perder memoria\nllevaba semanas sin respaldar.\n\n**Resuelto:** los 128 commits subidos a `titicheo65/maximus` el 17-sep. Escaneo\nprevio de credenciales (tokens, llaves privadas, claves de API): limpio.\n\n## 2. El servidor nunca hacía `git pull`\n\n`C:\\maximus` es un clon. El agente lee de ahí (`MAXIMUS_MEMORY_DIR`), pero nada\nlo actualizaba: P-008 punto 2, abierto desde el 20-ago sin tocarse. El Maximus de\nTelegram contestaba con la memoria del día que se instaló — **datos viejos dichos\ncon seguridad, que es peor que no tener memoria**.\n\n**Resuelto:** `scripts/sync-memoria.ps1` en `titicheo65/dimango-agent`\n(commit `6dcf854`). Hace `git pull --ff-only` en `C:\\maximus` cada 15 min por\nTarea Programada, avisa por Telegram solo tras dos fallos seguidos, y **no toca\n`C:\\dimango-agent`**: el código se despliega a mano a propósito.\n\nNo hace falta reiniciar el agente: `agent/maximus.py` invalida su caché por fecha\nde modificación de los archivos, así que relee la memoria solo.\n\n### La tarea se creó mal la primera vez — error de Maximus\n\nSe creó con `/RU SYSTEM`. **SYSTEM no tiene git en su PATH ni las credenciales\ndel repo**, así que a las 04:10 falló, y con `$ErrorActionPreference =\n'SilentlyContinue'` el log quedó con una **línea muda**: `FALLO el pull (intento\n1):` y nada más. `monitor-maximus.ps1` —escrito en agosto y funcionando— corre\ncon el usuario; el patrón correcto ya estaba en casa y no se copió.\n\nDos arreglos: el script busca `git` explícitamente y dice en el log cuando no lo\nencuentra (commit `6e15f0e`), y la tarea se recreó con\n`Register-ScheduledTask -LogonType Interactive`, que no pide contraseña.\n`schtasks /RP \"\"` desde PowerShell no sirve: las comillas se pierden y pide la\nclave por pantalla.\n\n**Costo de correr como usuario y no como SYSTEM:** la tarea vive mientras la\nsesión de Windows esté iniciada. En ServidorPlaya siempre lo está (PM2 corre\nigual), pero si alguien cierra sesión en vez de bloquear la pantalla, la\nsincronización se detiene **en silencio**.\n\n### Verificado de punta a punta (17-sep-2026, 04:2x)\n\nRicardo le preguntó por Telegram *\"¿quién carga el inventario en Playa?\"* y\ncontestó **Carlos en Playa, Alejandra en el Mall** — dato que solo existe en\nD-016, subido veinte minutos antes. La memoria llega sola al servidor.\n\n**Lo único no probado:** el disparo fue manual (`schtasks /Run`). Que el\ntemporizador de 15 min dispare **solo** se verifica mirando el log al día\nsiguiente: deben verse líneas cada cuarto de hora que nadie gatilló.\n\n## Corrección: Telegram NO estaba muerto\n\nMaximus afirmó que el canal de Telegram seguía caído desde el 20-ago, citando\nP-008 punto 3. **Falso.** El bot está configurado y en uso: `monitor-maximus.ps1`\navisa por ahí desde el 26-ago, existe `scripts/advisor_diario.py` (3\nrecomendaciones al día) y hay bots de checklist por local desde el 25-ago. El\nchat_id de Ricardo (`8208785474`) está escrito en el propio monitor.\n\n**La nota P-008 quedó congelada en agosto y Maximus la leyó como si fuera de\nhoy.** Misma familia que L-005 y L-006: se presentó con peso de hecho algo que\nsolo era un registro viejo sin verificar. **Regla derivada: un pendiente de\ninfraestructura de más de una semana se verifica contra el sistema antes de\nrepetirlo.**",
    "origen": "17-sep-2026, revision del funcionamiento de Maximus a pedido de Ricardo",
+   "grado": 5,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-055",
+   "tipo": "hallazgo",
+   "titulo": "El registro de eliminaciones de ítems murió el 1-jul-2026, el mismo día de la migración a DiMangoToGo",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "auditoria",
+    "control",
+    "fuga",
+    "caja",
+    "eliminaciones",
+    "egresos"
+   ],
+   "cuerpo": "# H-055 · Se borran ítems y nadie deja huella (17-sep-2026)\n\nRicardo preguntó si Maximus puede decirle **quién eliminó un ítem, qué cosa y por\nqué**, y lo mismo con los egresos de caja. Verificado en producción:\n\n## Eliminaciones: el dato dejó de existir\n\n**El último registro de `AuditoriaModificacion` es del 1-jul-2026, 00:50.**\nDos meses y medio sin una sola línea. Los ítems se siguen eliminando todos los\ndías; lo que se cortó es el registro.\n\n**Causa verificada:** de todo el código, solo `src/pages/EditarMesa.jsx` escribe\nesa auditoría (vía `components/auditoria/useAuditoria.jsx`). Caja, garzón,\n`PanelMesasAdmin`, `PedidosPendientesPanel` y las eliminaciones pedidas **por\nWhatsApp** (`personal_autorizado.py`) borran sin registrar nada.\n\n**La fecha no es casualidad: el 1-jul es el día de D-008**, cuando DiMango quedó\n100% en DiMangoToGo y murió Toteat. La migración se llevó el control por delante\ny nadie lo notó en 78 días.\n\n**Lo que se está perdiendo**, según los últimos datos que sí existen (junio):\neliminaciones de $22.500, $16.000, $11.500, $11.200, con motivos declarados\n\"Otro\", \"Cortesía\", \"Cliente cambió de opinión\". Un ítem eliminado **después de\nservido** es la forma más común de fuga en un restaurante. Hoy es invisible en los\ndos locales. Misma familia que H-032 (la evidencia se borraba sola al cobrar).\n\n## Egresos de caja: el dato está vivo, falta la herramienta\n\n`EgresoCaja` se escribe bien — último: 16-sep 19:29, Mall, \"CABLE CELULAR\"\n$14.990, efectivo. Trae monto, motivo, local, medio de pago y turno.\n\nMaximus tiene `egreso_caja_dimango` para **crear** un egreso, pero **ninguna\nherramienta para consultarlos**. Por eso no supo responder.\n\n## Orden de trabajo — no invertir el orden\n\n1. **Reparar el registro de eliminaciones** en todos los caminos: caja, garzón,\n   paneles de admin y WhatsApp.\n2. **Recién después**, darle a Maximus una herramienta de consulta\n   (eliminaciones + egresos, por rango de fechas, local y persona).\n\n**Por qué en ese orden:** si la herramienta llega primero, a la pregunta \"¿quién\neliminó algo esta semana?\" Maximus contestará **\"nadie\"** leyendo una tabla\nvacía — tranquilidad falsa sobre el punto exacto donde hay fuga. Peor que no\ntenerla.",
+   "origen": "17-sep-2026, Ricardo pregunta si Maximus puede decirle quién eliminó un ítem y por qué",
    "grado": 5,
    "color": "#4a9eff"
   },
@@ -1855,7 +1877,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 22,
+   "grado": 23,
    "color": "#ff5f56"
   },
   {
@@ -2088,7 +2110,7 @@
    ],
    "cuerpo": "**Aprobada por Ricardo el 12-sep-2026**, 24 días después de propuesta, y el\nmismo día implementada y verificada en producción:\n\n- El personal autorizado registra egresos de caja hasta **$50.000 por egreso**\n  y **$200.000 diarios acumulados por persona**\n- Queda registrado con su nombre y el motivo es obligatorio\n- Sobre $50.000, consulta a Ricardo\n- Cada egreso avisa a Ricardo por Telegram al instante\n\n**Ya no es una regla en un documento: está escrita en el código** — en\n`agent/personal_autorizado.py` (`EGRESO_MAX`, `EGRESO_DIA_MAX`) y repetida en\n`base44/functions/maximusEgreso/entry.ts`, para que no dependa de una sola\npieza. Ver [[D-014]].\n\n**Origen:** E-001 — un egreso de $10.550 escaló hasta Ricardo. Eso es 1,4\nminutos de venta de DiMango.\n\n**Primer uso real:** 12-sep-2026, 21:24 en Arica. Noemi registró $5.000\n(\"SENCILLO\") en la caja de Playa desde su WhatsApp, sin pedirle la clave a\nRicardo. Verificado en `EgresoCaja`: `autorizado_por: \"Noemi\"`, turno correcto,\nlocal correcto, y el aviso llegó a Telegram.",
    "origen": "propuesta de Maximus a partir de E-001; aprobada por Ricardo el 12-sep-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#8be9fd"
   },
   {
@@ -3994,6 +4016,31 @@
   {
    "de": "H-054",
    "a": "D-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-055",
+   "a": "D-008",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-055",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-055",
+   "a": "R-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-055",
+   "a": "E-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-055",
+   "a": "H-032",
    "rel": "relacionado"
   },
   {
