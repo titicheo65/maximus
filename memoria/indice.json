@@ -285,6 +285,27 @@
    "color": "#f5a623"
   },
   {
+   "id": "D-016",
+   "tipo": "decision",
+   "titulo": "Inventario diario: Carlos en Playa, Alejandra en el Mall; el panel de stock queda sin restringir hasta consolidar",
+   "estado": "vigente",
+   "autoridad": 4,
+   "fuente": "INFORMADO",
+   "fecha": "2026-09-17",
+   "tags": [
+    "stock",
+    "inventario",
+    "personal",
+    "delegacion",
+    "playa",
+    "mall"
+   ],
+   "cuerpo": "# D-016 · Quién carga el stock, y por qué el candado queda abierto (17-sep-2026)\n\n## La decisión\n\n**Carlos Latin hace el inventario en Playa. Alejandra en el Mall.** Los dos son\nrol `cajero` con clave de 4 dígitos activa, así que cada cambio queda en\n`MovimientoStockPanel` con nombre y hora (H-052).\n\n**Ricardo salió de la carga diaria.** Es lo que importa acá: la primera versión de\nla respuesta era \"yo Playa, Alejandra Mall\", que lo devolvía a una tarea diaria a\nhora fija dentro de la operación, a menos de dos meses de la semana de prueba del\n9-15 de noviembre (D-005). Lo corrigió solo, sin discusión.\n\n## El candado queda abierto, con fecha\n\nHoy `/StockEnVivo` y `/StockEnVivoMall` aceptan a **cualquiera de los 21** con\nclave activa, incluidos los 14 garzones. La bitácora registra quién tocó, pero no\nimpide que toque — y el problema declarado por Ricardo era justamente que *\"a\nveces se manipula y se vuelve a descuadrar\"*.\n\n**Ricardo decide no restringir todavía:** *\"no restringir nada aun hasta que quede\nconsolidado, nadie sabe q esa pagina existe\"*.\n\n**Objeción de Maximus, planteada una vez y no repetida:** que nadie conozca la\npágina es una protección que **se gasta sola** — deja de ser cierta el día que\nCarlos y Alejandra la usen delante de otros.\n\n**Fecha de revisión: 1 de octubre de 2026.** Si el inventario está consolidado, se\nrestringe a rol `cajero`/`admin` (deja adentro a Ricardo, Carlos, Alejandra,\nNoemi, Sebastián, Angélica y Jefe). Es un cambio de diez minutos y no toca el PIN\nde la caja.\n\n## Nota al margen, verificada el mismo día\n\nLos productos con `stock_activo` en **cero no son un descuadre**: Ricardo los pone\nen cero a propósito cuando el producto no se vende. Maximus levantó alarma por 28\nproductos en Playa y 22 en el Mall \"bloqueados\"; **era falsa alarma** y quedó\nretirada. El sistema funciona como debe.",
+   "origen": "17-sep-2026, Ricardo, tras revisar responsables del control de stock",
+   "grado": 5,
+   "color": "#f5a623"
+  },
+  {
    "id": "E-001",
    "tipo": "escalamiento",
    "titulo": "Noemi — autorizar egreso de caja de $10.550",
@@ -299,7 +320,7 @@
    ],
    "cuerpo": "Autorizar egreso de caja para pago de encomienda. **$10.550. 1 minuto**\n(entrar al sistema y poner clave).\n\nOrigen: operación normal · ¿Podía resolverlo otro? **Sí, con autoridad** ·\nNivel propuesto: 1 (decide y actúa) · Responsable: encargado de local.\n\n**Contexto:** $10.550 = 1,4 minutos de venta de DiMango; 0,006% de la\nfacturación mensual.",
    "origen": "bitácora de escalamientos",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff79c6"
   },
   {
@@ -1247,7 +1268,7 @@
    ],
    "cuerpo": "# H-052 · Stock: dos sistemas para el pan y cero trazabilidad (16-sep-2026)\n\n## Lo que estaba pasando\n\n**1. El pan sí tenía control, pero no donde Ricardo lo buscaba.** Hay dos\nsistemas paralelos: stock de **modificador** (`ModifierItem`) y stock de\n**insumo** (`Insumo` + `Receta`). Los panes están controlados como insumo, con\nreceta propia (\"Pan Frica\" → insumo `pan frica`) y bloqueo de venta encendido.\nSu stock de modificador **nunca se encendió** —Ciabatta ni siquiera tiene el\ncampo—, así que la pestaña Modificadores no mostraba nada.\n\nDe **624 modificadores, solo 44 tienen campos de stock** y **ninguno está activo\nen Playa**; en el Mall hay uno solo. El stock de modificador está prácticamente\nsin uso.\n\n**Dato que salió de paso:** el stock de pan del Mall está **en negativo**\n(frica −11, ciabatta −18). Nadie recarga ese conteo allá, y con el bloqueo\nencendido los sándwiches del Mall quedan bloqueados.\n\n**2. Ningún cambio de stock dejaba rastro.** Editar un número en `/StockEnVivo`\nsobrescribía el anterior. No se podía saber con qué se amaneció, cuánto se\nagregó ni quién lo movió: por eso \"se manipula y se descuadra\" sin explicación\nposible.\n\n**3. La pantalla ya pedía PIN y botaba quién entró.** `PINPadLock` valida contra\n`Personal` (8 personas con PIN de 4 dígitos) y **devuelve la persona**, pero\n`StockEnVivo` hacía `onUnlock={() => setBloqueado(false)}`: descartaba el nombre.\nNo hubo que crear claves nuevas, solo dejar de tirar el dato a la basura.\n\n## Lo hecho (falta publicar)\n\n- **`MovimientoStockPanel`** (entidad nueva): fecha, hora, local, tipo, objeto,\n  campo, valor anterior, valor nuevo, delta, **usuario y origen**.\n- **`lib/stockBitacora.js`**: registra los cambios (nunca frena la operación si\n  falla), lee los del día y calcula el resumen. Todo en fecha de Chile.\n- **Las dos pantallas y los tres paneles** (productos, modificadores, insumos)\n  registran cada cambio con el nombre de quien entró, que ahora se muestra\n  arriba.\n- **Control del día por producto**: `inicio · +agregado · −quitado · vendido →\n  esperado`, y si el esperado no calza con el stock real, la fila se marca en\n  ámbar con el número que hay. El vendido sale de los pedidos del día, contando\n  también lo que salió como modificador.\n- **Modificadores muestran el stock por insumo** cuando existe receta, en verde o\n  rojo si está agotado. **No se creó un segundo conteo del pan**: se muestra el\n  que ya descuenta al vender.\n\nLint sin errores, build OK, checkpoint creado.\n\n**Para probar tras publicar:** entrar a `/StockEnVivo` con un PIN, ver el nombre\narriba, cambiar un stock y volver a entrar: la fila debe mostrar el inicio y el\n\"+N\". En Modificadores, buscar \"frica\": debe aparecer el stock por insumo.\n\n## Pestaña \"Sugerido\" y stock en las pantallas de TV (16-sep-2026)\n\n**En los TV:** `StockItemBadge` ahora muestra también los **modificadores con\nstock** (el pan). Un solo archivo, y entra en las 9 pantallas y en \"ver comanda\ncompleta\". Antes, que \"Ave Palta\" tuviera insumos de sobra y el pan frica estuviera\nagotado solo se veía entrando a `/StockEnVivo`, o sea, nunca durante el servicio.\n\n**Pestaña 📈 Sugerido** (`components/stock/TabSugerido.jsx`, en los dos locales):\nlee los pedidos de los últimos 7/14/21/30 días —solo los campos necesarios, para\nno bajar megas a una tablet— y calcula, por producto y por modificador:\n\n> **IDEAL = día cargado (percentil 80) + 10%** · **ALERTA = un tercio del ideal**\n\n**No el promedio**, que quiebra stock dos de cada diez días, justo los buenos;\n**no el máximo**, que hace producir para un día que pasa una vez al mes. Botón\npara dejar la alerta como **mínimo real** del producto o del insumo, y queda en la\nbitácora con el nombre de quien lo aplicó.\n\n**Primeros números reales (28-ago al 14-sep, 8.001 pedidos), validados fuera de la\napp con los mismos datos:**\n\n| | prom/día | día cargado | máx | **ideal** | alerta |\n|---|---|---|---|---|---|\n| Pan Ciabatta Playa | 23,6 | 29 | 41 | **32** | 11 |\n| Pan Frica Playa | 19,2 | 26 | 30 | **29** | 10 |\n| Pan Ciabatta Mall | 10,7 | 16 | 21 | **18** | 6 |\n| Pan Frica Mall | 9,5 | 14 | 18 | **16** | 6 |\n\n**Caveats escritos en la propia pantalla:** el percentil se calcula sobre los días\n**con venta** (se muestra \"X de N días con venta\" para que se note en los ítems\nesporádicos), y una semana como la del 18 no se parece a un día normal: hay que\nrecalcular después.\n\n**Lo que no arregla ningún cálculo:** el pan del Mall está en **−11 y −18**. Allá\nno cargan el stock al abrir. Primero va esa instrucción, después el número.\n\n## Búsqueda por categoría (17-sep-2026)\n\nPedido de Ricardo: poder buscar por categoría. Se aplicó en las tres pestañas,\ncon el nombre que corresponde a cada una:\n\n- **Productos:** busca por nombre **y por categoría** (incluye las secundarias).\n- **Insumos:** por nombre **y por área** (PASTELERIA, BAR, COCINA…).\n- **Modificadores:** por nombre **y por grupo** (\"Tipo De Pan\", \"sabores cafe\"…).\n\nEs el mismo criterio en Playa y Mall. Lint sin errores nuevos, build OK.\n\n**Nota de trabajo:** la captura que mandó Ricardo era del **editor de Base44**\n(`/editor/preview`), no de la app publicada. Ahí los cambios no escriben en la\nbase real ([[L-011]]). Para probar de verdad: `dimangotogo.base44.app/StockEnVivo`.",
    "origen": "16-sep-2026, Ricardo: 'frica y ciabatta no muestran stock' y 'a veces se manipula y se vuelve a descuadrar'",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -1266,7 +1287,7 @@
    ],
    "cuerpo": "# H-053 · El stock de producto no baja por todos los canales (17-sep-2026)\n\n**La pregunta de Ricardo:** *\"si ahora quedan 6 cheesecake de arándanos, mañana\nel stock de inicio debe ser 6, ¿cierto?\"*\n\n**Sí: el stock es un saldo que sigue.** No hay ningún proceso que lo reinicie; lo\nque queda hoy es con lo que se amanece. Eso está bien.\n\n**El problema es cómo baja durante el día.** Leído el código:\n\n| Canal | ¿Descuenta stock del producto? | ¿Descuenta insumos? |\n|---|---|---|\n| **Caja** | **Sí**, al enviar y al cobrar (`Caja.jsx` 904 y 1142) | Sí |\n| **Garzón** | **Sí, pero al AGREGAR AL CARRITO** (`Waiter.jsx` 491) | Sí |\n| **Kiosko** | **No** | Sí |\n| **Menú de mesa** (QR) | **No** | Sí |\n| **Retiro local** | **No** | Playa **no**, Mall sí |\n\n**Dos formas distintas de descuadre, las dos silenciosas:**\n\n1. **Lo que se vende por kiosko, menú de mesa o retiro no baja el stock del\n   producto.** El número queda alto y se sigue ofreciendo algo que ya no está. El\n   bloqueo por insumo tapa parte del hoyo, pero solo para los productos con\n   receta.\n2. **El garzón descuenta al poner el ítem en el carrito, no al enviar la\n   comanda.** Si lo borra antes de mandar, ese stock **no vuelve**: se perdió una\n   unidad que sigue en el mesón.\n\n**Por qué importa ahora:** el control del día de `H-052` (inicio + agregado −\nvendido = esperado) va a marcar en ámbar justamente estos casos. Sin arreglar\nesto, el panel va a mostrar descuadres que no son robo ni error humano, sino del\npropio sistema.\n\n**Arreglo recomendado, uno solo:** que el descuento del stock del producto ocurra\nen **un solo lugar y en un solo momento** —cuando la venta existe— igual que ya\nhace `descontarInsumosVenta` con los insumos. Así quedan cubiertos los cinco\ncanales de una vez, en vez de parchar cinco pantallas que van a volver a\ndivergir. Pendiente de decisión de Ricardo.\n\n## Corrección tras el aporte de Ricardo (17-sep-2026)\n\nRicardo: *\"todas las plataformas de venta descuentan: playa 1-2-3, mall, retiro\nlocal mall, retiro local playa, waiter, caja\"*. **Tiene razón en lo que importa,\ny la nota anterior mezclaba dos stocks distintos.** Verificado canal por canal:\n\n| Canal | Descuenta INSUMO | Descuenta stock por PRODUCTO |\n|---|---|---|\n| Caja | Sí | Sí |\n| Garzón | Sí | Sí, **al agregar al carrito** (si lo borra, no vuelve) |\n| Kioscos Playa 1-2-3 y Mall | Sí | No |\n| Menú de mesa (QR) | Sí | No |\n| Retiro Local Mall | Sí | No |\n| **Retiro Local Playa** | **NO** | No |\n\n**El caso que puso Ricardo lo aclara:** los 6 cheesecake de arándanos son el\n**insumo** `cheesecake Arandanos` (controla_stock, Playa 6, Mall 0). El producto\n`CheeseCake Arándanos` tiene el stock por producto **apagado** en Playa. O sea,\nese número lo descuentan todos los canales… menos Retiro Local Playa.\n\n**Los dos hoyos reales, ahora sí acotados:**\n1. **`RetiroLocalPlaya.jsx` no llama a `descontarInsumosDeVenta`.** Es el único\n   canal que no descuenta nada; `RetiroLocalMall.jsx` sí (línea 572). Una línea\n   de diferencia entre dos pantallas gemelas.\n2. **El stock por producto** solo baja en caja y garzón. Afecta a los productos\n   que se controlan por producto y se venden por kiosco/menú/retiro.\n\n**De paso:** hay **productos duplicados** de cheesecake (mismo nombre, distinto\n`stock_activo_mall` y cantidad). Otro punto donde el número se parte en dos.\n\n## Segunda corrección: Retiro Playa SÍ descuenta (17-sep-2026)\n\nMi corrección anterior seguía equivocada en un punto: `RetiroLocalPlaya.jsx` no\nllama a `descontarInsumosDeVenta` **porque lo hace el componente compartido**\n`components/retiro/CheckoutRetiroLocal.jsx` (línea 114), que usan los dos retiros.\n**Ricardo tenía razón: los siete canales descuentan insumos.** Mi grep miró el\narchivo de la página y no el componente que crea la Order. Dos veces afirmé de\nmás sobre este mismo tema; la lección es mirar dónde se crea la Order, no dónde\nestá la pantalla.\n\n**El único hoyo real era el stock POR PRODUCTO.**\n\n## Arreglo aplicado (17-sep-2026, falta publicar)\n\nDecisión de Ricardo: **cada canal descuenta el stock de su local** — Playa\n(caja, garzón, kioscos 1-2-3, retiro) baja `/StockEnVivo`; Mall (caja, garzón,\nautoatención, retiro) baja `/StockEnVivoMall`.\n\nSe hizo **en un solo lugar**: `descontarInsumosVenta` (servidor) ahora descuenta\ntambién el stock por producto, con el local que trae la Order, sumando primero\nlas líneas repetidas del mismo producto y **protegido por la misma marca\n`insumos_descontados`**. Por eso el retiro local —que se cierra desde la caja—\nno puede descontar dos veces.\n\nSe **quitó** el descuento de las pantallas: dos bloques en `Caja.jsx` y el del\n`Waiter.jsx`, que además descontaba al agregar al carrito.\n\nLint sin errores nuevos, build OK, checkpoint creado.\n\n**Probar tras publicar, con un producto que tenga stock por producto encendido:**\nvender uno por caja, uno por garzón y uno por kiosco, y ver que baja de a uno en\n`/StockEnVivo`. En el garzón, agregar al carrito y **borrarlo antes de enviar**:\nel stock NO debe moverse.",
    "origen": "17-sep-2026, pregunta de Ricardo: '¿el stock se guarda día a día?'",
-   "grado": 3,
+   "grado": 4,
    "color": "#4a9eff"
   },
   {
@@ -1834,7 +1855,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 21,
+   "grado": 22,
    "color": "#ff5f56"
   },
   {
@@ -2085,7 +2106,7 @@
    ],
    "cuerpo": "Cuatro niveles, por área y por monto:\n\n1. **Decide y actúa** — no informa\n2. **Decide e informa** — actúa y deja registro\n3. **Consulta antes** — no actúa sin respuesta\n4. **Escala siempre** — nunca decide\n\n**El problema de Ricardo no es que nadie decida: es que nadie sabe hasta dónde\npuede decidir.**\n\nCada entrada de la bitácora de escalamientos se clasifica en un nivel y se asigna\na un responsable. Esa clasificación acumulada *es* el procedimiento de delegación.",
    "origen": "marco M5 de MENTORS.md, pendiente de aprobación",
-   "grado": 7,
+   "grado": 8,
    "color": "#8be9fd"
   },
   {
@@ -3023,6 +3044,31 @@
   {
    "de": "D-015",
    "a": "H-050",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-016",
+   "a": "H-052",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "D-016",
+   "a": "H-053",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "D-016",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-016",
+   "a": "R-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-016",
+   "a": "E-001",
    "rel": "relacionado"
   },
   {
