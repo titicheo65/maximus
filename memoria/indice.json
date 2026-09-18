@@ -124,7 +124,7 @@
    ],
    "cuerpo": "\"No tuvimos errores\" no cuenta como verificación.\n\nTodo cambio en producción necesita una prueba explícita con **criterio de\naprobación fijado de antemano** y una fecha de verificación bajo carga real.\nMaximus no cierra un pendiente sin eso.",
    "origen": "acordada con Ricardo, 19-ago-2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#f5a623"
   },
   {
@@ -1330,7 +1330,7 @@
    ],
    "cuerpo": "# H-055 · Se borran ítems y nadie deja huella (17-sep-2026)\n\nRicardo preguntó si Maximus puede decirle **quién eliminó un ítem, qué cosa y por\nqué**, y lo mismo con los egresos de caja. Verificado en producción:\n\n## Eliminaciones: el dato dejó de existir\n\n**El último registro de `AuditoriaModificacion` es del 1-jul-2026, 00:50.**\nDos meses y medio sin una sola línea. Los ítems se siguen eliminando todos los\ndías; lo que se cortó es el registro.\n\n**Causa verificada:** de todo el código, solo `src/pages/EditarMesa.jsx` escribe\nesa auditoría (vía `components/auditoria/useAuditoria.jsx`). Caja, garzón,\n`PanelMesasAdmin`, `PedidosPendientesPanel` y las eliminaciones pedidas **por\nWhatsApp** (`personal_autorizado.py`) borran sin registrar nada.\n\n**La fecha no es casualidad: el 1-jul es el día de D-008**, cuando DiMango quedó\n100% en DiMangoToGo y murió Toteat. La migración se llevó el control por delante\ny nadie lo notó en 78 días.\n\n**Lo que se está perdiendo**, según los últimos datos que sí existen (junio):\neliminaciones de $22.500, $16.000, $11.500, $11.200, con motivos declarados\n\"Otro\", \"Cortesía\", \"Cliente cambió de opinión\". Un ítem eliminado **después de\nservido** es la forma más común de fuga en un restaurante. Hoy es invisible en los\ndos locales. Misma familia que H-032 (la evidencia se borraba sola al cobrar).\n\n## Egresos de caja: el dato está vivo, falta la herramienta\n\n`EgresoCaja` se escribe bien — último: 16-sep 19:29, Mall, \"CABLE CELULAR\"\n$14.990, efectivo. Trae monto, motivo, local, medio de pago y turno.\n\nMaximus tiene `egreso_caja_dimango` para **crear** un egreso, pero **ninguna\nherramienta para consultarlos**. Por eso no supo responder.\n\n## Orden de trabajo — no invertir el orden\n\n1. **Reparar el registro de eliminaciones** en todos los caminos: caja, garzón,\n   paneles de admin y WhatsApp.\n2. **Recién después**, darle a Maximus una herramienta de consulta\n   (eliminaciones + egresos, por rango de fechas, local y persona).\n\n**Por qué en ese orden:** si la herramienta llega primero, a la pregunta \"¿quién\neliminó algo esta semana?\" Maximus contestará **\"nadie\"** leyendo una tabla\nvacía — tranquilidad falsa sobre el punto exacto donde hay fuga. Peor que no\ntenerla.\n\n---\n\n## RESUELTO el 17-sep-2026 — no había que construir, había que enchufar\n\nLa maquinaria estaba entera y desconectada:\n\n- `components/auditoria/useAuditoria.jsx` → escribe `AuditoriaModificacion` **y**\n  dispara el aviso a Telegram con usuario, mesa, producto, monto, motivo, hora y\n  turno, con 🚨 si el nivel es alto. **Solo la llamaba `EditarMesa`**, la pantalla\n  que dejó de usarse el 1-jul.\n- `TelegramConfig` ya tenía bot activo (`qrllamada_bot`) y **ocho grupos**\n  configurados: clientes, display, garzones y pagos, por local.\n\n**Segundo hallazgo, el que importa:** cortesías, egresos, mermas y descuentos\nmanuales **sí avisaban** — vía `notificarAccionAdmin` — pero **al grupo de\nGARZONES del local**. Las acciones que mueven plata sin pasar por una venta se\nmostraban en el chat de las mismas personas cuya conducta controlan, mezcladas\ncon el ruido operativo. No faltaba sistema: estaba mal dirigido.\n\n### Lo que se hizo\n\n1. `src/lib/controlOperacion.js` (nuevo): un solo punto de entrada,\n   `registrarControl(...)`, que nunca lanza — un control caído no puede caerse\n   encima de la venta.\n2. `PanelMesasAdmin.eliminarItem` ahora registra y avisa. Es **la** pantalla\n   donde se borran ítems de mesas abiertas, y su propio encabezado dice\n   *\"Sin necesidad de Modo Jefe ni acceso a Caja\"*: borraba sin clave y sin\n   huella.\n3. `enviarTelegram` acepta `origen: \"control\"`; `notificarAccionAdmin` lo usa,\n   así que cortesía, egreso, merma y descuento salen del grupo de garzones.\n4. `notificarAuditoriaTelegram` apunta al mismo grupo y antepone 🏖️ PLAYA /\n   🏬 MALL, porque el grupo es uno solo.\n\n### Decisiones de Ricardo\n\n- **Un solo grupo** para los dos locales, con etiqueta de local.\n- **Solo él adentro las primeras dos semanas**: medir antes de que la conducta\n  cambie por sentirse mirada.\n\n### Configuración\n\nGrupo **\"Dimango Control\"**, chat_id **`-5335398927`**, escrito en el código\n(no es secreto; el token del bot sigue fuera) y sobreescribible con\n`TELEGRAM_CHAT_CONTROL`. **Si el grupo se convierte en supergrupo, Telegram le\ncambia el id a uno con `-100` y los avisos mueren en silencio.**\n\n**Verificado:** mensaje de prueba entregado al grupo (`sendMessage` → ok).\nCheckpoint `6aaca3684ab531eadf50af69`. **Falta publicar.**\n\n### Advertencia entregada a Ricardo\n\nSon 78 días sin control. Al encenderlo van a aparecer eliminaciones y cortesías\nque siempre ocurrieron. **No confundir \"empezó a pasar\" con \"empecé a verlo\".**",
    "origen": "17-sep-2026, Ricardo pregunta si Maximus puede decirle quién eliminó un ítem y por qué",
-   "grado": 5,
+   "grado": 7,
    "color": "#4a9eff"
   },
   {
@@ -1389,7 +1389,7 @@
    ],
    "cuerpo": "Cada componente que Ricardo agrega —Base44, DiMangoToGo, DiMangoWorking,\nservidor de impresión, tótem, cuatro medios de pago— es una pieza más que\n**solo él entiende**. Está reemplazando dependencia de personas por dependencia\nde sistemas que dependen de una sola persona.\n\n**Regla derivada:** automatización que solo Ricardo puede mantener no es\nautomatización, es una dependencia nueva con mejor interfaz. Toda iniciativa\ntécnica debe pasar el test de D-002.",
    "origen": "lectura de Maximus, 19-ago-2026",
-   "grado": 26,
+   "grado": 27,
    "color": "#27c93f"
   },
   {
@@ -1551,7 +1551,27 @@
    ],
    "cuerpo": "# L-011 · La vista previa del editor engaña (12-sep-2026)\n\n**Tres veces en tres días**, una prueba dada por buena en\n`app.base44.com/apps/<id>/editor/preview` **no dejó rastro en la base**:\n\n| Fecha | Prueba | Qué se creyó | Qué había en la base |\n|---|---|---|---|\n| 10-sep | \"Optimizar fotos\" | fotos reducidas | ningún producto cambiado |\n| 11-sep | Subir planilla de julio | julio corregido | seguía la planilla anterior |\n| 12-sep | Vender gnocchi | stock bajó a 0 | `gnocchi` seguía en 3, y el último pedido de producción era de 3 horas antes |\n\n**Regla:** toda prueba que deba **escribir datos** —cargar, cobrar, descontar,\noptimizar— se hace en el **sitio publicado** (`dimangotogo.com`,\n`dimangoworking.base44.app`), nunca en la vista previa del editor. La vista previa\nsirve para mirar la interfaz.\n\n**Y del lado de Maximus:** no dar por verificada una prueba porque el usuario vea\nel número en pantalla. **Confirmarla en la base**, que es lo que evitó dos veces\nseguir construyendo sobre un resultado falso. Es `D-007` aplicado: \"no tuvimos\nerrores\" no es verificación.",
    "origen": "Tercera vez que pasa: fotos (10-sep), planilla de julio (11-sep), stock de insumos (12-sep-2026)",
-   "grado": 7,
+   "grado": 8,
+   "color": "#27c93f"
+  },
+  {
+   "id": "L-012",
+   "tipo": "leccion",
+   "titulo": "Publicar no basta: cada terminal sigue con el código viejo hasta que se recarga",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "pwa",
+    "despliegue",
+    "verificacion",
+    "caja"
+   ],
+   "cuerpo": "# L-012 · El cambio estaba publicado; la caja no se había enterado (17-sep-2026)\n\nSe cambió el destino de los avisos de control (cortesías, egresos, mermas,\ndescuentos): del grupo de garzones al grupo de Control. Ricardo publicó, probó\nuna cortesía, y **siguió llegando al grupo de garzones**.\n\n**No era el código.** El cambio de destino vive en el **front**\n(`lib/verificarPinModoJefe.js`, que manda `origen: \"control\"`). DiMangoToGo es una\nPWA: la pantalla de caja tenía el JavaScript anterior cargado y seguía mandando\n`origen: \"garzones\"`. La función del servidor, ya actualizada, obedecía lo que le\nllegaba.\n\n**Recargó la caja y llegó al grupo correcto.** Misma publicación, mismo código.\n\n## Regla derivada\n\n**Después de publicar un cambio que afecta a una pantalla en uso, hay que\nrecargarla antes de probar** — cerrar y abrir la app, o Ctrl+Shift+R. Vale para\ncaja, garzón, kioscos y TV, que son dispositivos que quedan días sin recargarse.\n\n**Y el corolario, que es el que cuesta plata:** una prueba sobre una pantalla\ncacheada da un **falso negativo**, y el falso negativo lleva a \"el cambio no\nsirvió\" → a revertir algo que estaba bien. Es el mismo error de L-011 (probar en\nel editor preview en vez de la app publicada) por el otro extremo: allá se probó\ndonde no escribe, acá se probó con lo que no se actualizó.\n\nPariente de L-005 y L-006: la conclusión se sacó antes de verificar en qué\nestado estaba realmente el sistema que se estaba probando.",
+   "origen": "17-sep-2026, la cortesía seguía llegando al grupo equivocado después de publicar",
+   "grado": 3,
    "color": "#27c93f"
   },
   {
@@ -2115,6 +2135,26 @@
    "cuerpo": "# P-019 · Lo que queda pendiente (12-sep-2026, 03:10)\n\n## Actualización 13-sep-2026 (domingo)\n\n**Cerrado desde la versión anterior:**\n- Secretos fuera del código: publicado y verificado — `/Colacion` trae datos y el\n  WhatsApp de retiro llega (tras arreglar la URL muerta de ngrok, `H-044`).\n- Descuento de insumos en todos los canales: publicado.\n- \"Lomo duplicado\": **no lo era** — `Lomo liso no angus` es otro corte; Ricardo lo\n  aclaró. Los 13 insumos apagados sin querer (`H-045`): Ricardo decidió dejarlos así.\n- Delegación de egresos y eliminación por ítem por WhatsApp (`D-014`): en producción.\n- Cuadratura unificada Caja/Admin Ventas (`H-046`): publicada.\n- **12-sep, $15.040 de sobrante en efectivo: cerrado por decisión de Ricardo**\n  (\"olvidémonos de ayer\"). Lo de fondo sigue abierto abajo, hacia adelante.\n\n**Abierto para hoy/esta noche:**\n- **Cierre del 13-sep:** comparar las 7 líneas Caja vs Admin Ventas (prueba de `H-046`)\n  y mirar si los **vouchers declarados vuelven a calzar exacto al peso con el\n  esperado**. Si calzan, que el cajero declare desde el cierre de lote Transbank.\n- ~~Instructivo a Carlos, Alejandra y Angélica~~ — **enviado por Ricardo el 13-sep**,\n  \"ya están claros\". Queda la prueba de eliminar ítem en mesa real.\n- \"Retiro caja\" $100.000 agregado al turno del 11 ya cerrado: revisar.\n- ~~Colación tiene el número de Noemi a nombre de Angélica Rivera~~ — **descartado**:\n  Ricardo revisó y los dos números están correctos en colación. La alarma venía de\n  un supuesto de Maximus (que la captura del chat que saludaba a \"Angélica Rivera\"\n  era del celular de Noemi); lo más probable es que fuera el de Angélica.\n- `COLACION_TOKEN`: **no se rotó** (Ricardo, 13-sep). Solo se movió al gestor de\n  secretos de Base44 (`H-043`), así que el valor sigue siendo el que quedó visible\n  en una captura del 12-sep. Riesgo bajo (token interno, solo colación). Rotar un\n  día de semana: cambiar `.env` del servidor **y** el secreto de Base44 a la vez, y\n  verificar que `/Colacion` traiga trabajadores con datos.\n\n**Hoy no se publica nada** (domingo, locales abiertos — `L-006`).\n\n**Stock en las pantallas de TV (13-sep):**\n- Primera versión —franja de stock bajo el encabezado— **publicada por Ricardo y\n  descartada**: *\"no me entendiste lo que quiero\"*. Lo que pidió era la cantidad\n  **al lado de cada ítem de la comanda**, donde mira quien prepara. Error de Maximus\n  al interpretar el pedido; costo, una vuelta de publicación.\n- **Segunda versión, construida y verificada, falta publicar:** indicador por ítem\n  (`components/display/StockItemBadge.jsx` + `lib/stockProductosDisplay.js`) en las 9\n  pantallas vivas y en \"Ver comanda completa\" (tamaño grande). Rojo AGOTADO, ámbar\n  \"quedan N\" (≤ mínimo), verde \"stock N\"; nada si el producto no lleva stock en ese\n  local. **Una consulta por local cada 60 s para toda la pantalla**, no una por ítem\n  (H-041). Cruce por `product_id` — **280 de 280 ítems reales lo traen** — y por\n  nombre como respaldo (retiro Playa no guarda id). La franja se borró. Cada\n  pantalla: −2 líneas de franja, +2 de indicador, 0 ajenas; lint sin errores nuevos\n  (los 4 de imports sin usar son previos); build y checkpoint OK.\n  **Probar tras publicar:** una comanda con un producto que lleve stock en\n  DisplayCafeteria (Playa) y DisplayMeson (Mall); el número debe coincidir con\n  `/StockEnVivo` y `/StockEnVivoMall`.\n- **Tercera vuelta (13-sep, 14:26):** Ricardo publicó y el CheeseCake Oreo **no mostraba\n  nada**. No era un fallo de publicación: ese plato **no lleva stock por producto,\n  lleva stock por insumo** (`cheesecake oreo`: Playa 1, Mall 1), y el indicador solo\n  leía producto. Segundo error de interpretación del mismo pedido: \"productos con stock\n  asignado\" incluye los dos tipos, y casi toda la pastelería va por insumo.\n  **Arreglo:** `stockProductosDisplay.js` usa primero el stock por producto y, si no\n  hay, las unidades que alcanzan por insumo con **`cargarStockPorInsumo`**, el mismo\n  cálculo de la Caja y el garzón (no se duplicó). Insumos se refrescan cada 2 min.\n  Simulado con datos reales: **café Playa pasa de 9 a 32 productos con indicador**\n  (9 por producto + 23 por insumo); Mesón Mall 33 (20 + 13). CheeseCake Oreo Playa →\n  \"quedan 1\", esperado. Build y checkpoint OK.\n  **Lección:** la captura de Ricardo era del **editor de Base44**, no de la app\n  publicada; la causa real se encontró mirando los datos del producto, no el código.\n- **VERIFICADO por Ricardo en la app publicada (13-sep): \"ahora sí se ve\".** Cerrado.\n\n**Bienvenida de los kioscos · Fiestas Patrias (13-sep) — PUBLICADA y verificada por Ricardo: \"se ve el logo\".**\n- Pedido de Ricardo para `/KioskoBienvenidaPlaya1/2/3` y `/KioskoBienvenidaMall`. Playa 1-2-3\n  comparten `pages/KioskoBienvenida.jsx`; el Mall tiene su página. Dos archivos, no cuatro.\n- Guirnalda de banderines animada + franja con la bandera (`components/kiosko/DecoracionFiestasPatrias.jsx`,\n  solo SVG/CSS, sin imágenes nuevas), textos \"¡Felices Fiestas Patrias! 🇨🇱\" / \"¡A celebrar el 18! 🎉\"\n  y CTA rojo con borde blanco.\n- **Decisión de Ricardo (13-sep): nada de promover empanadas ni ninguna compra en la bienvenida.**\n  Maximus había propuesto un botón \"Pide tus empanadas para el 18\"; se quitó. La línea de\n  categorías queda **\"Heladería · Cafetería · Pizzería · Restaurante\"** en las dos pantallas y\n  también fuera de septiembre (así lo pidió; si solo lo quería en fiestas, es un cambio chico).\n- **Se enciende sola todo septiembre y se apaga el 1-oct** (`lib/fiestasPatrias.js`, hora de\n  Chile, vuelve cada año). Ricardo pidió hasta el 30-sep: coincide. Probado con 6 fechas,\n  incluido el cambio de horario (el 1-sep Chile está en UTC−4).\n- Maqueta en `entregables/kioscos-fiestas-patrias.html` al tamaño del tótem (617×1025).\n  **Error propio en el camino:** medí un \"desborde de 48 px\" que venía de la maqueta\n  (`height:100%` + padding sin `border-box`), hice un ajuste innecesario y lo revertí. Con la\n  maqueta corregida: botón Club termina en 1001 (franja desde 1011), 172 px de aire; Mall 937.\n- Build y lint sin errores. **Probar tras publicar:** abrir las 4 bienvenidas en el tótem real\n  y confirmar que se ve completo el botón del Club.\n- **Logo (13-sep): el de las bienvenidas daba 404.** `dimango.cl/wp-content/uploads/2022/03/logo-dimango.png`\n  ya no existe; como la imagen se oculta al fallar, **los tótems mostraban la bienvenida sin logo\n  todo el año**, no solo en septiembre. Reemplazado por un logo circular (círculo blanco, fondo\n  transparente, 384 px, 7,7 KB) armado desde `~/Downloads/logodimango_1024x1024_transparente.png`\n  y **alojado en la propia app** (`public/logo-dimango-circular.png`), a 112 px. Huella verificada\n  al subirlo, incluido en el build. **Pendiente, fuera de alcance:** `BienvenidaRetiroLocalPlaya.jsx`\n  y `BienvenidaRetiroLocalMall.jsx` siguen apuntando al mismo logo roto.\n\n---\n\n## Listo en el sandbox, falta que Ricardo publique *(12-sep — ya publicado, ver arriba)*\n\n1. **Secretos fuera del código** (`H-043`). **Orden obligatorio:** crear en Base44\n   `AGENTE_API_SECRET` y `COLACION_TOKEN` —los valores están en\n   `C:\\dimango-agent\\.env` como `API_SECRET` y `COLACION_TOKEN`— y **recién ahí\n   publicar**. Al revés se caen los avisos de WhatsApp al cliente y `/Colacion`.\n   Probar: que cargue `/Colacion` y que llegue el WhatsApp de un retiro local.\n2. **Descuento de insumos en los canales que faltaban** (`H-042`): kioscos de Playa\n   1-2-3, kiosco y menú del Mall, retiro de los dos locales y carta de mesa.\n   Ya verificado en garzón y caja.\n\n## Para probar en la apertura\n\n- **Botón \"Ya se cobró — cerrar comanda\"** (`H-039`): usarlo en la primera mesa que\n  reaparezca y avisarle al equipo que ya no tienen que llamar a Ricardo.\n- **Caja en hora punta** (`H-041`): si vuelve el mensaje rojo, foto **con el texto\n  del error** para confirmar si es saturación (429).\n- **Kiosco**: resubir las 10 fotos (5 pesadas y 5 rotas) desde AdminCarta › Fotos.\n\n## Decisiones que dependen de Ricardo\n\n- ~~**Lomo duplicado**~~ — no lo era: son dos cortes distintos (Ricardo, 13-sep).\n- **Encender los otros 12 insumos** en Playa y **cargar el stock del Mall**\n  (`stock_actual_mall` está vacío).\n- **Los 27 hallazgos de seguridad**: mandar la lista completa para clasificarla. El\n  grave —`Order` sin reglas de acceso— se toca con los locales cerrados.\n- ~~**Comisiones Mercado Pago vs Transbank**~~ — cobran igual (crédito 2,95%, débito\n  1,49%, Ricardo 13-sep). `P-002` pasa a negociar por volumen; Ricardo manda el\n  informe de liquidación de agosto el 14-sep.\n\n## Con fecha\n\n- ~~**13-sep:** registrar las imposiciones de agosto (35% Mall / 65% Playa).~~\n  **HECHO y verificado en la base el 13-sep-2026** (no en el editor): `GastoEgreso`\n  12:45-12:46 · Mall **$3.170.225** + Playa (GELATERIA) **$5.887.551** = **$9.057.776**,\n  35,0% / 65,0% exacto, $442 mil bajo el estimado de $9,5M. `fecha_pago` 2026-08-13,\n  que es el campo con que el tablero asigna el mes → caen en **agosto**.\n- **20-sep:** registrar el F29 de agosto (25% / 75%). Con los dos cargados se sabe\n  cómo cerró realmente el Mall (`D-013`) y si se abre la conversación del arriendo.\n\n## Deuda técnica anotada, sin fecha\n\n- **Cobro en una sola llamada** (`H-039`): hoy son 15-18 llamadas en serie.\n- **34 registros de mesa duplicados en Playa** y la limpieza automática que no\n  cierra comandas de cuentas ya pagadas.\n- **Por qué no corren los workflows** escritos como archivo (`H-042`): hay otros\n  que dependen de ese mecanismo, como el que registra la venta del kiosco.",
    "origen": "Cierre de la sesión del 11 y 12 de septiembre de 2026",
    "grado": 8,
+   "color": "#ff5f56"
+  },
+  {
+   "id": "P-020",
+   "tipo": "pendiente",
+   "titulo": "Desmontar 'Modo Jefe No Está' sin llevarse por delante la clave de supervisor",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "caja",
+    "deuda-tecnica",
+    "control",
+    "refactor"
+   ],
+   "cuerpo": "# P-020 · Modo Jefe está muerto, pero no se borra de un saque\n\n**El hecho le da la razón a Ricardo:** la entidad `ModoJefeNoEsta` tiene **6\nregistros en toda su historia**, el último del **14-jun-2026**. Tres meses sin\nuso. No funciona mal: no se usa.\n\n## Dos cosas distintas con el mismo nombre\n\n| | Qué es | Qué hacer |\n|---|---|---|\n| **\"Modo Jefe No Está\"** | sesión temporal para cuando el jefe no está: `ModoJefeNoEsta`, `hooks/useModoJefe.js`, `ModalActivarModoJefe`, `PanelModoJefe`, `ModalSolicitarClaveModoJefe`, `pages/ModoJefe.jsx` | **eliminar** |\n| **La clave de supervisor** | `lib/verificarPinModoJefe.js`: pide clave antes de cortesía, egreso, merma y descuento manual | **conservar** |\n\nViven mezclados por un accidente de nombre.\n\n## La trampa\n\n**`notificarAccionAdmin` vive dentro de `verificarPinModoJefe.js`** — es la\nfunción que desde el 17-sep manda las cortesías, egresos, mermas y descuentos al\ngrupo de Control (H-055). Borrar \"Modo Jefe\" sin cuidado se lleva **los avisos\nrecién conectados** y, peor, **la clave que protege las cortesías**: cualquiera\npodría condonar una cuenta sin autorización.\n\n**Tamaño real: 200 referencias en 25 archivos**, casi todas en la caja.\n\n## Orden propuesto (un paso por sesión, checkpoint en cada uno)\n\n1. Sacar `notificarAccionAdmin` a su propio archivo (`lib/avisoControl.js`) y\n   actualizar sus 6 llamadores.\n2. Renombrar `verificarPinModoJefe` → `verificarClaveSupervisor`, que es lo que\n   hace.\n3. Eliminar las pantallas muertas: `pages/ModoJefe.jsx`, `PanelModoJefe`,\n   `ModalActivarModoJefe`, `ModalSolicitarClaveModoJefe`, `hooks/useModoJefe.js`.\n4. Limpiar el campo `modo_jefe_no_esta` de los registros de auditoría y, al\n   final, la entidad.\n\n**Nunca de madrugada ni el mismo día de otra publicación** (P5 de MENTORS, SOUL\nprohibición 9). Es la caja: si se rompe, no se cobra.",
+   "origen": "17-sep-2026, Ricardo: 'esa funcion nunca funciono bien, deberia eliminarse'",
+   "grado": 2,
    "color": "#ff5f56"
   },
   {
@@ -4237,6 +4277,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "L-012",
+   "a": "H-055",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-012",
+   "a": "L-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-012",
+   "a": "D-007",
+   "rel": "relacionado"
+  },
+  {
    "de": "M-001",
    "a": "P-005",
    "rel": "bloqueado_por"
@@ -4759,6 +4814,16 @@
   {
    "de": "P-019",
    "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-020",
+   "a": "H-055",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-020",
+   "a": "L-002",
    "rel": "relacionado"
   },
   {
