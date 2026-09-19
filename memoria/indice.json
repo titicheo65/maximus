@@ -1124,7 +1124,7 @@
    ],
    "cuerpo": "# H-043 · 27 problemas de seguridad, y no todos son iguales (12-sep-2026)\n\nEl panel `editor/workspace/security` de DiMangoToGo marca **27 problemas abiertos**.\nLos cinco visibles en pantalla, clasificados por riesgo real:\n\n| Problema | Riesgo real |\n|---|---|\n| **\"Los usuarios públicos pueden acceder a todos los registros de Order\"** | **ALTO.** `Order.jsonc` **no tiene bloque `rls`**: sin reglas, cualquiera que abra la carta o el kiosco —que corren sin login— puede leer **todas** las órdenes: nombre, teléfono, mesa y monto de cada cliente. Es la misma familia de `H-035` |\n| Clave de WhatsApp escrita en el código (×2) y TOKEN de `proxyColacion` | MEDIO. **Son funciones de backend**: el secreto NO viaja al navegador. Está en el código de la app y en el repo privado |\n| `MERCADO_PAGO_ACCESS_TOKEN` fuera de la lista de secretos permitidos | BAJO, es configuración |\n\n**Secretos escritos a mano, inventario:** `confirmarReservaWhatsApp`,\n`notificarPedidoTorta`, `notificarRetiroLocal` (los tres comparten un `API_SECRET`\ndel **servidor del agente en ServidorPlaya**, endpoint `/api/pedido`) y\n`proxyColacion` (TOKEN del servidor de colación por ngrok).\n\n**Advertencia dada a Ricardo: NO usar \"Corregir todos los problemas\".** Cerrar los\npermisos de `Order` de un plumazo deja sin vender al kiosco, la carta de mesa y el\nretiro, que **crean y actualizan órdenes sin usuario logueado** (en la base se ven\ncomo `created_by: anonymous`). Cualquier regla nueva tiene que permitir: crear la\norden, actualizarla con los datos del pago, y leer la propia — sin abrir la lista\ncompleta.\n\n**Orden propuesto:** (1) mover los cuatro secretos al gestor de secretos **sin\ncambiar su valor** —cero riesgo, cierra tres hallazgos—; (2) rotarlos después, con\nel inventario de quién los usa (lección de `P-018`: la rotación anterior casi deja\nlos dos locales sin imprimir); (3) diseñar el RLS de `Order` y probarlo con los\nlocales cerrados.\n\n**Pendiente:** ver los 27 completos; solo 5 son visibles en la captura.\n\n## Paso 1 hecho: los cuatro secretos salieron del código (12-sep-2026, sandbox)\n\n| Función | Antes | Ahora |\n|---|---|---|\n| `confirmarReservaWhatsApp` | `API_SECRET` escrito | `Deno.env.get(\"AGENTE_API_SECRET\")` |\n| `notificarPedidoTorta` | idem | idem |\n| `notificarRetiroLocal` | idem | idem |\n| `proxyColacion` | `TOKEN` escrito | `Deno.env.get(\"COLACION_TOKEN\")` |\n\n**Cero secretos escritos a mano** en `base44/functions`. Las cuatro **fallan\ncerrado**: si el secreto no está, devuelven `ok:false` con el motivo en texto, en\nvez de intentar la llamada y fallar sin explicación (misma corrección de `H-035`).\n**No se cambió ningún valor**: es una mudanza, no una rotación.\n\n**De dónde salen los valores:** el otro extremo es el servidor del agente en\nServidorPlaya, que los lee de `C:\\dimango-agent\\.env` como **`API_SECRET`**\n(`main.py:956`) y **`COLACION_TOKEN`** (`colacion_web.py:52`). Los valores viejos\ntambién quedaron en el historial del sandbox.\n\n**Orden obligatorio:** crear los dos secretos en Base44 **antes** de publicar. Al\nrevés, se caen los avisos de WhatsApp al cliente y la pantalla de colación hasta\nque se creen.\n\n\n## Paso 2 preparado el 18-sep-2026: las lecturas anónimas salen de la entidad\n\n**Mapa de quién toca `Order` sin login** (lo que hacía peligroso el botón\n\"Corregir todos los problemas\"):\n\n| Pantalla sin login | Qué hace |\n|---|---|\n| Kioscos (5), Retiro Playa y Mall, Menú de mesa | **crean** órdenes |\n| Kiosco (4 llamadas) y Menú (3) | **actualizan** con los datos del pago |\n| SmartWaiterChat | **lee** las de su mesa, para armar la cuenta |\n| MenuPedido | **lee** la suya por id |\n\nCon login (UserGuard de Base44) están Waiter, Caja y los displays. **Todo lo\ndemás es anónimo**, así que un RLS por rol los deja fuera.\n\n**Construido:** `base44/functions/ordenesDeMesa/entry.ts` — devuelve solo las\nórdenes de **una** mesa y local, o **una** por id, y **sin teléfono, dirección\nni datos del socio**. Corre con permisos de servidor, así que sigue funcionando\ncuando la entidad quede cerrada. Sin mesa ni id responde vacío: no es una puerta\nde servicio a la lista completa.\n\nLas dos lecturas anónimas ya pasan por ahí (`SmartWaiterChat`, `MenuPedido`).\n**Es aditivo: mientras no se active el RLS, todo funciona igual.** Build OK,\ncheckpoint `6aade66dcb9cbe987908878a`.\n\n## Lo que FALTA, y por qué no se hizo hoy\n\nActivar el `rls` de `Order`: **read y delete solo para roles internos; create y\nupdate abiertos**, o el kiosco y el retiro dejan de vender.\n\n**No se aplicó el viernes 18-sep**: fiestas patrias, Playa abierto hasta 00:30.\nUna condición mal escrita deja el kiosco sin vender en el peor día del año.\nSe aplica con los locales cerrados y se prueba, local por local: kiosco, retiro,\ncarta de mesa y chat de mesa.\n\n**Riesgo residual declarado:** `update` queda abierto a anónimos porque no hay\nforma de identificar \"su propia orden\" sin usuario. Alguien que conozca un id\npodría modificar esa orden. Es menor que la fuga de lectura —que expone nombre,\nteléfono y monto de **todos** los clientes— y acotarlo exige rediseñar cómo\npaga el kiosco.\n\n**Sigue pendiente:** ver los 27 problemas completos. Solo 5 eran visibles en la\ncaptura del 12-sep.\n\n## Paso 2 COMPLETO y verificado — 18-sep-2026, 23:4x\n\nAparecieron **cinco pantallas sin login más** que leen `Order`, y dos eran\ncríticas: **`/DisplayMall` y `/DisplayMeson` son TV de producción sin guard**.\nActivar el RLS esa misma noche habría dejado la cocina del Mall y el mesón sin\ncomandas el sábado. El chequeo se hizo **antes** de tocar nada.\n\nInventario final de lecturas anónimas, todas migradas a `ordenesDeMesa`:\n\n| Pantalla | Modo | Qué recibe ahora |\n|---|---|---|\n| Los nueve TV (`DisplayBase`) | `display` | solo pendientes y en preparación, del local |\n| `ChatMesa`, `ChatMesaMall`, `PagarCuenta` | `pendientes` | solo lo que esa mesa debe |\n| `SmartWaiterChat` | por mesa | las de su mesa |\n| `MenuPedido` | por id | la suya |\n\n**Ninguna recibe teléfono, dirección ni datos personales del cliente.**\n\n**Verificado en producción por Ricardo:** TV de Playa y del Mall funcionando\ntras publicar.\n\n**De yapa, H-041:** los TV pedían `Order.list()` — las últimas 300 órdenes\n**completas**, nueve pantallas, cada 15 segundos. Ahora piden solo comandas\nactivas con campos mínimos. La fuga y la saturación se arreglaron en el mismo\nmovimiento.\n\n## Lo único que falta: activar el `rls` de `Order`\n\n```\ncreate: null          → kiosco, retiro y menú siguen vendiendo\nupdate: null          → el kiosco necesita actualizar el pago (riesgo residual)\nread:   solo roles    → cierra la fuga\ndelete: solo roles\n```\n\nPatrón copiado de `PedidoTorta` y `PrintJob`, que ya funcionan así.\n\n**Acordado con Ricardo: domingo 20-sep después del cierre (23:00).** Sobre algo\nque para entonces llevará 24 h funcionando en operación real. Es un cambio de\nuna línea.\n\n---\n\n## CERRADO el 19-sep-2026, 00:40 — verificado desde fuera\n\nEl `rls` de `Order` quedó así (36 campos y `required` intactos; respaldo previo\nguardado antes de tocar):\n\n```\ncreate: null   → kiosco, retiro, menú de mesa y tótem siguen vendiendo\nupdate: null   → el kiosco necesita marcar el pago (riesgo residual declarado)\nread:   roles  → cierra la fuga\ndelete: roles\n```\n\n**Dos pantallas se habían escapado del inventario y aparecieron en el chequeo\nfinal: `DisplayMeson` y `DisplayMall` NO usan `DisplayBase`** — leían `Order`\npor su cuenta y además tenían `Order.subscribe`, que el servidor empezó a\nrechazar (`Connection rejected by server` en la consola). Se migraron a\n`ordenesDeMesa` (modo `historial`), se quitó la suscripción y **el refresco bajó\nde 30 s a 10 s** para compensar la pérdida del tiempo real.\n\n**Costo declarado:** esas dos pantallas del Mall pierden el aviso instantáneo;\nuna comanda puede tardar hasta 10 s en aparecer. Las pantallas con login\n(caja, garzón, panel de mesas) conservan el tiempo real.\n\n**La prueba, hecha desde el navegador sin sesión:**\n\n| | antes | ahora |\n|---|---|---|\n| `GET /entities/Order?limit=3` | pedidos con nombre, teléfono y monto | **`200 []`** |\n| `/DisplayMeson` (pública) | funcionaba | funciona — \"Historial (30)\" |\n\n**Falta una sola prueba, y solo se puede hacer en el local:** armar un pedido en\nun kiosco hasta la pantalla de pago. `create` y `update` quedaron abiertos, así\nque debería funcionar, pero es el canal que más duele si falla. **Ricardo lo\nprueba el sábado antes de abrir.**\n\n**Sigue pendiente de este hallazgo:** ver los 27 problemas completos del panel de\nseguridad — solo 5 eran visibles en la captura del 12-sep.",
    "origen": "Ricardo abrió el panel de Seguridad el 12-sep-2026",
-   "grado": 8,
+   "grado": 9,
    "color": "#4a9eff"
   },
   {
@@ -1478,7 +1478,27 @@
    ],
    "cuerpo": "# H-060 · El mismo campo con dos significados\n\n`TurnoCaja.total_tarjeta` —y sus hermanos `total_efectivo`,\n`total_transferencia`— se escriben desde **dos caminos distintos**:\n\n| Dónde | Cuándo | Qué guarda |\n|---|---|---|\n| `src/pages/Caja.jsx:463` | al **cerrar** el turno | `montos.tarjeta + propinas.tarjeta` → **CON propina** |\n| `src/lib/cuadraturaTurno.js:224` | al **cuadrar** el turno | `venta.tarjeta` → **SIN propina** |\n\nEl cierre escribe primero y la cuadratura sobrescribe después. **El significado\ndel campo depende de si alguien alcanzó a cuadrar el turno.**\n\nEn septiembre 34 de 38 turnos quedaron `CUADRADO`, por eso el mes se lee\nconsistente. Un turno que quede sin cuadrar guarda otro número bajo el mismo\nnombre, y nada avisa.\n\n## Por qué importa ahora\n\nEs la trampa que habría hecho fallar de forma **intermitente** cualquier\nintegración que lea `TurnoCaja` — el peor tipo de falla, porque funciona la\nmayoría de los días.\n\n`cuadraturaTurno.js` se escribió el 13-sep justamente para terminar con la\ncuadratura programada dos veces. **Quedó un camino sin migrar:** el cierre de\nturno en `Caja.jsx`.\n\n## Arreglo\n\n`Caja.jsx` debe usar `totalesParaGuardar()` como las demás pantallas, en vez de\ncalcular sus propios totales. Es el criterio que ya fijó `cuadraturaTurno.js`:\n*\"Las dos pantallas deben usar SOLO esta función.\"*\n\n**Se arregla antes de conectar ToGo con Working**, no después.",
    "origen": "19-sep-2026, leyendo el código mientras se comparaba la caja contra la cuadratura (H-059)",
-   "grado": 3,
+   "grado": 5,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-061",
+   "tipo": "hallazgo",
+   "titulo": "Las observaciones de la Caja se perdían al cobrar directo: la comanda nace en ModalCobrar y ese camino no copiaba las notas",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "caja",
+    "displays",
+    "comandas",
+    "observaciones"
+   ],
+   "cuerpo": "# H-061 · Dos caminos crean la comanda, uno la creaba incompleta\n\nEl cajero escribía la observación del helado y el TV de helados no la mostraba.\nEn cocina sí se veía. **No era la pantalla: eran dos caminos distintos.**\n\n| Camino | Dónde nace la comanda | Observaciones |\n|---|---|---|\n| Botón **Display** | `Caja.jsx` → `buildOrderItems()` | **sí** viajan |\n| **Cobrar directo** | `ModalCobrar.jsx` → `crearOrder()` | **se perdían** |\n\nEl mapeo del cobro copiaba siete campos —`product_id`, `product_name`,\n`quantity`, `price`, `category`, `modifiers`, `display_types`— y **ninguno de\nlos cuatro de la nota** (`notes`, `observation`, `note_text`, `comentario`).\nTampoco mandaba la nota general de la orden.\n\nPor eso en cocina funcionaba: esos pedidos se mandan primero a display. En\nhelados el cajero cobra de una y despacha, así que siempre caía en el camino\nincompleto.\n\n**`ModalPostCobro.jsx` tenía exactamente el mismo hueco.** Los dos corregidos.\n\n## El dato que lo destrabó\n\nLa orden guardada tenía `payment_method: \"tarjeta\"` y `payment_status:\n\"pagado\"`. El botón Display crea con `\"efectivo\"` / `\"pendiente_pago\"`. **Ese\npar de campos probó que la comanda no venía de donde yo estaba buscando.**\n\n## Hallazgo lateral, arreglado de paso\n\nDiez pantallas de display leían `order.notes || order.observations`.\n**`observations` en plural NO existe en la entidad `Order`** — los campos son\n`notes` y `observation`. Era una bomba de tiempo: cualquier nota que quedara\nsolo en `observation` no se mostraba en ninguna pantalla. Corregido en\nDisplayHelados, Bar, Cafetería, Frío, Kitchen, Mall, Mesón, Plancha,\nKitchenDisplay y ComandaCompletaView.\n\n## Mismo patrón que H-060, el mismo día\n\nDos caminos escriben la misma cosa y solo uno está completo. En H-060 es\n`TurnoCaja.total_tarjeta` (con propina al cerrar, sin propina al cuadrar); acá\nson las comandas de la Caja. **Conviene revisar qué otras entidades se crean\ndesde más de un lugar.**",
+   "origen": "19-sep-2026, Ricardo reporta que DisplayHelados no muestra los comentarios escritos en el panel de Caja",
+   "grado": 4,
    "color": "#4a9eff"
   },
   {
@@ -1568,7 +1588,7 @@
    ],
    "cuerpo": "Maximus clasificó la emisión de DTE como **riesgo #1 del negocio a $5,5M/día**,\npor encima de todo lo demás, y lo repitió cinco veces.\n\nEl número era una construcción propia: asumía que DiMangoToGo emitía por sí\nmisma y que no había alternativa. La realidad —proveedor certificado, emisión\nmanual que los encargados saben usar, folios al día, cero fallas en julio— lo\ndesmintió.\n\n**La estimación tenía autoridad 5 y se presentó con el peso de un hecho.**\nRegla: todo riesgo cuantificado debe declarar de qué arquitectura depende, y\nverificarla antes de priorizar sobre ella.",
    "origen": "error propio de Maximus, corregido el 20-ago-2026",
-   "grado": 10,
+   "grado": 11,
    "color": "#27c93f"
   },
   {
@@ -1587,7 +1607,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 19,
+   "grado": 20,
    "color": "#27c93f"
   },
   {
@@ -1717,6 +1737,24 @@
    "cuerpo": "# L-013 · Tres intentos para imprimir una hoja (19-sep-2026)\n\nEl botón de impresión de la hoja de conteo de insumos —`src/lib/stockImprimir.js`,\npestaña Insumos de `/StockEnVivo` y `/StockEnVivoMall`— falló dos veces antes de\nfuncionar. Las dos fallas son reutilizables.\n\n## Falla 1 · `window.onload` dentro de una ventana escrita con `document.write`\n\nEl patrón copiado de `/RankingVentas` y `/checklist/ChecklistExportar`:\n\n```js\nwin.document.write(`... <script>window.onload = function(){ window.print(); }<\\/script>`);\nwin.document.close();\n```\n\n**El evento `load` ya pasó cuando se asigna el manejador**, así que nunca\ndispara. La ventana abre y se queda ahí. Funciona en algunos navegadores por\nsuerte de timing, no por diseño.\n\n**`/RankingVentas` y `/checklist/ChecklistExportar` tienen el mismo bug latente**\nen sus botones de 80mm. Hoy imprimen; no está garantizado que sigan.\n\n## Falla 2 · La ventana nueva termina en \"Guardar como PDF\"\n\nCon el disparo arreglado desde la página padre, el resultado en el PC fue\n**descarga de PDF en vez de impresión**: el navegador trata la ventana emergente\ncomo documento aparte.\n\n## Lo que sí funciona\n\n**Un iframe oculto en la misma página**, que usa el diálogo de impresión de esa\npantalla. Es el camino que ya funcionaba en el local para la precuenta\n(`/CreadorPrecuenta`) y el voucher de boleta — **estaba a la vista y no lo miré\nantes de escribir el mío.**\n\nTres detalles que no son opcionales:\n- El iframe va **fuera de la vista con `opacity:0`, no con `display:none` ni\n  `0x0`**: un iframe sin caja no maqueta y sale la hoja en blanco.\n- **300 ms antes de `print()`**: imprimir antes de que maquete sale vacío.\n- **No sacar el iframe de inmediato**: algunos navegadores leen el documento\n  después de cerrar el diálogo y el trabajo se cancela.\n\n## El límite que ningún código arregla\n\n**El navegador solo ve impresoras instaladas en el equipo donde corre.** La\ntérmica que cuelga del servidor de impresión no existe para él. Probado en Mac\ny celular: solo ofrece PDF. **En el PC de caja de Playa, donde las impresoras\nestán instaladas en Windows, imprimió.**\n\nRegla: cualquier botón de impresión por navegador se prueba **en el equipo del\nlocal**, no en el Mac. Si el papel tiene que salir desde una tablet, el camino\nes la cola de impresión, no `window.print()`.",
    "origen": "19-sep-2026, hoja de conteo de insumos en StockEnVivo: tres intentos hasta que imprimió",
    "grado": 3,
+   "color": "#27c93f"
+  },
+  {
+   "id": "L-014",
+   "tipo": "leccion",
+   "titulo": "Ante un dato que no aparece: mirar primero el registro guardado, después el código",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "metodo",
+    "diagnostico",
+    "dimangotogo"
+   ],
+   "cuerpo": "# L-014 · Tres publicaciones que costaron dos\n\nRicardo reportó que el TV de helados no mostraba los comentarios escritos en la\nCaja. Maximus fue directo al código de las pantallas.\n\n| Intento | Qué arregló | ¿Era el problema? |\n|---|---|---|\n| 1 | campo fantasma `order.observations` en 10 pantallas | no |\n| 2 | blindaje del carrito contra estado viejo (closure) | no |\n| 3 | `ModalCobrar` no copiaba las notas al crear la comanda | **sí** |\n\nLos dos primeros eran defectos reales y quedaron corregidos, pero **fueron a\nproducción sin resolver nada** y Ricardo probó dos veces de más.\n\n## Lo que lo resolvió, y estaba disponible desde el minuto uno\n\n**Consultar la orden guardada.** Traía `payment_method: \"tarjeta\"` y\n`payment_status: \"pagado\"`, cuando el camino que yo estaba leyendo crea con\n`\"efectivo\"` / `\"pendiente_pago\"`. Ese par de campos probó en un segundo que la\ncomanda nacía en otro lugar. Dos pasos después apareció la causa.\n\n## Regla\n\nCuando un dato no aparece donde debería, el primer movimiento es **leer el\nregistro tal como quedó guardado** y comparar sus campos contra los que produce\ncada camino de escritura. La huella del creador está en los valores por\ndefecto: son la firma de quién lo escribió.\n\nLeer código viene después, y ya sabiendo qué archivo abrir.\n\n**Misma familia que L-006** (atribuir una falla sin leer el error completo) y\n**L-005** (cuantificar un riesgo sin verificar la arquitectura): en los tres\ncasos se teorizó antes de mirar la evidencia que estaba a una consulta.\n\n## Pista de oro que dio Ricardo\n\n*\"los otros display como kitchen display funciona\"*. Que algo funcione en un\nlado y no en otro **acota más que cualquier lectura de código**: descarta la\npantalla y obliga a buscar la diferencia entre los dos caminos. Preguntarlo\nantes habría ahorrado la segunda publicación.",
+   "origen": "19-sep-2026, tres publicaciones para arreglar que el TV no mostraba las observaciones de la Caja",
+   "grado": 5,
    "color": "#27c93f"
   },
   {
@@ -4408,6 +4446,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-061",
+   "a": "H-060",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-061",
+   "a": "H-043",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-061",
+   "a": "L-014",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -4585,6 +4638,26 @@
   {
    "de": "L-013",
    "a": "H-052",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-014",
+   "a": "H-061",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "L-014",
+   "a": "L-006",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-014",
+   "a": "L-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-014",
+   "a": "H-060",
    "rel": "relacionado"
   },
   {
