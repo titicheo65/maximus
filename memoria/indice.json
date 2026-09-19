@@ -143,7 +143,7 @@
    ],
    "cuerpo": "Desde el 1-jul-2026 DiMango opera 100% sobre DiMangoToGo. Aurexgroup —también\nde Ricardo— le factura el servicio: **$1.000.000 en julio**.\n\n**Motivo real (informado por Ricardo, 20-ago):** Toteat era un sistema plano y\n**cobraba por ventas**. Ricardo prefiere pagarse a sí mismo y tener un sistema\nsólido que controla.\n\n**Lo bueno:** desaparece el problema de dos fuentes de verdad.\n**Lo malo:** desaparece la red. Ya no hay sistema alternativo si falla.",
    "origen": "informado por Ricardo",
-   "grado": 13,
+   "grado": 14,
    "color": "#f5a623"
   },
   {
@@ -566,7 +566,7 @@
    ],
    "cuerpo": "| | Playa | Mall | Total |\n|---|---|---|---|\n| Venta bruta | $119.455.935 | $40.464.040 | $159.919.975 |\n| Venta c/IVA | $119.044.684 | $40.433.220 | $159.477.904 |\n| **Venta neta** | **$100.037.550** | **$33.977.496** | $134.015.045 |\n| Propinas (aparte) | $7.260.449 | $3.455.478 | $10.715.927 |\n| **% del total** | **74,65%** | **25,35%** | 100% |\n\n**Estado de resultados por local (ARITMÉTICA; supone mercadería 28,7% pareja):**\n\n| | Mall | Playa |\n|---|---|---|\n| Arriendo | **37,4%** | 0% (propio) |\n| Mercadería | 28,7% | 28,7% |\n| Laboral directo | 19,4% | 21,4% |\n| Medios de pago | 2,6% | 2,6% |\n| **Queda** | **11,8%** | **47,3%** |\n\n**El arriendo del Mall es 37,4% de su venta neta. El umbral de viabilidad es 20%.**\n\nY ese 11,8% no descuenta todavía: la mano de obra de Playa que produce para el\nMall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni\nadministración. **El Mall está en el borde o bajo el agua.**\n\n**Playa subsidia al Mall.** Ya no es hipótesis.\n\n**Para llegar a un arriendo del 20%:** vender $63,6M netos (crecer **87%**) o\nrenegociar el arriendo a $6,8M (**bajar 47%**). La tercera opción es cerrar.\n\n**Antes de decidir:** leer el contrato de Plaza Oeste — reajuste, componente\nvariable, vencimiento y multa por salida anticipada.",
    "origen": "DiMangoToGo /AdminVentas, resumen contable julio filtrado por local",
-   "grado": 19,
+   "grado": 20,
    "color": "#4a9eff"
   },
   {
@@ -584,7 +584,7 @@
    ],
    "cuerpo": "`/AdminVentas` muestra **COSTO NETO: $0**. En el esquema, `Product.cost` existe\ny está descrito como *\"costo neto unitario del producto (para cálculo de\nmargen)\"*.\n\n**Está construido y nadie lo llenó.**\n\nCargar los costos daría **margen bruto por producto y por categoría**, calculado\nsolo, sin inventario y sin contador. Responde la pregunta que nunca se pudo\nplantear: cuáles productos ganan plata y cuáles no.\n\nMáximo valor por mínimo esfuerzo de todo lo identificado el 20-ago.",
    "origen": "DiMangoToGo /AdminVentas + esquema Product.cost del repo",
-   "grado": 7,
+   "grado": 9,
    "color": "#4a9eff"
   },
   {
@@ -1440,6 +1440,48 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-059",
+   "tipo": "hallazgo",
+   "titulo": "La caja de DiMangoToGo y la cuadratura de DiMangoWorking cuadran mejor de lo esperado — salvo tres días de Playa con el efectivo en cero",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "caja",
+    "cuadratura",
+    "dimangotogo",
+    "dimangoworking",
+    "efectivo",
+    "propinas",
+    "delivery"
+   ],
+   "cuerpo": "# H-059 · Primera comparación POS contra cuadratura (septiembre 2026)\n\nNunca se habían comparado. La cajera escribe en DiMangoWorking mirando la\npantalla de DiMangoToGo, y nadie cruzaba los dos números.\n**35 pares día-local, del 1 al 18 de septiembre.**\n\n## Lo que cuadra\n\n| Medio | ToGo (POS) | Working | Diferencia | Veredicto |\n|---|---|---|---|---|\n| Efectivo* | $11.776.306 | $11.741.610 | **$34.696 (0,3%)** | cuadra |\n| Tarjeta | $74.909.014 | $80.206.932 | −$5.297.918 | **es la propina** |\n| Online | $421.100 | $284.894 | $136.206 | pendiente |\n| Transferencias | $383.194 | $315.703 | $67.491 | el Mall nunca las declara |\n| T. Alimentación | $213.400 | $210.061 | $3.339 | ruido |\n\n\\* sin los tres días en cero que se explican abajo.\n\n**Delivery: cuadra al peso.** `VentaInternaCierre` → `CuadraturaDiaria`,\n**$3.348.477** idénticos, los 18 días. PedidosYa $2.464.227 · UberEats\nrestaurante $667.800 · UberEats postres $216.450. **Todo en Playa, cero en el\nMall.** El proceso de venta interna se hace todos los días: la sospecha de que\nnadie llenaba esos campos era falsa.\n\n## La diferencia de tarjeta NO es una fuga\n\nWorking anota el **voucher** (venta + propina, lo que imprime la máquina); ToGo\nanota la **venta**. La propina con tarjeta de septiembre según ToGo es\n**$4.879.355** de los $5.297.918. **Queda un resto de $418.563 —0,56% de la\ntarjeta— sin explicación.**\n\nConsecuencia para cualquier integración: se manda **venta + propina tarjeta**,\no descuadra $5 millones al mes.\n\n## Lo único sin explicar: tres días de Playa con el efectivo en cero\n\n| Fecha | Efectivo en el POS | Declarado | Egresos del día |\n|---|---|---|---|\n| 8-sep | $441.770 | **0** | $376.500 |\n| 9-sep | $373.190 | **0** | $208.300 |\n| 15-sep | $432.500 | **0** | $15.600 |\n| | **$1.247.460** | **0** | $600.400 |\n\n`efectivo_personal` está en **cero todo septiembre**, así que no se traspasó a\notro campo. Los egresos no alcanzan a cubrirlo. **Pasó once días sin que nadie\nlo viera. Pendiente preguntar al encargado de Playa.**\n\n## Dos correcciones de Maximus en la misma sesión\n\n1. **Online duplicado.** Se sumó `total_online` **más** khipu, mercadopago y\n   flow, cuando `total_online` ya es la suma de los tres\n   (`totalesParaGuardar()`). El online se reportó como $821.300: era $421.100.\n   Ricardo lo corrigió de memoria.\n2. **El egreso no descuenta el efectivo.** Ricardo propuso que la diferencia\n   venía de ahí. El código dice que el descuento vive en `esperado.efectivo`,\n   no en `total_efectivo`, y los datos lo confirman: **cuadran 0 de 32 días**\n   contra los $764.680 de egresos. Si ToGo descontara, faltarían en su lado y\n   no faltan.\n\n## Las diferencias diarias son desfase de fecha, no fuga\n\nEl efectivo tiene swings grandes que **se anulan entre sí**: 10-sep Working\n+$227.350, 17-sep Working −$232.160. Es efectivo declarado con un día de\ncorrimiento. En el mes la diferencia es 0,3%.",
+   "origen": "19-sep-2026, comparación de los 35 pares día-local de septiembre entre TurnoCaja (ToGo) y CuadraturaDiaria (Working)",
+   "grado": 6,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-060",
+   "tipo": "hallazgo",
+   "titulo": "TurnoCaja.total_* se escribe desde dos lugares con significados opuestos: con propina al cerrar, sin propina al cuadrar",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "caja",
+    "cuadratura",
+    "deuda-tecnica",
+    "propinas"
+   ],
+   "cuerpo": "# H-060 · El mismo campo con dos significados\n\n`TurnoCaja.total_tarjeta` —y sus hermanos `total_efectivo`,\n`total_transferencia`— se escriben desde **dos caminos distintos**:\n\n| Dónde | Cuándo | Qué guarda |\n|---|---|---|\n| `src/pages/Caja.jsx:463` | al **cerrar** el turno | `montos.tarjeta + propinas.tarjeta` → **CON propina** |\n| `src/lib/cuadraturaTurno.js:224` | al **cuadrar** el turno | `venta.tarjeta` → **SIN propina** |\n\nEl cierre escribe primero y la cuadratura sobrescribe después. **El significado\ndel campo depende de si alguien alcanzó a cuadrar el turno.**\n\nEn septiembre 34 de 38 turnos quedaron `CUADRADO`, por eso el mes se lee\nconsistente. Un turno que quede sin cuadrar guarda otro número bajo el mismo\nnombre, y nada avisa.\n\n## Por qué importa ahora\n\nEs la trampa que habría hecho fallar de forma **intermitente** cualquier\nintegración que lea `TurnoCaja` — el peor tipo de falla, porque funciona la\nmayoría de los días.\n\n`cuadraturaTurno.js` se escribió el 13-sep justamente para terminar con la\ncuadratura programada dos veces. **Quedó un camino sin migrar:** el cierre de\nturno en `Caja.jsx`.\n\n## Arreglo\n\n`Caja.jsx` debe usar `totalesParaGuardar()` como las demás pantallas, en vez de\ncalcular sus propios totales. Es el criterio que ya fijó `cuadraturaTurno.js`:\n*\"Las dos pantallas deben usar SOLO esta función.\"*\n\n**Se arregla antes de conectar ToGo con Working**, no después.",
+   "origen": "19-sep-2026, leyendo el código mientras se comparaba la caja contra la cuadratura (H-059)",
+   "grado": 3,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -2023,7 +2065,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 23,
+   "grado": 24,
    "color": "#ff5f56"
   },
   {
@@ -4328,6 +4370,41 @@
   {
    "de": "H-058",
    "a": "T-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-059",
+   "a": "H-015",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-059",
+   "a": "H-016",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-059",
+   "a": "H-060",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-059",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-059",
+   "a": "D-008",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-060",
+   "a": "H-059",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-060",
+   "a": "H-016",
    "rel": "relacionado"
   },
   {
