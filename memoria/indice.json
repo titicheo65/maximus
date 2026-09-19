@@ -344,7 +344,7 @@
    ],
    "cuerpo": "# D-018 · Marketing DiMango (19-sep-2026)\n\nRicardo aprueba construir un agente de marketing **dentro** de Maximus — no un\ncerebro nuevo — y pide **etapas 1 y 2 en paralelo**, más un módulo extra:\n**Laboratorio Creativo**, que investiga herramientas de IA y propone **una**\nprueba concreta por semana, con costo, \"porque quiero aprender a usar estas\ntecnologías mientras construimos nuestra propia agencia\".\n\n## La objeción que se planteó antes de aprobar\n\n**No hay con qué saber si funciona.** Marketing es el 0,145% de la venta, sin\natribución y sin línea base; el diagnóstico de agosto concluyó que *la\nfacturación la genera la ubicación, no la estrategia*. Por eso la **etapa 1 no\nproduce contenido: mide** el último año de Instagram y Facebook. Ricardo lo\naceptó y pidió las dos etapas en paralelo, que es compatible: medir no bloquea\nconstruir.\n\n**Clasificación:** proyecto activo, **quinto en la fila**. Compite con el Club\nsin adoptar, `Product.cost` vacío, `emitirBoletaV2` y P-021. Pasa el filtro\n—toca ventas y hoy lo hace Ricardo a mano— pero no desplaza a esos.\n\n## La decisión técnica que define el proyecto\n\n**La IA no inventa comida.** Las fotos reales son la materia prima y el modelo\nhace oficio de estudio: recorta, corrige luz, arma el carrusel, monta el texto.\nRazón: un plato generado se nota, el cliente que llega al local compara, y en\npublicidad tiene filo legal. **El video queda fuera de la v1** — lo más caro, lo\nmás lento y lo que peor envejece.\n\n## Lo construido el 19-sep (commit `d502add`)\n\nTodo en `agent/marketing/`, **aditivo**: no toca el cerebro operativo ni sus 21\nherramientas.\n\n| Pieza | Qué hace |\n|---|---|\n| `insights.py` | métricas reales de IG/FB, **solo lectura**, con los tokens que ya existen. Si falta un permiso, dice **cuál** y dónde se pide |\n| `banco_fotos.py` | las fotos que deja Ricardo en una carpeta, descritas **una vez** con visión y catalogadas por producto, categoría y calidad |\n| `propuestas.py` | cruza venta + fotos + redes + fechas chilenas reales y arma 2-3 propuestas, **cada una justificada con un dato** |\n| `marketing_diario.py` | la corrida diaria; mismo patrón que `advisor_diario` |\n| `laboratorio_creativo.py` | una prueba por semana, con costo al frente y **lo que descartó**, que importa tanto como lo que recomienda |\n\n**Nada publica.** Todo va a aprobación por Telegram. Publicar es la etapa 3 y\nnecesita un permiso de Meta que pasa por revisión.\n\n**Las fotos entran por carpeta, no por chat** (v1): un bot nuevo obliga a crear\nbot, webhook y credencial. El ingreso por chat queda para la v2.\n\n## Pendiente de Ricardo\n\n1. Confirmar que el token de Meta tiene permisos de lectura de métricas.\n2. Crear el grupo de Telegram de marketing y dar su chat_id.\n3. Dejar 20-30 fotos reales en la carpeta.\n4. **Definir qué es DiMango para el cliente** — si es el helado, la pizza del\n   domingo en familia o el after del Chinchorro. Ningún agente puede inventar\n   eso, y sin esa definición produce contenido correcto y sin alma.\n\n## Condición explícita de Ricardo\n\n**Antes de contratar cualquier servicio externo, se presentan los costos y él\naprueba.** Las etapas 1 y 2 no requieren contratar nada: el modelo ya está\npagado y las métricas de Meta son gratis.",
    "origen": "19-sep-2026, Ricardo aprueba la propuesta técnica y pide arrancar",
-   "grado": 4,
+   "grado": 5,
    "color": "#f5a623"
   },
   {
@@ -566,7 +566,7 @@
    ],
    "cuerpo": "| | Playa | Mall | Total |\n|---|---|---|---|\n| Venta bruta | $119.455.935 | $40.464.040 | $159.919.975 |\n| Venta c/IVA | $119.044.684 | $40.433.220 | $159.477.904 |\n| **Venta neta** | **$100.037.550** | **$33.977.496** | $134.015.045 |\n| Propinas (aparte) | $7.260.449 | $3.455.478 | $10.715.927 |\n| **% del total** | **74,65%** | **25,35%** | 100% |\n\n**Estado de resultados por local (ARITMÉTICA; supone mercadería 28,7% pareja):**\n\n| | Mall | Playa |\n|---|---|---|\n| Arriendo | **37,4%** | 0% (propio) |\n| Mercadería | 28,7% | 28,7% |\n| Laboral directo | 19,4% | 21,4% |\n| Medios de pago | 2,6% | 2,6% |\n| **Queda** | **11,8%** | **47,3%** |\n\n**El arriendo del Mall es 37,4% de su venta neta. El umbral de viabilidad es 20%.**\n\nY ese 11,8% no descuenta todavía: la mano de obra de Playa que produce para el\nMall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni\nadministración. **El Mall está en el borde o bajo el agua.**\n\n**Playa subsidia al Mall.** Ya no es hipótesis.\n\n**Para llegar a un arriendo del 20%:** vender $63,6M netos (crecer **87%**) o\nrenegociar el arriendo a $6,8M (**bajar 47%**). La tercera opción es cerrar.\n\n**Antes de decidir:** leer el contrato de Plaza Oeste — reajuste, componente\nvariable, vencimiento y multa por salida anticipada.",
    "origen": "DiMangoToGo /AdminVentas, resumen contable julio filtrado por local",
-   "grado": 18,
+   "grado": 19,
    "color": "#4a9eff"
   },
   {
@@ -1418,6 +1418,25 @@
    "cuerpo": "# H-057 · El CRM no estaba incompleto: estaba vacío (18-sep-2026)\n\n## Cómo empezó\n\nRicardo trajo una guía para construir un **clon de GoHighLevel** con Claude Code\n(12 módulos: pipeline Kanban, email marketing, landing pages, facturación,\nworkflows, multi-usuario) y la idea de mejorar el CRM del Club.\n\n**Se recomendó NO seguirla**, por dos razones:\n\n1. **Encaje:** GoHighLevel es para negocios B2B con proceso de venta largo —\n   lead, propuesta, negociación, cierre. DiMango vende pizzas y helados al\n   mostrador. De los 12 módulos solo dos aplican: automatizaciones y reseñas.\n2. **Cimientos:** los números del propio Club.\n\n| Club hoy | |\n|---|---|\n| Socios registrados | **404** |\n| Con algún punto | **21** (5%) |\n| Visitas en 5 meses | **68** |\n| Visitas en septiembre | **9** |\n| Pedidos en 14 días de septiembre | **7.997** |\n\n**El CRM ve el 0,1% de lo que pasa en los locales.** Agregarle módulos a eso no\nlo mejora: lo decora. Ricardo lo aceptó de inmediato — *\"tienes razón yo creo que\nya lo tenemos\"* — y redefinió el pedido: **ingresar al cliente a la comanda, que\naparezca en los TV con sus puntos y lo que más pide.**\n\n## Lo que ya existía y nadie usaba\n\n- `Order` y `CuentaMesa` tienen `club_customer_id`, `club_customer_name`,\n  `club_customer_phone`, `is_club_member`, `club_identificado_por` y\n  `club_identificado_en` **desde hace meses**.\n- `ClubDiMangoModal` funciona en retiro local y kiosko.\n- **19 comandas identificadas en 5 meses**, cinco de ellas de Ricardo.\n\nY un detalle: el botón ⭐ Socio del garzón **lo quitó Maximus el 15-sep** (H-048),\ncon razón —servía para sumar puntos sin prueba de presencia— pero eso dejó al\ngarzón sin ninguna forma de identificar al cliente. Se repuso con otro propósito.\n\n## Lo construido el 18-sep\n\n1. **Texto corregido** en los cuatro canales: *\"Acumulará puntos por esta\n   compra\"* → *\"Tu visita queda registrada\"*. La pantalla prometía puntos que hoy\n   se cargan a mano; una promesa que depende de que alguien se acuerde no es una\n   promesa. La prueba de Ricardo destapó esto.\n2. **Garzón:** botón ⭐ Socio. Primero quedó dentro del carrito y **Ricardo no lo\n   encontró** — error de criterio: se puso donde era fácil de programar, no donde\n   se ve. Movido a la **cabecera, junto al número de mesa**, visible siempre.\n3. **Caja:** el mismo botón en el panel de cobro; al confirmar, el socio queda en\n   todas las órdenes de la mesa y en la cuenta.\n4. **`crmProxy` acción `perfil_socio`:** nombre, puntos, visitas y lo más pedido\n   en una sola llamada.\n5. **`BadgeSocioClub`:** se muestra en las **nueve pantallas** (comparten\n   `DisplayBase`) y en \"Ver comanda completa\". Caché de 10 min compartido entre\n   pantallas — sin eso, nueve TV refrescando harían cientos de llamadas por\n   servicio.\n\n**Decisiones de diseño:** el \"suele pedir\" exige el mismo producto **dos veces o\nmás** (con una compra no hay patrón, hay una compra); si el CRM no responde, la\npantalla muestra solo el nombre y sigue andando.\n\n## Lo que quedó consciente y pendiente\n\n**La identificación es por teléfono, no por QR.** Maximus había recomendado QR;\nse implementó con el modal existente para reutilizar. Consecuencia: **un garzón\npuede escribir un teléfono sin que el cliente esté**. Hoy no regala puntos\n(siguen manuales) pero sí crea una visita. El control es por **traza**:\n`club_identificado_por` guarda quién lo hizo. **El escaneo del QR es la versión\nbuena y sigue pendiente.**\n\n## Estado de la verificación (18-sep, cierre)\n\n- ✅ Botón visible en el garzón tras moverlo a la cabecera.\n- ✅ Nombre visible en el TV — **pero sobre la comanda de retiro de las 00:18**,\n  que ya traía cliente de antes.\n- ⏳ **Sin probar: garzón → identificar → enviar → TV.** No existe ninguna\n  comanda con `club_identificado_en: \"waiter\"` posterior al 15-sep.\n- ⏳ **Sin confirmar: si los puntos aparecen** junto al nombre. Si sale el nombre\n  sin puntos, el badge está bien y falla la consulta al CRM.\n\n## La medición que decide si esto sirvió\n\n**En dos semanas: ¿qué porcentaje de las comandas de la semana tiene socio?**\nSi es menos del 10%, el problema no es la herramienta y hay que darle al cliente\nuna razón para mostrar su QR, en vez de pedirle al garzón que se acuerde.",
    "origen": "18-sep-2026, Ricardo propone mejorar el CRM; la revisión mostró que el problema no era el CRM sino que nadie identifica al cliente",
    "grado": 6,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-058",
+   "tipo": "hallazgo",
+   "titulo": "Línea base de Instagram: 11.958 seguidores y 7,5 interacciones por publicación — el contenido no está llegando",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "marketing",
+    "instagram",
+    "metricas",
+    "linea-base"
+   ],
+   "cuerpo": "# H-058 · La primera medición real de marketing que tiene DiMango (19-sep-2026)\n\nHasta hoy el marketing de DiMango era **$238.000 al mes y ninguna medición**.\nEsta es la línea base, leída de la API de Meta:\n\n| | |\n|---|---|\n| Cuenta | `@dimango.arica` (Página: Dimango Arica) |\n| **Seguidores** | **11.958** |\n| Publicaciones analizadas | 50 · del 27-jun al 18-sep-2026 |\n| **Interacción promedio** | **7,5** por publicación |\n| Interacción total del período | 373 |\n\n## Los tres hallazgos\n\n**1. La tasa de interacción es 0,06%.** Siete interacciones sobre casi doce mil\nseguidores. En gastronomía local lo normal es 1-3%: DiMango está **entre 15 y 50\nveces por debajo**. Y no es por falta de publicar — 50 posts en 83 días.\n**El problema no es la cantidad, es que el contenido no está llegando.**\n\n**2. El video rinde 6 veces más, y se publicó UNO en tres meses.**\n\n| Formato | Publicaciones | Interacción promedio |\n|---|---|---|\n| VIDEO | **1** | **42,0** |\n| IMAGE | 49 | 6,8 |\n\nUn caso no es una ley, pero la diferencia es demasiado grande para ignorarla.\n\n**3. Se publica en los días que menos rinden.**\n\n| Día | Publicaciones | Promedio |\n|---|---|---|\n| martes | 3 | **18,0** |\n| sábado | 2 | 8,0 |\n| viernes | 12 | 7,6 |\n| lunes | 12 | 7,6 |\n| miércoles | 10 | 7,3 |\n| domingo | 10 | 4,4 |\n| jueves | 1 | 4,0 |\n\nEl martes rinde el doble que el promedio y es el día en que menos se publica.\n\n## Corrección a la propuesta del mismo día (D-018)\n\nMaximus propuso **dejar el video fuera de la v1** por caro, lento y artificial.\n**Los datos lo desmienten en parte y la recomendación cambia:** lo que no sirve\nes el video **generado con IA**; lo que estos números piden es video **real** —\nel horno, el helado, la mesa servida. Eso no cuesta créditos, cuesta grabar.\n\n## Lo que todavía no se puede medir\n\nEl token **no tiene permiso para leer alcance ni visitas al perfil**: solo likes\ny comentarios. Falta `instagram_manage_insights` (y `pages_read_engagement`).\n\n**Por qué importa y no es un detalle:** sin alcance no se sabe si el contenido\nno gusta o si Instagram directamente no lo está mostrando. **Son dos problemas\ncon soluciones opuestas** — uno se arregla con mejor contenido, el otro con\nfrecuencia, formato y horario. Pedir ese permiso en el panel de Meta no toca la\nmensajería que hoy funciona.\n\n## Hipótesis abierta, sin verificar\n\nUna tasa de 0,06% con 11.958 seguidores hace sospechar que **buena parte de esa\naudiencia no es real o está inactiva** (seguidores antiguos, comprados en algún\nmomento, o cuentas muertas). Con el permiso de alcance se resuelve en una\nconsulta. **No se afirma nada todavía.**",
+   "origen": "19-sep-2026, primera lectura de métricas reales de @dimango.arica vía API de Meta",
+   "grado": 3,
    "color": "#4a9eff"
   },
   {
@@ -2966,7 +2985,7 @@
    ],
    "cuerpo": "Un observador competente diría que el problema de Ricardo no es falta de\nestructura sino exceso de iniciativas simultáneas — él mismo escribió\n\"probablemente tengo más proyectos de los que debería ejecutar\".\n\nUn #2 cuesta $2-3M/mes y tarda 6 meses en ser útil. Cortar la cartera de\nproyectos a la mitad es gratis y funciona el lunes siguiente.\n\n**Criterio de veredicto fijado el 19-ago:** si en la bitácora \"Proyecto iniciado\npor Ricardo\" supera el **40% de los minutos**, gana la tesis rival y la prioridad\npasa a cerrar proyectos antes que a buscar un #2.",
    "origen": "tesis rival planteada por Maximus, 19-ago-2026",
-   "grado": 14,
+   "grado": 15,
    "color": "#bd93f9"
   }
  ],
@@ -4274,6 +4293,21 @@
   {
    "de": "H-057",
    "a": "L-012",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-058",
+   "a": "D-018",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-058",
+   "a": "H-015",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-058",
+   "a": "T-001",
    "rel": "relacionado"
   },
   {
