@@ -1310,7 +1310,7 @@
    ],
    "cuerpo": "# H-052 · Stock: dos sistemas para el pan y cero trazabilidad (16-sep-2026)\n\n## Lo que estaba pasando\n\n**1. El pan sí tenía control, pero no donde Ricardo lo buscaba.** Hay dos\nsistemas paralelos: stock de **modificador** (`ModifierItem`) y stock de\n**insumo** (`Insumo` + `Receta`). Los panes están controlados como insumo, con\nreceta propia (\"Pan Frica\" → insumo `pan frica`) y bloqueo de venta encendido.\nSu stock de modificador **nunca se encendió** —Ciabatta ni siquiera tiene el\ncampo—, así que la pestaña Modificadores no mostraba nada.\n\nDe **624 modificadores, solo 44 tienen campos de stock** y **ninguno está activo\nen Playa**; en el Mall hay uno solo. El stock de modificador está prácticamente\nsin uso.\n\n**Dato que salió de paso:** el stock de pan del Mall está **en negativo**\n(frica −11, ciabatta −18). Nadie recarga ese conteo allá, y con el bloqueo\nencendido los sándwiches del Mall quedan bloqueados.\n\n**2. Ningún cambio de stock dejaba rastro.** Editar un número en `/StockEnVivo`\nsobrescribía el anterior. No se podía saber con qué se amaneció, cuánto se\nagregó ni quién lo movió: por eso \"se manipula y se descuadra\" sin explicación\nposible.\n\n**3. La pantalla ya pedía PIN y botaba quién entró.** `PINPadLock` valida contra\n`Personal` (8 personas con PIN de 4 dígitos) y **devuelve la persona**, pero\n`StockEnVivo` hacía `onUnlock={() => setBloqueado(false)}`: descartaba el nombre.\nNo hubo que crear claves nuevas, solo dejar de tirar el dato a la basura.\n\n## Lo hecho (falta publicar)\n\n- **`MovimientoStockPanel`** (entidad nueva): fecha, hora, local, tipo, objeto,\n  campo, valor anterior, valor nuevo, delta, **usuario y origen**.\n- **`lib/stockBitacora.js`**: registra los cambios (nunca frena la operación si\n  falla), lee los del día y calcula el resumen. Todo en fecha de Chile.\n- **Las dos pantallas y los tres paneles** (productos, modificadores, insumos)\n  registran cada cambio con el nombre de quien entró, que ahora se muestra\n  arriba.\n- **Control del día por producto**: `inicio · +agregado · −quitado · vendido →\n  esperado`, y si el esperado no calza con el stock real, la fila se marca en\n  ámbar con el número que hay. El vendido sale de los pedidos del día, contando\n  también lo que salió como modificador.\n- **Modificadores muestran el stock por insumo** cuando existe receta, en verde o\n  rojo si está agotado. **No se creó un segundo conteo del pan**: se muestra el\n  que ya descuenta al vender.\n\nLint sin errores, build OK, checkpoint creado.\n\n**Para probar tras publicar:** entrar a `/StockEnVivo` con un PIN, ver el nombre\narriba, cambiar un stock y volver a entrar: la fila debe mostrar el inicio y el\n\"+N\". En Modificadores, buscar \"frica\": debe aparecer el stock por insumo.\n\n## Pestaña \"Sugerido\" y stock en las pantallas de TV (16-sep-2026)\n\n**En los TV:** `StockItemBadge` ahora muestra también los **modificadores con\nstock** (el pan). Un solo archivo, y entra en las 9 pantallas y en \"ver comanda\ncompleta\". Antes, que \"Ave Palta\" tuviera insumos de sobra y el pan frica estuviera\nagotado solo se veía entrando a `/StockEnVivo`, o sea, nunca durante el servicio.\n\n**Pestaña 📈 Sugerido** (`components/stock/TabSugerido.jsx`, en los dos locales):\nlee los pedidos de los últimos 7/14/21/30 días —solo los campos necesarios, para\nno bajar megas a una tablet— y calcula, por producto y por modificador:\n\n> **IDEAL = día cargado (percentil 80) + 10%** · **ALERTA = un tercio del ideal**\n\n**No el promedio**, que quiebra stock dos de cada diez días, justo los buenos;\n**no el máximo**, que hace producir para un día que pasa una vez al mes. Botón\npara dejar la alerta como **mínimo real** del producto o del insumo, y queda en la\nbitácora con el nombre de quien lo aplicó.\n\n**Primeros números reales (28-ago al 14-sep, 8.001 pedidos), validados fuera de la\napp con los mismos datos:**\n\n| | prom/día | día cargado | máx | **ideal** | alerta |\n|---|---|---|---|---|---|\n| Pan Ciabatta Playa | 23,6 | 29 | 41 | **32** | 11 |\n| Pan Frica Playa | 19,2 | 26 | 30 | **29** | 10 |\n| Pan Ciabatta Mall | 10,7 | 16 | 21 | **18** | 6 |\n| Pan Frica Mall | 9,5 | 14 | 18 | **16** | 6 |\n\n**Caveats escritos en la propia pantalla:** el percentil se calcula sobre los días\n**con venta** (se muestra \"X de N días con venta\" para que se note en los ítems\nesporádicos), y una semana como la del 18 no se parece a un día normal: hay que\nrecalcular después.\n\n**Lo que no arregla ningún cálculo:** el pan del Mall está en **−11 y −18**. Allá\nno cargan el stock al abrir. Primero va esa instrucción, después el número.\n\n## Búsqueda por categoría (17-sep-2026)\n\nPedido de Ricardo: poder buscar por categoría. Se aplicó en las tres pestañas,\ncon el nombre que corresponde a cada una:\n\n- **Productos:** busca por nombre **y por categoría** (incluye las secundarias).\n- **Insumos:** por nombre **y por área** (PASTELERIA, BAR, COCINA…).\n- **Modificadores:** por nombre **y por grupo** (\"Tipo De Pan\", \"sabores cafe\"…).\n\nEs el mismo criterio en Playa y Mall. Lint sin errores nuevos, build OK.\n\n**Nota de trabajo:** la captura que mandó Ricardo era del **editor de Base44**\n(`/editor/preview`), no de la app publicada. Ahí los cambios no escriben en la\nbase real ([[L-011]]). Para probar de verdad: `dimangotogo.base44.app/StockEnVivo`.\n\n## Filtro por área en Insumos — 19-sep-2026 (verificado en producción)\n\nBotones **Todas · BAR · COCINA · DESPACHO · PASTELERIA** con el conteo de cada\nuna, sobre la lista de insumos de `/StockEnVivo` y `/StockEnVivoMall`.\n\n**Por qué:** el stock se carga **por área**, no producto por producto — el de\npastelería cuenta sus tortas, el de bar sus bebidas. Escribir el área en el\nbuscador cada vez era lento. Va directo al reparto de D-016 (Carlos en Playa,\nAlejandra en el Mall).\n\nLas áreas salen de los datos, no del código: si aparece un área nueva, el botón\naparece solo. Respeta el filtro \"Con control\", así que los números coinciden con\nlo que se está mirando.",
    "origen": "16-sep-2026, Ricardo: 'frica y ciabatta no muestran stock' y 'a veces se manipula y se vuelve a descuadrar'",
-   "grado": 7,
+   "grado": 8,
    "color": "#4a9eff"
   },
   {
@@ -1395,7 +1395,7 @@
    ],
    "cuerpo": "# H-056 · Apagado automático, encendido manual (17-sep-2026)\n\n## El síntoma\n\nRicardo: *\"todos los días desaparecen en waiter y caja productos o\nmodificadores\"*. Su rutina era pedirle al agente de Base44 que los reactivara —\ny al día siguiente volvía a pasar. **16-sep: fettuccine y reineta. 17-sep: ave.**\n\n## La causa, verificada en el código y en los datos\n\n`descontarInsumosVenta` hacía esto: cuando un insumo con `bloquea_venta` llegaba\na 0, ponía `available`/`available_mall` en **false** en **todos** los platos cuya\nreceta lo usa. El plato no salía como \"AGOTADO\": **desaparecía** de Waiter, Caja\ny Carta, porque las tres filtran por ese campo.\n\n**El defecto no era apagar: era que nadie volvía a encender.** Reponer el insumo\nen `/StockEnVivoMall` actualiza el insumo y **no toca los productos**\n(`StockInsumosPanel` no tiene un solo `Product.update`). El plato quedaba\nenterrado hasta que una persona lo desenterrara a mano.\n\n> **Apagado automático + encendido manual = todo apagado.** Solo es cuestión de\n> días. Por eso pasaba \"todos los días\".\n\n**La huella en los datos del 17-sep es inconfundible** — apagados en bloque, en\nel mismo segundo:\n\n| Hora (Chile) | Apagados | Insumo |\n|---|---|---|\n| 15:34:55 | Ave Italiano, Ave Solo, Ave Dimango, Ave Baltimore, Ave Palta, Ave Luco, Ave Chacarero, Ave Tomate, Ave Americano, Chicken Bacon — **10 sándwiches** | ave churrasco |\n| 17:24:37 | Fettuccine, Fetuccini Di Parma | fettuccine |\n| 18:21:43 | Lomo Saltado, Risotto de Lomo Saltado, Spaguetti de Lomo Saltado, Tabla Mixta, Tabla Dimango, Tabla Bar Previa, Fiorentini | lomo / tabla |\n\nLos 10 de ave estuvieron invisibles **de 15:34 a 23:00 — más de 7 horas de\nservicio** — y el insumo ya estaba repuesto (11 unidades) mientras seguían\napagados. Fettuccine tenía 9 unidades de stock de producto cargado y estaba\napagado igual.\n\n## El arreglo\n\n**Se quitó el bloque que apaga.** No se reemplazó por otro que encienda: dos\nautomatismos peleando por el mismo campo es peor que uno.\n\nEl corte por falta de insumo **ya existe en vivo**: `lib/stockPorInsumo` +\n`canAgregar` en `ProductCatalog` muestran \"SIN &lt;INSUMO&gt;\" y bloquean el botón\ncuando el insumo tiene `bloquea_venta`. Ese corte **lee el número actual**, así\nque se recupera solo al reponer. El bloque borrado no agregaba protección: solo\ndejaba daño.\n\nLa función ahora devuelve `insumosAgotados` — la señal sin el daño.\n\n`available`/`available_mall` vuelve a significar lo que dice su nombre: **una\ndecisión de una persona** sobre si el plato se ofrece o no.\n\nCheckpoint previo `6aac718c73c4758c0087b22f`; cambio en `26c2d69`.\n\n## Lo que queda\n\n**22 productos siguen apagados en el Mall estando activos en Playa.** Son de tres\nclases distintas y no se deben tratar igual:\n\n- **Víctimas del automatismo (encender):** Fiorentini, Tabla Mixta, Tabla Dimango,\n  Tabla Bar Previa, Risotto de Lomo Saltado, Lomo Saltado, Spaguetti de Lomo\n  Saltado, Fettuccine.\n- **Correctamente apagados** por stock de producto en 0 (`stock_activo_mall`):\n  Torta Senador, 3 Leches, CheeseCake Oreo, Tiramisu, Lasagna Frita. Se encienden\n  solos al cargar stock en el panel (línea 92 de `StockEnVivoMall`). **No tocar.**\n- **Dudosos, de días anteriores** (11 y 15-sep): Tabla De Mar, Mozzarella al\n  Orégano, Bruschetta Serrano, Mini Pizza Niños, Mil hojas Frutilla, 1 und\n  Empanada de Queso, Entera Cheese Cake Horneado, Entera CheeseCake Oreo,\n  FENTIMANS Rose Lemonade. **Los confirma Ricardo** — pueden estar apagados a\n  propósito.\n\n## La lección, que es la de siempre\n\nEl agente de Base44 encontró el mismo hecho (los 10 \"Ave\" en false) y **lo\narregló a mano**. Eso cierra el día, no el problema: al día siguiente el\nautomatismo vuelve a apagarlos. **Arreglar el síntoma donde la causa sigue viva\nes trabajo que se repite para siempre** — y en este caso era trabajo que Ricardo\nhacía todos los días.",
    "origen": "17-sep-2026, Ricardo: 'todos los dias desaparecen en waiter y caja productos o modificadores'",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -1499,6 +1499,48 @@
    "cuerpo": "# H-061 · Dos caminos crean la comanda, uno la creaba incompleta\n\nEl cajero escribía la observación del helado y el TV de helados no la mostraba.\nEn cocina sí se veía. **No era la pantalla: eran dos caminos distintos.**\n\n| Camino | Dónde nace la comanda | Observaciones |\n|---|---|---|\n| Botón **Display** | `Caja.jsx` → `buildOrderItems()` | **sí** viajan |\n| **Cobrar directo** | `ModalCobrar.jsx` → `crearOrder()` | **se perdían** |\n\nEl mapeo del cobro copiaba siete campos —`product_id`, `product_name`,\n`quantity`, `price`, `category`, `modifiers`, `display_types`— y **ninguno de\nlos cuatro de la nota** (`notes`, `observation`, `note_text`, `comentario`).\nTampoco mandaba la nota general de la orden.\n\nPor eso en cocina funcionaba: esos pedidos se mandan primero a display. En\nhelados el cajero cobra de una y despacha, así que siempre caía en el camino\nincompleto.\n\n**`ModalPostCobro.jsx` tenía exactamente el mismo hueco.** Los dos corregidos.\n\n## El dato que lo destrabó\n\nLa orden guardada tenía `payment_method: \"tarjeta\"` y `payment_status:\n\"pagado\"`. El botón Display crea con `\"efectivo\"` / `\"pendiente_pago\"`. **Ese\npar de campos probó que la comanda no venía de donde yo estaba buscando.**\n\n## Hallazgo lateral, arreglado de paso\n\nDiez pantallas de display leían `order.notes || order.observations`.\n**`observations` en plural NO existe en la entidad `Order`** — los campos son\n`notes` y `observation`. Era una bomba de tiempo: cualquier nota que quedara\nsolo en `observation` no se mostraba en ninguna pantalla. Corregido en\nDisplayHelados, Bar, Cafetería, Frío, Kitchen, Mall, Mesón, Plancha,\nKitchenDisplay y ComandaCompletaView.\n\n## Mismo patrón que H-060, el mismo día\n\nDos caminos escriben la misma cosa y solo uno está completo. En H-060 es\n`TurnoCaja.total_tarjeta` (con propina al cerrar, sin propina al cuadrar); acá\nson las comandas de la Caja. **Conviene revisar qué otras entidades se crean\ndesde más de un lugar.**",
    "origen": "19-sep-2026, Ricardo reporta que DisplayHelados no muestra los comentarios escritos en el panel de Caja",
    "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-062",
+   "tipo": "hallazgo",
+   "titulo": "Se declara como venta exenta consumo afecto: el cajero marca EXENTO la transacción completa cuando la cuenta lleva cigarros",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "sii",
+    "tributario",
+    "iva",
+    "cigarros",
+    "mercadopago",
+    "caja",
+    "exento"
+   ],
+   "cuerpo": "# H-062 · El monto exento del RCV no son cigarros\n\nRicardo detecta en el RCV de septiembre un **monto exento de $2.293.050** cuando\nlo único exento que vende es tabaco. La causa quedó identificada con evidencia\nen el mismo día.\n\n## La evidencia\n\n**Detalle de cobros de Mercado Pago, 1 al 14 de septiembre:**\n\n| Tax Setting | Monto | Transacciones |\n|---|---|---|\n| Cargo afecto | $15.857.092 | 1.865 |\n| **Cargo exento** | **$2.151.000** | **255** |\n| Sin configurar | $61.028 | 2 |\n\n**14 días de MP explican casi todo el exento del mes.** El ticket promedio de\nlas transacciones exentas es **$8.435**; una cajetilla vale $5.400–$6.100.\n\n| Monto de la transacción exenta | Cuántas |\n|---|---|\n| hasta $6.500 (podría ser una cajetilla) | 78 |\n| **$6.500 a $13.000** | **135** |\n| **$13.000 a $30.000** | **41** |\n| más de $30.000 | 1 |\n\nLas más altas: $33.500, $29.600, $29.300, $27.600, $25.600. **Son cuentas de\nmesa, no tabaco.**\n\n## El mecanismo, confirmado\n\nLa secuencia del 12-sep en la máquina 8611 (72 exentas de 184) muestra las\nexentas **intercaladas** con las afectas, no en bloque:\n\n```\n.EE.....E....E..E.E.....EEE..E......E.E.E....E.......EE...E.\n```\n\n**Descarta que la máquina quedara trabada en modo exento: alguien elige\n\"exento\" venta por venta.** Y el terminal solo permite marcar la transacción\ncompleta, no un ítem — así que cuando la cuenta lleva cigarros, se marca exenta\n**la comida también**.\n\nSe junta con lo que hace el software: `ModalCobrar.jsx:401` y\n`ModalPostCobro.jsx:643` **restan los cigarros del DTE** (\"vale aparte\"), por\neso las boletas del RCV salen con exento 0. Nadie diseñó las dos cosas juntas.\n\n## Cuánto se vende de cigarros de verdad\n\nMuestra de 500 órdenes (19–20 sep): **$65.000, el 0,99% de la venta**, 24\nunidades, todo en Playa. Extrapolado al mes: **~$800.000** (ARITMÉTICA, muestra\nde día y medio y venta muy variable). Contra $2,29M declarados exentos:\n**sobran ~$1,4 millones.**\n\n## Lo que NO es\n\n**No es error de Mercado Pago.** DiMangoToGo no emite documentos tipo 48 —solo\nboleta (39) y factura (33)—, y a la máquina le manda **solo el monto**:\n`transactions: { payments: [{ amount }] }`, sin ningún indicador de impuesto.\n\n## Decisión de Ricardo (20-sep)\n\n*\"Carlos Jirón me dará la responsabilidad a mí, lo que tenemos que cambiar es el\ntema de los cigarros, que no genere exento toda la comanda.\"*\n\n## Pendientes\n\n1. **Arreglo automático:** la Order API de Point (Chile) acepta\n   `taxes: [{ payer_condition: \"payment_taxable_iva\" }]`. **Falta que Mercado\n   Pago confirme el valor para exento** — la doc oficial devuelve 403. Con ese\n   dato, la app manda el impuesto en cada cobro y el cajero deja de elegir.\n2. **Arreglo intermedio, si MP no responde:** separar el cobro en dos\n   transacciones cuando la comanda lleva cigarros. Acota el exento al valor real\n   del tabaco. **No se toca en día de servicio.**\n3. **Carlos Jirón:** cómo corresponde documentar la venta de cigarros, dado que\n   hoy sale de la boleta y se marca exenta la transacción entera.",
+   "origen": "20-sep-2026, Excel 'Detalle Cobros 1-14 sept' de Mercado Pago, cruzado con el RCV del SII y con las ventas de DiMangoToGo",
+   "grado": 3,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-063",
+   "tipo": "hallazgo",
+   "titulo": "H-056 cerrado de verdad: la carta del Mall BORRABA el plato agotado en vez de marcarlo, y el corte por stock seguía escribiendo available_mall",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "dimangotogo",
+    "mall",
+    "carta",
+    "stock",
+    "displays"
+   ],
+   "cuerpo": "# H-063 · La mitad que le faltaba a H-056\n\nEl 17-sep se quitó el apagado de platos por insumo agotado. **Quedaron vivas\ndos piezas**, y por eso los platos siguieron desapareciendo del Mall.\n\n## Pieza 1 · La carta del Mall borraba, la de Playa marcaba\n\n```js\n// CartaPublica (PLAYA)\n.filter(p => p.available !== false)                                    // no mira el stock\n.map(p => ({ ...p, _agotado: p.stock_activo && p.stock_cantidad <= 0 })) // lo MARCA\n\n// CartaMall (MALL)\nif (p.stock_activo_mall && (p.stock_cantidad_mall || 0) <= 0) return false;  // lo BORRA\n```\n\n**Mismo dato, dos comportamientos.** Playa mostraba el sello AGOTADO y el Mall\neliminaba el plato de la lista. Esa línea es toda la asimetría que Ricardo\nllevaba días preguntando. Corregido: el Mall usa ahora el patrón de Playa.\n\n`CartaMesa` (el QR de mesa) ya estaba bien en los dos locales. Los tótems de\nretiro ocultan en **ambos** locales — ahí no hay asimetría y no se tocó.\n\n## Pieza 2 · Tres escrituras automáticas sobre `available_mall`\n\nDe nada sirve marcar agotados si algo sigue apagando el plato, porque\n`available_mall = false` **sí** lo oculta. Quitadas:\n\n| Dónde | Qué hacía |\n|---|---|\n| `descontarInsumosVenta` | al vender la última unidad, apagaba el plato |\n| `StockEnVivo` | bajar el stock a cero apagaba el plato |\n| `StockEnVivoMall` | lo mismo |\n\nLas tres **solo mueven la cantidad** ahora. `available` vuelve a significar una\nsola cosa: *una persona decidió no ofrecerlo*. No se pierde protección: todas\nlas pantallas cortan leyendo el stock en vivo.\n\n## Lo que se creyó y era falso\n\nAntes de encontrar la línea, la hipótesis era operativa: *\"en Playa reponen y\nen el Mall no\"*. Tenía datos a favor —Playa hizo **281** movimientos de stock\nen dos días contra **16** del Mall, y el Mall tiene 73 insumos parados en cero\ncontra 46 de Playa— **pero no era la causa**. Ricardo insistió tres veces en la\nmisma pregunta y tenía razón.\n\nQueda como dato cierto y aparte: el stock del Mall casi no se mantiene, y eso\nseguirá importando para el margen por local (H-008).\n\n## Daño acumulado que hubo que desenterrar a mano\n\n75 productos con `available_mall` en false; se encendieron los 10 que tenían el\ncanal del Mall. **Los otros 65 no tienen canal asignado**, así que encenderlos\nno cambia nada: necesitan `waiter_mall` en `/AdminCarta`, y eso lo decide quien\nsepa qué despacha esa cocina.\n\nTambién se quitó el grupo de modificadores **\"Sub Recetas\" (`BA.999`)** —114\nítems heredados de Toteat el 1-abr— de los 14 sándwiches que lo arrastraban.",
+   "origen": "20-sep-2026, Ricardo insiste: 'el tema es por qué pasa en Mall y no en Playa'",
+   "grado": 3,
    "color": "#4a9eff"
   },
   {
@@ -1754,7 +1796,7 @@
    ],
    "cuerpo": "# L-014 · Tres publicaciones que costaron dos\n\nRicardo reportó que el TV de helados no mostraba los comentarios escritos en la\nCaja. Maximus fue directo al código de las pantallas.\n\n| Intento | Qué arregló | ¿Era el problema? |\n|---|---|---|\n| 1 | campo fantasma `order.observations` en 10 pantallas | no |\n| 2 | blindaje del carrito contra estado viejo (closure) | no |\n| 3 | `ModalCobrar` no copiaba las notas al crear la comanda | **sí** |\n\nLos dos primeros eran defectos reales y quedaron corregidos, pero **fueron a\nproducción sin resolver nada** y Ricardo probó dos veces de más.\n\n## Lo que lo resolvió, y estaba disponible desde el minuto uno\n\n**Consultar la orden guardada.** Traía `payment_method: \"tarjeta\"` y\n`payment_status: \"pagado\"`, cuando el camino que yo estaba leyendo crea con\n`\"efectivo\"` / `\"pendiente_pago\"`. Ese par de campos probó en un segundo que la\ncomanda nacía en otro lugar. Dos pasos después apareció la causa.\n\n## Regla\n\nCuando un dato no aparece donde debería, el primer movimiento es **leer el\nregistro tal como quedó guardado** y comparar sus campos contra los que produce\ncada camino de escritura. La huella del creador está en los valores por\ndefecto: son la firma de quién lo escribió.\n\nLeer código viene después, y ya sabiendo qué archivo abrir.\n\n**Misma familia que L-006** (atribuir una falla sin leer el error completo) y\n**L-005** (cuantificar un riesgo sin verificar la arquitectura): en los tres\ncasos se teorizó antes de mirar la evidencia que estaba a una consulta.\n\n## Pista de oro que dio Ricardo\n\n*\"los otros display como kitchen display funciona\"*. Que algo funcione en un\nlado y no en otro **acota más que cualquier lectura de código**: descarta la\npantalla y obliga a buscar la diferencia entre los dos caminos. Preguntarlo\nantes habría ahorrado la segunda publicación.",
    "origen": "19-sep-2026, tres publicaciones para arreglar que el TV no mostraba las observaciones de la Caja",
-   "grado": 5,
+   "grado": 6,
    "color": "#27c93f"
   },
   {
@@ -2014,7 +2056,7 @@
    ],
    "cuerpo": "~~Vale ~$20,5M al año. Una tarde de trabajo.~~\n\n~~La hipótesis de H-002 es que DiMangoToGo enruta volumen hacia Mercado Pago, que\ncobra más que Transbank. Si se confirma, se corrige cambiando el orden de\npreferencia de medios de pago en la app.~~\n\n## Reformulado el 13-sep-2026\n\nRicardo pasó las tasas: **crédito 2,95%, débito 1,49%, iguales en Mercado Pago y\nTransbank.** La palanca \"cambiar de proveedor\" no existe. Los $20,5M/año quedan como\n**valor desconocido**: eran el salto medido en el RCV, no un ahorro disponible.\n\n**Palancas que quedan, de mayor a menor:**\n1. **Negociar la tasa por volumen.** DiMango pasa del orden de **$130-140M/mes en\n   tarjeta** (estimación: julio $159,9M con IVA × ~84% tarjeta, proxy de un turno).\n   Cada **0,1 punto** menos sobre ese volumen ≈ **$130-140 mil/mes ≈ $1,6M/año**\n   (aritmética sobre supuestos). Con dos proveedores cobrando igual, hay con qué\n   negociar: que compitan.\n2. **Confirmar si las tasas son + IVA** y si hay cargos fijos (POS, liquidación\n   anticipada). Cambia el costo real en ~19% de la comisión.\n3. **Medir el mix crédito/débito** desde los informes de liquidación de julio y\n   agosto: define cuánto vale cada palanca.\n\n**Siguiente paso concreto:** el informe de liquidación de agosto de los dos\nproveedores (monto liquidado, comisión, IVA, cargos). Con eso se calcula la tasa\nefectiva real y se entra a negociar con número.",
    "origen": "derivado de H-002",
-   "grado": 8,
+   "grado": 9,
    "color": "#ff5f56"
   },
   {
@@ -2066,7 +2108,7 @@
    ],
    "cuerpo": "**No existe sistema central de inventario.** Consecuencia directa: compras ≠\nconsumo, la merma es inmedible, y el 28,7% de H-001 es costo de *compra*, no de\n*consumo*.\n\n**Alternativa más barata (H-016):** cargar `Product.cost` en DiMangoToGo da\nmargen bruto por producto sin instalar inventario. No mide merma, pero responde\nla pregunta más útil primero.",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 10,
+   "grado": 11,
    "color": "#ff5f56"
   },
   {
@@ -2139,7 +2181,7 @@
    ],
    "cuerpo": "El punto único ya no es DiMangoToGo: son **SimpleFactura e internet**.\n\nLas dos vías de emisión —la app y la web del proveedor— requieren conexión. En\nChile la boleta es 100% electrónica: el talonario timbrado ya no existe como\ncontingencia.\n\n**Pregunta abierta para el proveedor, sin urgencia:** ¿SimpleFactura **encola**\nlas boletas si cae internet y las timbra al recuperar conexión? El SII contempla\nese modo, pero hay que confirmar si el software lo implementa o simplemente\nfalla.",
    "origen": "derivado de P-001",
-   "grado": 6,
+   "grado": 7,
    "color": "#ff5f56"
   },
   {
@@ -4461,6 +4503,36 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-062",
+   "a": "P-002",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-062",
+   "a": "P-005",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-062",
+   "a": "P-009",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-063",
+   "a": "H-056",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-063",
+   "a": "H-052",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-063",
+   "a": "L-014",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -5761,13 +5833,14 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-09-19",
+ "generado": "2026-09-20",
  "huerfanos": [],
  "enlaces_rotos": [
   "H-024 --relacionado--> H-010",
   "H-042 --relacionado--> H-010",
   "H-045 --relacionado--> H-010",
   "H-047 --relacionado--> H-005",
+  "H-062 --relacionado--> H-005",
   "P-015 --relacionado--> H-010",
   "S-025 --relacionado--> MEMORY"
  ]
