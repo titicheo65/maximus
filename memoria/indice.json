@@ -179,7 +179,7 @@
    ],
    "cuerpo": "**Objeción original de Maximus, planteada dos veces y retirada** al descubrir\nque el canal ya estaba construido: no abre un proyecto nuevo, cierra uno a\nmedias, y permite capturar la bitácora de escalamientos sin que Ricardo anote.\n\n**FASE 1 APROBADA el 20-ago-2026** con el criterio de D-007: Ricardo preguntó\npor WhatsApp desde su celular por el costo laboral de julio y Maximus respondió\n$30.271.531 / 45 personas / $36-42M cargado, **etiquetando el estimado como\nestimado**. No inventó.\n\n**Canal:** Telegram para Ricardo (Meta no permite iniciar conversación fuera de\nla ventana de 24h sin plantilla aprobada, lo que haría imposible el saludo\nmatutino). WhatsApp para clientes y trabajadores.",
    "origen": "repo ~/whatsapp-agentkit + despliegue verificado en ServidorPlaya",
-   "grado": 19,
+   "grado": 20,
    "color": "#f5a623"
   },
   {
@@ -2186,7 +2186,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 25,
+   "grado": 26,
    "color": "#ff5f56"
   },
   {
@@ -2462,6 +2462,26 @@
    "cuerpo": "# P-022 · Lo que queda abierto de la carta\n\n## Construido el 21-sep: `/FichaCarta`\n\nUna ficha por producto que reemplaza el ir y venir entre cinco pantallas.\nTiene: nombre, descripción, categoría, foto por URL, **canales con su precio\ncada uno**, pantallas de TV, y **activo + control de stock por local**. Guarda\n**solo los campos que cambiaron**.\n\nDos filtros separados, después de que el primero mezclaba cosas distintas:\n**\"No se pueden vender (147)\"** y **\"Sin precio de Mall (331)\"**.\n\n## El mapa de canales, confirmado por Ricardo\n\n| Canal | Pantallas |\n|---|---|\n| `kiosko` | Autoatención Playa 1, 2 y 3 |\n| `retiro_local` | Retiro Playa — **solo Playa** |\n| `waiter` | Caja Playa + Waiter Playa |\n| `waiter_mall` | **TODO el Mall: Waiter + Caja + RetiroLocalMall** |\n| `delivery` | /Delivery — sin activar |\n\n**Lo que no era obvio:** `price_waiter_mall` es EL precio del Mall completo. En\nPlaya hay tres precios según el canal; en el Mall, uno solo. **Subir precios en\nel Mall es una columna por producto, no tres.**\n\n## PENDIENTE 1 — Retiro del Mall muestra lo que no corresponde\n\n`RetiroLocalMall.jsx:79` acepta `retiro_local` **y** `waiter_mall`, y además los\nproductos **sin canal**. Resultado: **198 productos se ven hoy en el Retiro del\nMall** sin corresponder.\n\nPor categoría: destilados 54 · vinos 42 · tragos 19 · cafetería 13 · bebidas 13\n· postres 10 · espumantes 7 · jugos, cervezas y pizzas 5 c/u · cigarros 4 ·\nresto sueltos.\n\n**115 de los 198 son alcohol** (destilados, vinos, tragos, espumantes): decidir\nla categoría completa resuelve el 58%.\n\n**Esperando a Ricardo:** qué categorías sí van al Mall. Con eso se les agrega\n`waiter_mall` y **después** se cierra el filtro. Lista completa en el scratchpad\nde la sesión (`retiro-mall-revisar.txt`).\n\n## PENDIENTE 2 — Falta meter a la ficha\n\n**Modificadores y receta**, que son lo que causó los dos incidentes de la\nsemana: el grupo \"Sub Recetas\" colgando de 14 sándwiches y el insumo en cero\ncortando un plato. Hoy hay que salir de la ficha para verlos.\n\n**No debe entrar:** orden de la carta (se arrastra mirando la lista completa) ni\nimportación de CSV. El alza del Mall va como botón aparte, por categoría y con\nvista previa.\n\n## PENDIENTE 3 — Retirar las pantallas viejas\n\n`AdminProducts` y `AdminCarta` siguen vivas y **se contradicen con los datos**:\nel 21-sep AdminCarta mostraba todos los canales en gris en productos que tenían\ncuatro activos. No se arregló a propósito: si la ficha la reemplaza, arreglarla\nes trabajo que se bota.\n\n## PENDIENTE 4 — Bloqueo temporal\n\n`StockEnVivo` y `StockEnVivoMall` tienen **Productos y Modificadores cerrados**\na pedido de Ricardo mientras ordena los insumos. Se revierte vaciando\n`VISTAS_BLOQUEADAS` al principio de cada archivo.\n\n## Nota de método\n\nEl 21-sep de madrugada Ricardo dijo *\"colapsé, siento que me ahogo en un vaso de\nagua\"*. **Parte de eso fue de Maximus:** cada arreglo abrió un frente nuevo —65\nsin canal, 198 del retiro, 178 insumos, cinco pantallas, alza de precios— y se\nle apilaron listas como si todas fueran urgentes. **Ninguna lo era.** Todas\nllevaban meses así y nada estaba sangrando.\n\n**Regla:** al entregar un hallazgo lateral, decir explícitamente si corre o no\ncorre. Una lista sin plazo se lee como una deuda vencida.",
    "origen": "21-sep-2026, madrugada; Ricardo pide una sola pantalla para decidir todo de un producto",
    "grado": 4,
+   "color": "#ff5f56"
+  },
+  {
+   "id": "P-023",
+   "tipo": "pendiente",
+   "titulo": "El agente de WhatsApp comprometió una torta para hoy sin registro ni aviso: debe tomar solicitudes, nunca confirmar",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "whatsapp",
+    "agente",
+    "tortas",
+    "produccion",
+    "prompts"
+   ],
+   "cuerpo": "# P-023 · Torta comprometida por chat, invisible para el negocio\n\n## Lo que pasó\n\nEl agente de WhatsApp comprometió una torta para el mismo día. **No existe en el\nsistema:** el último `PedidoTorta` registrado es del **16-sep**. Sin registro,\nsin abono, sin aviso. Vive solo en la conversación.\n\n## El canal formal funciona; el problema es el otro\n\n`/PedidoTortas` valida 24 h, cobra el abono, y `notificarPedidoTorta` avisa por\ncorreo y Telegram. **Los seis últimos pedidos tienen `telegram_notificado: true`.**\nAhí no hay nada que arreglar.\n\n## La causa está en el prompt, y es nuestra\n\n`config/prompts.yaml`, sección Tortas por Encargo, dice:\n\n> *\"Si el cliente prefiere coordinar por aquí, toma sus datos (nombre, teléfono,\n> sabor, formato, fecha y local de retiro) y avísale que el equipo confirmará la\n> disponibilidad y el abono.\"*\n\n**Se le pide tomar datos sin darle herramienta para registrarlos ni para avisar\na nadie**, y nada le prohíbe aceptar una fecha para hoy. El agente hizo lo único\nque podía. El agujero es de diseño, no del modelo.\n\n## Lo que Ricardo pide\n\n> *\"Que solo ofrezca y reserve, pero no confirme nada antes que el soporte humano\n> confirme la solicitud. Las ventas se manejan con 24 hrs de anticipación\n> mediante un abono previo. Que no confirme venta hasta que nosotros\n> contactemos al cliente por la misma vía tomando el control, o bien por\n> llamada.\"*\n\n## Plan propuesto (NO ejecutado — esperando definición)\n\n1. **Herramienta `solicitud_torta`** en el agente de clientes: registra la\n   solicitud y **dispara aviso a un grupo de Telegram** con los datos y el\n   teléfono del cliente. Hoy no hay registro ni aviso.\n2. **Reescribir el prompt** con tres reglas duras:\n   - nunca confirmar — lenguaje de *\"queda anotada tu solicitud\"*, jamás *\"tu\n     torta está encargada\"*;\n   - **mínimo 24 horas**, ofreciendo la fecha más próxima posible;\n   - siempre avisar que el equipo lo contactará y que **sin abono no hay\n     reserva**.\n3. **No tocar** `/PedidoTortas`: funciona.\n\n## Bloqueado esperando a Ricardo\n\n- **A qué grupo de Telegram va el aviso** (¿\"Dimango Control\", el del local, uno\n  nuevo?).\n- Si el agente debe seguir ofreciendo el link de pedidos como vía principal\n  (recomendación de Maximus: sí — ahí el abono queda pagado y registrado).\n\n**No se toca el agente hasta esa definición: le habla a todos los clientes.**\n\n## Dato de contexto\n\n`PedidoTortas.jsx` tiene además un modo **\"⚡ Para hoy\"** que se habilita cuando\nhay torta ya elaborada cargada en `StockTortasDia`. Es legítimo (vender lo que\nestá en vitrina) pero conviene revisarlo cuando se retome el tema.",
+   "origen": "21-sep-2026, Ricardo reporta que el agente vendió una torta para hoy y nadie supo",
+   "grado": 2,
    "color": "#ff5f56"
   },
   {
@@ -5406,6 +5426,16 @@
   {
    "de": "P-022",
    "a": "H-061",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-023",
+   "a": "D-010",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-023",
+   "a": "P-007",
    "rel": "relacionado"
   },
   {
