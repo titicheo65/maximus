@@ -44,8 +44,8 @@ Ricardo no pudo responder ninguno de estos, y tuvo la disciplina de no inventarl
 | Margen bruto | **DESCONOCIDO** | Falta el consumo real (merma). El costo laboral ya está |
 | Margen neto | **DESCONOCIDO, y faltan ~$36M/mes** — H-012 | Con el laboral ya restado, el residual sigue en 26% de la venta: implausible. ~$430M/año sin explicación |
 | Facturación y margen por local | **DESCONOCIDO** — P-003 | No se sabe si un local subsidia al otro. Decide la viabilidad del Mall (H-003) |
-| Ticket promedio por local | **DESCONOCIDO** — sale de P-003 | Sin esto no hay palanca de ticket |
-| N° de transacciones por local | **DESCONOCIDO** — sale de P-003 | Sin esto no hay palanca de volumen |
+| Ticket promedio por local | **Mall $19.545 · Playa $16.000** (HECHO, 4 semanas 17-ago a 13-sep) — H-064 | — |
+| N° de transacciones por local | **Mall 1.640 comandas en 28 días** (58/día) · Playa ~1.460/semana — H-064 | — |
 | CAC / ROAS | **DESCONOCIDO** | No hay atribución. Con marketing en ~0,05% de la venta, es irrelevante hoy |
 
 ~~**Rango de exposición del costo laboral**~~ — **RESUELTO el 20-ago-2026.** La banda estimada era $31,5M–$49,5M. El dato real (julio, líquido) es **$30,27M**; cargado, **$36-42M**. La incertidumbre bajó de $18M/mes a ~$6M. Detalle por local y por puesto en `MEMORY.md` H-011.

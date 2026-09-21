@@ -417,7 +417,7 @@
    ],
    "cuerpo": "Mayo $11.874.572 · Junio $11.842.204 · **Julio $12.721.588 (+7,1%)** — sube\nmientras la venta cae 7,4%.\n\n**Resuelto por H-015:** el Mall hace el 25,35% de la venta, no la mitad. El\narriendo es el **37,4% de su venta neta**, casi el doble del umbral viable.\n\n**Pendiente:** leer el contrato — reajuste, componente variable, vencimiento y\nmulta por salida anticipada.",
    "origen": "RCV del SII",
-   "grado": 8,
+   "grado": 9,
    "color": "#4a9eff"
   },
   {
@@ -566,7 +566,7 @@
    ],
    "cuerpo": "| | Playa | Mall | Total |\n|---|---|---|---|\n| Venta bruta | $119.455.935 | $40.464.040 | $159.919.975 |\n| Venta c/IVA | $119.044.684 | $40.433.220 | $159.477.904 |\n| **Venta neta** | **$100.037.550** | **$33.977.496** | $134.015.045 |\n| Propinas (aparte) | $7.260.449 | $3.455.478 | $10.715.927 |\n| **% del total** | **74,65%** | **25,35%** | 100% |\n\n**Estado de resultados por local (ARITMÉTICA; supone mercadería 28,7% pareja):**\n\n| | Mall | Playa |\n|---|---|---|\n| Arriendo | **37,4%** | 0% (propio) |\n| Mercadería | 28,7% | 28,7% |\n| Laboral directo | 19,4% | 21,4% |\n| Medios de pago | 2,6% | 2,6% |\n| **Queda** | **11,8%** | **47,3%** |\n\n**El arriendo del Mall es 37,4% de su venta neta. El umbral de viabilidad es 20%.**\n\nY ese 11,8% no descuenta todavía: la mano de obra de Playa que produce para el\nMall (H-008), los 3 empleados \"ambos\", servicios, gastos comunes ni\nadministración. **El Mall está en el borde o bajo el agua.**\n\n**Playa subsidia al Mall.** Ya no es hipótesis.\n\n**Para llegar a un arriendo del 20%:** vender $63,6M netos (crecer **87%**) o\nrenegociar el arriendo a $6,8M (**bajar 47%**). La tercera opción es cerrar.\n\n**Antes de decidir:** leer el contrato de Plaza Oeste — reajuste, componente\nvariable, vencimiento y multa por salida anticipada.",
    "origen": "DiMangoToGo /AdminVentas, resumen contable julio filtrado por local",
-   "grado": 20,
+   "grado": 21,
    "color": "#4a9eff"
   },
   {
@@ -1544,6 +1544,27 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-064",
+   "tipo": "hallazgo",
+   "titulo": "Línea base del Mall: ticket $19.545 y 1.640 comandas en 28 días — el Mall cobra 22% más caro que Playa, su problema es volumen",
+   "estado": "vigente",
+   "autoridad": 2,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "mall",
+    "ticket",
+    "transacciones",
+    "precios",
+    "tablero",
+    "linea-base"
+   ],
+   "cuerpo": "# H-064 · Línea base del Mall antes del alza de precios\n\nMedida para poder juzgar el alza de precios que Ricardo quiere hacer en el Mall.\n**Cierra dos indicadores que `BRAIN.md` §3 tenía como DESCONOCIDO desde el\n19-ago-2026:** ticket promedio por local y número de transacciones por local.\n\n## Mall — 4 semanas completas (17-ago al 13-sep)\n\n| Semana | Días | Venta | Comandas | Ticket | Venta/día |\n|---|---|---|---|---|---|\n| 17-ago | 7 | $6.564.413 | 342 | $19.194 | $937.773 |\n| 24-ago | 7 | $9.613.508 | 449 | $21.411 | $1.373.358 |\n| 31-ago | 7 | $8.303.983 | 457 | $18.171 | $1.186.283 |\n| 7-sep | 7 | $7.570.698 | 392 | $19.313 | $1.081.528 |\n| **Total** | **28** | **$32.052.602** | **1.640** | **$19.545** | **$1.144.736** |\n\nPlaya en el mismo período: ticket **$16.000**, venta/día **$3,5M**.\n\n## El hallazgo: el Mall no es barato, es chico\n\n**El ticket del Mall es 22% más alto que el de Playa** ($19.545 vs $16.000) y su\nventa diaria es **un tercio** ($1,14M vs $3,5M).\n\nEl problema del Mall no es el precio por comanda: es que entran pocas comandas\npara pagar un arriendo de $12,7M al mes (37,4% de su venta neta, H-015).\n**Subir precios es palanca de margen, no solución al arriendo** — para eso hacen\nfalta más comandas, no comandas más caras.\n\n## Cómo medir el alza, porque el ticket global NO sirve\n\nEl ticket semanal del Mall oscila **±9%** ($18.171 a $21.411); Playa la mitad.\nCon ~400 comandas por semana, un grupo grande mueve el promedio.\n\n**Un alza de 8% medida contra el ticket global es indistinguible del ruido.**\nLa medición correcta, en las categorías que se suban:\n\n- **unidades vendidas** de esa categoría\n- **venta de esa categoría**\n\nEl ticket global queda solo como control de que no se cayó el volumen total.\n\n## Advertencia de uso\n\n**No usar las semanas del 14 y 21 de septiembre como base:** el Mall cerró el 18\ny 19 por fiestas patrias. Están contaminadas.\n\n## Dato que habilita el alza\n\nDe 675 productos, **359 se venden en el Mall y solo 28 tienen precio propio de\nMall** (`price_waiter_mall`). Los otros 331 cobran lo mismo que Playa. **El\ncampo existe y funciona desde hace meses; no se usa porque cargarlo producto por\nproducto entre cinco pantallas es inviable.** De ahí la ficha única.",
+   "origen": "21-sep-2026, TurnoCaja de DiMangoToGo, 4 semanas completas del 17-ago al 13-sep-2026",
+   "grado": 3,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -2056,7 +2077,7 @@
    ],
    "cuerpo": "~~Vale ~$20,5M al año. Una tarde de trabajo.~~\n\n~~La hipótesis de H-002 es que DiMangoToGo enruta volumen hacia Mercado Pago, que\ncobra más que Transbank. Si se confirma, se corrige cambiando el orden de\npreferencia de medios de pago en la app.~~\n\n## Reformulado el 13-sep-2026\n\nRicardo pasó las tasas: **crédito 2,95%, débito 1,49%, iguales en Mercado Pago y\nTransbank.** La palanca \"cambiar de proveedor\" no existe. Los $20,5M/año quedan como\n**valor desconocido**: eran el salto medido en el RCV, no un ahorro disponible.\n\n**Palancas que quedan, de mayor a menor:**\n1. **Negociar la tasa por volumen.** DiMango pasa del orden de **$130-140M/mes en\n   tarjeta** (estimación: julio $159,9M con IVA × ~84% tarjeta, proxy de un turno).\n   Cada **0,1 punto** menos sobre ese volumen ≈ **$130-140 mil/mes ≈ $1,6M/año**\n   (aritmética sobre supuestos). Con dos proveedores cobrando igual, hay con qué\n   negociar: que compitan.\n2. **Confirmar si las tasas son + IVA** y si hay cargos fijos (POS, liquidación\n   anticipada). Cambia el costo real en ~19% de la comisión.\n3. **Medir el mix crédito/débito** desde los informes de liquidación de julio y\n   agosto: define cuánto vale cada palanca.\n\n**Siguiente paso concreto:** el informe de liquidación de agosto de los dos\nproveedores (monto liquidado, comisión, IVA, cargos). Con eso se calcula la tasa\nefectiva real y se entra a negociar con número.",
    "origen": "derivado de H-002",
-   "grado": 9,
+   "grado": 10,
    "color": "#ff5f56"
   },
   {
@@ -4533,6 +4554,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-064",
+   "a": "H-015",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-064",
+   "a": "H-003",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-064",
+   "a": "P-002",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -5833,7 +5869,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-09-20",
+ "generado": "2026-09-21",
  "huerfanos": [],
  "enlaces_rotos": [
   "H-024 --relacionado--> H-010",
