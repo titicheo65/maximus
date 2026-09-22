@@ -380,7 +380,7 @@
    ],
    "cuerpo": "Promedio 3 meses: **$39,5M/mes** en alimentos y bebidas = **28,7% de la venta\nneta**. Dentro del rango normal de la industria (28-35%). **Ricardo compra bien.**\n\nSe usa el promedio a propósito: el RCV va por fecha de recepción y el mes a mes\noscila artificialmente. Mayo aparece anómalamente bajo.\n\n**Limitación (P-005):** es costo de **compra**, no de **consumo**. Sin inventario\nla merma es inmedible, así que el costo real puede ser peor.",
    "origen": "RCV de compras del SII, may-jul 2026",
-   "grado": 9,
+   "grado": 10,
    "color": "#4a9eff"
   },
   {
@@ -470,7 +470,7 @@
    ],
    "cuerpo": "**Flujo confirmado:** los pedidos se envían todos los días — se despacha desde\n**Playa Chinchorro** y se entrega en el **Mall**. El Mall no produce nada.\n\n**Consecuencia:** si el traspaso no se registra valorizado, el costo de\nmercadería por local no existe — solo existe la venta por local.\n\n**Son dos controles distintos, no uno:**\n1. Pedido del Mall vs venta del Mall — ¿piden de más?\n2. Despachado en Playa vs recibido en el Mall — ¿llega todo?\n\nEl segundo es el punto de fuga clásico en operaciones de dos locales, y es el\nque nadie mira porque \"es de la casa\".",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 11,
+   "grado": 12,
    "color": "#4a9eff"
   },
   {
@@ -1581,7 +1581,7 @@
    ],
    "cuerpo": "# H-065 · La pregunta de agosto, respondida\n\n`H-010` (20-ago) fijó el número que había que medir **antes** de construir\ncualquier alerta de reposición:\n\n> *\"¿Qué % de los productos vendidos tiene una `ReglaInsumo` que los cubra?\"*\n\n## La respuesta\n\nDe **517 recetas vinculadas y activas**:\n\n| | Cuántos | % |\n|---|---|---|\n| Descuentan **todos** sus insumos | 65 | **13%** |\n| Descuentan **solo algunos** | 44 | 9% |\n| **No descuentan nada** | **408** | **79%** |\n\nCausa: de los ~230 insumos que las recetas usan, **solo 52 tienen encendido el\ninterruptor \"Descuenta\"**. Los otros 178 tienen receta y el descuento apagado.\n\n## Lo que sí está sano\n\n**Cero recetas apuntan a un insumo inexistente.** El riesgo número uno de H-010\n—el puente venta↔bodega por nombre de texto— hoy no está fallando. Nada se\npierde en silencio por un nombre mal escrito.\n\n**Solo 4 insumos se cuentan sin que ningún plato los use:** Filete, frutos del\nmar, galletón Americano, mozzarella 38. *(El galletón otra vez, el mismo del\nárea equivocada.)*\n\n## Consecuencia\n\n**El stock de insumos no es un inventario: es una lista de números escritos a\nmano.** Salvo en 65 platos, vender no mueve nada. Por eso hay insumos\ncongelados en el valor que alguien escribió hace semanas.\n\nEs también la causa de fondo del incidente del 20-sep: cuando Alejandra encendió\n\"Corta venta\" en diez insumos, encendió el corte sobre números que en su mayoría\nnadie mantiene.\n\n## Recomendación (no ejecutada)\n\n**No encender los 178.** Serían 178 contadores bajando solos sobre stocks sin\ncargar, y en una semana media carta bloqueada — lo del 20-sep multiplicado.\n\nEl orden correcto es por área: empezar por **pastelería** (16 insumos y gente\nque los cuenta), cargar su stock real, encender el descuento solo ahí, y\nverificar una semana contra el conteo físico con la hoja impresa (L-013). Si\ncuadra, se suma la siguiente área.\n\n**Regla:** insumo que nadie cuenta no debe tener el descuento encendido. Un\nnúmero que no se mantiene no protege — apaga la carta.",
    "origen": "21-sep-2026, chequeo sobre 246 insumos y 800 recetas de DiMangoToGo",
-   "grado": 5,
+   "grado": 6,
    "color": "#4a9eff"
   },
   {
@@ -1604,6 +1604,28 @@
    "cuerpo": "# H-066 · Doble documento tributario en autoatención\n\n## La regla, dicha por Ricardo\n\n**Solo emiten boleta: efectivo, transferencia y Khipu.**\nNo emiten: tarjeta, online, Mercado Pago, Flow, tarjeta de alimentación, QR, SB.\n\nRazón: esos medios **se declaran solos ante el SII** y ya registran IVA. Emitir\nboleta encima es pagar el IVA **dos veces**.\n\n## Lo que hacía el sistema\n\nSiete puntos pueden emitir boleta. Auditados todos:\n\n| Dónde | Medio | Emitía | |\n|---|---|---|---|\n| Caja — `ModalCobrar` / `ModalPostCobro` | tarjeta | No, comprobante interno | ✔ |\n| **`emitirBoleta` V1, vía `/AdminBoletas`** | **default `'tarjeta'`** | **Sí, sin filtro** | ✘ |\n| Caja | efectivo, transferencia | Sí, botón manual | ✔ |\n| **Kiosko Autoatención Playa 1/2/3** | **tarjeta** | **Sí, automático** | ✘ |\n| **`MenuPedido`, canal kiosko** | **tarjeta** | **Sí, automático** | ✘ |\n| Waiter — garzón | casilla, cualquier medio | Sí si la marcaban | ✘ |\n| Webhook Flow / Mercado Pago mesa | online | Sí, automático | ✘ |\n| Webhook Khipu mesa | khipu_online | Sí | ✔ |\n\nEl código: `medio_pago: \"tarjeta\", source: \"kiosko\"` en\n`KioskoAutoatencionPlayaBase.jsx:629` y `MenuPedido.jsx:721`.\n\n**La Caja estaba bien resuelta desde antes y el kiosco nunca se alineó.** Cada\nventa de autoatención generaba dos documentos: el comprobante del terminal\nMercado Pago Point (DTE 48) y una boleta nuestra (DTE 39).\n\n## Estado: corregido y publicado el 22-sep-2026 (00:22)\n\nCandado puesto en **las tres puertas**, verificado sobre el código publicado:\n`emitirBoletaV2` (385 líneas), `emitirBoleta` V1 (301) y `ModalEmitirBoleta.jsx`\n(326). Ninguna quedó cortada ni duplicada al pegar.\n\n**Probado — efectivo en caja emite boleta con folio, normal.** Esa era la\nprueba crítica: el riesgo del cambio no era dejar de emitir de más, era dejar de\nemitir donde el SII sí lo exige. **Pendiente:** una venta de kiosco con tarjeta,\nque debe completarse sin folio.\n\n## La corrección\n\n**Un candado en el backend, no siete parches de pantalla:** lista blanca de\nmedios en `emitirBoletaV2`, que es por donde pasan los siete. Si el medio\ndeclarado no es efectivo, transferencia o Khipu, devuelve\n`bloqueado_por_medio_pago` y no emite.\n\nParche completo en `parche-boleta-medios.md` (scratchpad de la sesión):\ncandado + retirar la llamada del kiosco + bloquear la casilla del waiter +\nsacar la emisión de los webhooks de Flow y MP.\n\n**El medio vacío pasa a propósito:** lo mandan la caja y la pestaña Sin Boleta,\ndonde un humano con sesión ya decidió. Se bloquea el medio declarado, no el\nsilencio.\n\n## Lo que queda abierto, y es plata\n\n1. **Cuánto IVA se pagó de más, y desde cuándo.** Todas las boletas de kiosco\n   emitidas sobre pagos con tarjeta. Se mide contando `Boleta` con\n   `source: kiosko`. **Es material para Carlos Jirón** (N-006): si el doble IVA\n   se declaró, se corrige por rectificatoria.\n2. **Eliminar `qr` del enum** `Order.payment_method`\n   (`base44/entities/Order.jsonc:198`). Cambio de esquema: antes hay que contar\n   las ventas históricas que lo usan, porque borrar el valor rompe la lectura de\n   esas órdenes.\n\n## Nota de método\n\nRicardo pidió *\"anular la emisión en todos los medios\"*. Anular en **todos**\nhabría dejado el efectivo sin ningún documento tributario — nadie más emite ahí.\nLa instrucción se acotó antes de ejecutarla y él fijó la regla exacta. **El\nexceso se corrige; la ausencia es infracción.**\n\n## Decisión de Ricardo — 22-sep-2026, 00:30\n\n**No se persigue el IVA retroactivo por ahora.** Prefiere supervisar las boletas\ndel día siguiente y asegurar que no vuelva a ocurrir.\n\n**Objeción de Maximus, planteada una vez:** la rectificatoria tiene plazo, así\nque ignorarlo indefinidamente sí tiene costo. Queda **pospuesto con fecha de\nrevisión**, no abandonado (mismo criterio que D-001). Es una consulta de veinte\nminutos con `diagnosticoBoletasKiosko`, no un proyecto.\n\n**Supervisión acordada:** mirar las boletas del día y verificar dos cosas — que\nninguna venta de kiosco traiga folio, y que las de efectivo **sí** lo traigan.\nLa segunda es la que más importa: una venta en efectivo sin boleta es peor que\nel problema que se arregló.",
    "origen": "21-sep-2026, Ricardo reporta emision de folio en pagos con tarjeta; auditoria de los 7 puntos de emision de DiMangoToGo",
    "grado": 3,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-067",
+   "tipo": "hallazgo",
+   "titulo": "El puente bodega (Working) → stock de venta (ToGo): calce real 36%, y la pieza que falta es el factor de conversión, no el código",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "bodega",
+    "insumos",
+    "stock",
+    "working",
+    "dimangotogo",
+    "inventario",
+    "integracion"
+   ],
+   "cuerpo": "# H-067 · Medido: por qué no se puede conectar todavía\n\n## Lo que pidió Ricardo\n\n> *\"El inventario está en DiMangoWorking, nosotros descontamos stock desde ahí.\n> Ideal que para hacer un solo trabajo eso se vincule y descuente\n> inmediatamente en StockEnVivo y en StockEnVivoMall.\"*\n\n## El número que decide\n\nDe los **64 insumos que sí descuentan** en ToGo, cuántos reciben entrada desde\nbodega (medido sobre 500 movimientos de SALIDA, 17-22 sep):\n\n| | |\n|---|---|\n| Calce exacto de nombre | 14 (22%) |\n| Calzan al ignorar la unidad | +9 (14%) |\n| **Máximo alcanzable hoy** | **23 de 64 — 36%** |\n| Sin movimiento de bodega en 5 días | 41 |\n\n**Conectar así deja dos de cada tres insumos sin su entrada.** El stock bajaría\ncon cada venta y no subiría nunca: en una semana, media cocina bloqueada — el\nincidente del 20-sep, pero automático y en todas las áreas.\n\n## Las tres causas, y solo una es de nombres\n\n**1. La bodega escribe la unidad dentro del nombre.**\n`\"pan ciabatta und\"` vs `\"pan ciabatta\"` · `\"papas fritas kg\"` vs\n`\"papas fritas\"` · `\"salmon porcion\"` vs `\"Salmon\"` · y un typo, `\"gnocci\"`.\nRecupera 9 de golpe.\n\n**2. No hablan de la misma unidad, y esta es la pieza que falta en el diseño.**\nBodega piensa en **unidad de compra** (kg, 500 gr); el local cuenta en **unidad\nde uso** (porciones, platos). Sumar 1 cuando bodega despacha 1 kg es sumar peras\ncon manzanas. **Cada par necesita un factor de conversión.**\n\n**3. Solo dos áreas mueven bodega.** De 500 salidas: **COCINA 349, DESPACHO 151,\ncero BAR y cero PASTELERÍA.** Los 41 sin entrada son en su mayoría elaborados\n—cheesecakes, tortas, crepes, brownie, gnocchi— que vienen del **Centro de\nProducción**, no de bodega. **Por eso pastelería funcionó sin este puente.**\n\n## El rendimiento ya está implícito en los costos — y es material de margen\n\n`BodegaGeneral` guarda el mismo producto en kg y en porción, con su costo:\n\n| | Costo kg | Costo porción | Porciones/kg implícitas | Gramaje |\n|---|---|---|---|---|\n| Salmón | $14.500 | $2.500 | **5,8** | ~172 g |\n| Filete | $14.590 | $3.000 | **4,9** | ~206 g |\n| Lomo liso | $8.750 | $2.250 | **3,9** | ~257 g |\n\n*(ARITMÉTICA sobre costos cargados, no medición física.)*\n\nRicardo preguntó si un kilo de salmón son 4 porciones. **Según sus propios\nnúmeros son casi 6.** Si de verdad fueran 4, el costo por porción no es $2.500\nsino **$3.625 — un 45% más**, y ese error está entrando en el margen de cada\nplato de salmón. **El factor no es un detalle de inventario: es margen.**\n\nY al revés, es la vía para medir merma: si entraron 11 porciones, se vendieron 9\ny quedan 0, faltan 2. Eso hace medible lo que H-001 dejó abierto — que el 28,7%\nes costo de **compra**, no de **consumo**.\n\n## Lo que ya existe y no hay que construir\n\n- **El local viaja en `notas`**, con formato que escribe el sistema:\n  `\"Pedido diario → PLAYA\"` / `\"Pedido diario → MALL\"`. Permite decidir entre\n  `stock_actual` y `stock_actual_mall`.\n- **El área viaja en `destino`** (COCINA / DESPACHO).\n- **Ya existe un sistema de vínculos** en el checklist: hay movimientos con\n  `\"Pedido diario (vínculo de Pan Frica) → PLAYA\"`. **No hay que inventar el\n  mecanismo de vinculación, hay que extenderlo a ToGo.**\n\n## El desorden de fondo, dentro de la propia Working\n\nDe **201 items movidos en 5 días, 74 (37%) no existen en `BodegaGeneral`**:\n`queso cheddar kg`, `salame kg`, `cilantro`, `hierba buena`, `guantes m 100`,\n`redecilla cofia`. Causa: **`MovimientoStock` deja escribir el nombre a mano.**\n\nArreglo de raíz y chico: **que el movimiento se elija de una lista, no se\nescriba.** No bloquea el proyecto —los movimientos del checklist vienen\nlimpios— pero sin eso el maestro sigue divergiendo.\n\n*(Corrección de Ricardo: \"Bodega Mall\" NO es un duplicado de \"Mall\" — es\nguardería, y las transferencias pasan igual por el checklist.)*\n\n## Estado: planilla entregada, esperando a Ricardo\n\n`~/Downloads/equivalencias-bodega-togo.csv` — 64 filas con la pareja sugerida,\nlas unidades de los dos lados y la columna de factor:\n\n| Grupo | Filas | Qué hace falta |\n|---|---|---|\n| 4. LISTO | 18 | nada, factor 1 |\n| 3. UNIDAD DISTINTA | 7 | poner el número |\n| 2. NOMBRE DUDOSO | 9 | confirmar que es el mismo |\n| 1. SIN PAREJA | 30 | decir si existe con otro nombre |\n\nDe las 30 sin pareja, **8 son pastelería y 4 bar** — esperable, no vienen de\nbodega. **Las 17 de cocina son las que deciden.**\n\nError detectado por la propia planilla: `empanadas queso unidad` y\n`empanadas camaron` apuntan al mismo item de bodega. Una de las dos está mal.\n\n## Orden acordado\n\n1. **Llenar la planilla** — tarea de Ricardo. Empezar por los grupos 3 y 2 (16 filas).\n2. **Conectar**: `producto_id` → insumo, `cantidad × factor`, local desde notas,\n   área desde destino. Código corto.\n3. **Cocina de Playa primero.** Una semana contra conteo físico antes de sumar área.\n\n**Regla: los factores se miden, no se estiman.** Un factor inventado muestra\nporciones que no existen y vende platos que no se pueden hacer — peor que no\ntener control.",
+   "origen": "22-sep-2026, Ricardo pide que descontar en Working actualice StockEnVivo y StockEnVivoMall",
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -2208,7 +2230,7 @@
    ],
    "cuerpo": "**El caso que planteó Ricardo:** se venden 10 Coca-Colas, reponen 12 → alerta.\n\n**Lo que ya existe:**\n- Venta del día anterior: correo automático a la 1:30 AM\n- `ChecklistPedido`: cantidad solicitada vs entregada, por local y área\n- `ReglaInsumo`: convierte producto vendido → insumo\n\n**Lo único que falta:** que al cargar el pedido aparezca al lado lo que se vendió.\nLos dos datos están sobre la mesa a la misma hora y nadie los junta.\n\n**Riesgo previo a medir:** el puente venta↔bodega es matching por **nombre de\ntexto**. Antes de construir cualquier alerta hay que medir qué % de los productos\nvendidos tiene una `ReglaInsumo` que los cubra. Si es 60%, la alerta miente en el\n40% restante y se ignora en dos semanas.\n\n**Control de personas (N-004):** Verónica pide y despacha. Sin separación de\nfunciones, el control técnico no cambia nada.\n\n## El puente venta↔bodega cambió de sistema — 24-ago-2026\n\nLo de arriba describe `ChecklistPedido` y `ReglaInsumo`, en **DimangoWorking**.\nVerificado hoy con datos reales: `ChecklistPedido` tiene 136 registros en\ntotal y **ninguno más reciente que el 5 de marzo de 2026** — se usó diez días\ny se abandonó. Ricardo confirmó: *\"ahora usamos all dimangotogo para el\nchecklist\"*.\n\n**El reemplazo ya existe y está vivo, en DimangoToGo:** la página `/Checklist`\n(`src/pages/Checklist.jsx` + `ChecklistEnVivo.jsx`), sobre las entidades\n`Order` (venta), `Receta` (reemplaza a `ReglaInsumo` — vincula\n`nombre_en_venta` a una lista de insumos con cantidad y área) e `Insumo`\n(catálogo con `stock_actual`/`stock_minimo`, **en construcción ahora mismo**\npor Ricardo — la mayoría de esos dos campos siguen en `null`).\n\n**El riesgo previo a medir, medido:** cobertura de recetas en Playa,\n1-24-ago-2026: **68,4%** de las unidades vendidas tienen receta vinculada.\nEl 31,6% restante no descuenta insumo — entre los productos sin receta:\nensaladas, guarniciones (papas mayo, papas provenzal), varios cócteles y\ntragos (mojito, paloma, campari spritz), cafés especiales. **No es un\nproblema menor de cola larga — hay categorías completas de bar y de\nguarniciones afuera.**\n\n## Maximus ya puede leerlo — 24-ago-2026\n\nFunción `maximusChecklist` en DimangoToGo (mismo patrón de secreto que\n`maximusVentas`, solo lectura) replica exactamente `calcularChecklist()` de\n`ChecklistEnVivo.jsx` — Maximus ve lo mismo que la pantalla, no una versión\nparalela. Herramienta `checklist_dimango` en `maximus.py`: pregunta qué\nreponer por local/área/fecha, devuelve la lista de insumos a reponer, el %\nde cobertura y los productos sin receta. **Solo lectura, a propósito** — no\nsugiere cantidades de pedido ni escribe nada, decisión tomada con Ricardo el\nmismo día para no construir sobre una cobertura del 68%.\n\n## Recerrado el 29-ago-2026 — ver H-024\n\nLos dos primeros pasos de abajo quedaron resueltos o descartados. Detalle\ncompleto en `H-024`.\n\n1. ~~Subir la cobertura de recetas~~ — **HECHO**. Cobertura re-medida el\n   29-ago: **99,9%** (80,4% vinculado + 19,5% excluido a propósito). Ricardo\n   siguió cargando `Receta` después del 24-ago sin que nadie se lo pidiera.\n2. ~~Cargar `stock_actual`/`stock_minimo` en `Insumo`~~ — **DESCARTADO como\n   bloqueo**. Se leyó el código real de `ChecklistEnVivo.jsx`:\n   `calcularChecklist()` no usa esos campos para nada. Siguen en `null` en\n   las 224 filas de `Insumo`, pero son irrelevantes para este cruce.\n3. **El bloqueo real, recién identificado:** en las cuatro pestañas de\n   `Checklist.jsx` (Vinculación, Checklist en vivo, Exportar, Editor) no\n   existe ningún campo donde se registre **cuánto se pidió**. El sistema\n   calcula \"a reponer\" desde la venta, pero no hay nada con qué compararlo.\n   El `ChecklistPedido` de DimangoWorking sí tenía `cantidad_solicitada`,\n   pero está abandonado desde marzo (ver arriba).\n\n**Siguiente paso concreto:** agregar en DimangoToGo un campo o tabla chica\nque capture \"cantidad pedida\" por insumo/área/día (quién pide, cuánto,\ncuándo). Con \"a reponer\" ya calculado y expuesto a Maximus\n(`maximusChecklist`), el cruce que cierra el caso original de Ricardo es\ndirecto una vez exista ese dato — es una pieza más chica de lo que este\npendiente tenía anotado hasta hoy.",
    "origen": "pedido explícito de Ricardo + auditoría del código",
-   "grado": 27,
+   "grado": 28,
    "color": "#ff5f56"
   },
   {
@@ -2523,7 +2545,7 @@
    ],
    "cuerpo": "# P-024 · No falta sistema, falta que alguien cuente\n\n## Lo que pidió Ricardo\n\n> *\"Necesito control en mi local, necesito que el equipo registre stock y que\n> antes que se acabe pida rellenar.\"*\n\n## Lo que ya está construido — y no se usa\n\n| Pieza | Estado |\n|---|---|\n| `stock_minimo` / `stock_minimo_mall` en `Insumo` | Campos creados, **vacíos** |\n| `TabSugerido` — stock ideal con percentil 80 de demanda real | Construido el 16-sep |\n| Hoja de conteo imprimible por área (L-013) | Construida el 21-sep |\n| Descuento automático venta → insumo | **Apagado en 178 de 230 insumos** (H-065) |\n| `MovimientoStock`, `ChecklistPedido`, `ReglaInsumo` | Existen |\n\n**El diagnóstico, y es el punto entero de esta nota: el software está completo.\nLo que no existe es la rutina humana que lo alimenta.** Solo 65 de 517 recetas\ndescuentan de verdad; hay insumos congelados en el número que alguien escribió\nhace semanas.\n\n## Por qué fracasó el intento anterior\n\nSe encendió de golpe y para todo. El 20-sep Alejandra activó \"corta venta\" en\ndiez insumos y bloqueó platos que sí había, porque el corte cayó sobre números\nque nadie mantenía. **Un sistema que mintió una vez no lo vuelven a mirar** — y\nesa es la deuda real que hay que remontar, no la técnica.\n\n## Plan propuesto — un área, un nombre, una hora\n\n1. **Pastelería. 16 insumos. Nadie más.**\n2. **Un responsable con nombre**, no \"el área\". Una persona del turno.\n3. **Hora fija**, al cierre, con la hoja impresa.\n4. **Cargar el mínimo de esos 16**: `TabSugerido` propone el número con la venta\n   real y Ricardo lo aprueba.\n5. **Regla sin permiso (R-002):** lo que amanece bajo el mínimo se pide ese día.\n   El encargado no consulta, pide.\n6. **Una semana**, y recién entonces comparar conteo físico contra sistema. Si\n   cuadra, encender el descuento automático **solo en pastelería** y sumar la\n   siguiente área. Dos meses para las cinco.\n\n## Lo que Maximus construiría DESPUÉS, no antes\n\nAviso diario a Telegram con los insumos bajo mínimo **y las áreas que no\ncontaron hoy**. El segundo importa más: un control se muere cuando nadie nota\nque dejaron de alimentarlo, y ese aviso hace visible el incumplimiento sin que\nRicardo revise nada — que es el objetivo de los 90 días.\n\n**No se construye hasta que cuenten una semana: avisar de un número que nadie\ncarga es ruido.**\n\n## Bloqueado esperando a Ricardo\n\n**¿Quién cuenta pastelería y a qué hora?** Nombre y hora. Con eso se arma la\nhoja del área, se cargan los mínimos y se escribe el procedimiento en una página.",
    "origen": "22-sep-2026, Ricardo pide que el equipo registre stock y pida reposición antes de quebrar",
-   "grado": 5,
+   "grado": 6,
    "color": "#ff5f56"
   },
   {
@@ -4701,6 +4723,31 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-067",
+   "a": "H-008",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-067",
+   "a": "P-024",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "H-067",
+   "a": "H-065",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-067",
+   "a": "P-007",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-067",
+   "a": "H-001",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -6065,6 +6112,7 @@
   "H-047 --relacionado--> H-005",
   "H-062 --relacionado--> H-005",
   "H-065 --deriva_de--> H-010",
+  "H-067 --deriva_de--> H-010",
   "P-015 --relacionado--> H-010",
   "P-024 --relacionado--> H-010",
   "S-025 --relacionado--> MEMORY"
