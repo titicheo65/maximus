@@ -1520,7 +1520,7 @@
    ],
    "cuerpo": "# H-062 · El monto exento del RCV no son cigarros\n\nRicardo detecta en el RCV de septiembre un **monto exento de $2.293.050** cuando\nlo único exento que vende es tabaco. La causa quedó identificada con evidencia\nen el mismo día.\n\n## La evidencia\n\n**Detalle de cobros de Mercado Pago, 1 al 14 de septiembre:**\n\n| Tax Setting | Monto | Transacciones |\n|---|---|---|\n| Cargo afecto | $15.857.092 | 1.865 |\n| **Cargo exento** | **$2.151.000** | **255** |\n| Sin configurar | $61.028 | 2 |\n\n**14 días de MP explican casi todo el exento del mes.** El ticket promedio de\nlas transacciones exentas es **$8.435**; una cajetilla vale $5.400–$6.100.\n\n| Monto de la transacción exenta | Cuántas |\n|---|---|\n| hasta $6.500 (podría ser una cajetilla) | 78 |\n| **$6.500 a $13.000** | **135** |\n| **$13.000 a $30.000** | **41** |\n| más de $30.000 | 1 |\n\nLas más altas: $33.500, $29.600, $29.300, $27.600, $25.600. **Son cuentas de\nmesa, no tabaco.**\n\n## El mecanismo, confirmado\n\nLa secuencia del 12-sep en la máquina 8611 (72 exentas de 184) muestra las\nexentas **intercaladas** con las afectas, no en bloque:\n\n```\n.EE.....E....E..E.E.....EEE..E......E.E.E....E.......EE...E.\n```\n\n**Descarta que la máquina quedara trabada en modo exento: alguien elige\n\"exento\" venta por venta.** Y el terminal solo permite marcar la transacción\ncompleta, no un ítem — así que cuando la cuenta lleva cigarros, se marca exenta\n**la comida también**.\n\nSe junta con lo que hace el software: `ModalCobrar.jsx:401` y\n`ModalPostCobro.jsx:643` **restan los cigarros del DTE** (\"vale aparte\"), por\neso las boletas del RCV salen con exento 0. Nadie diseñó las dos cosas juntas.\n\n## Cuánto se vende de cigarros de verdad\n\nMuestra de 500 órdenes (19–20 sep): **$65.000, el 0,99% de la venta**, 24\nunidades, todo en Playa. Extrapolado al mes: **~$800.000** (ARITMÉTICA, muestra\nde día y medio y venta muy variable). Contra $2,29M declarados exentos:\n**sobran ~$1,4 millones.**\n\n## Lo que NO es\n\n**No es error de Mercado Pago.** DiMangoToGo no emite documentos tipo 48 —solo\nboleta (39) y factura (33)—, y a la máquina le manda **solo el monto**:\n`transactions: { payments: [{ amount }] }`, sin ningún indicador de impuesto.\n\n## Decisión de Ricardo (20-sep)\n\n*\"Carlos Jirón me dará la responsabilidad a mí, lo que tenemos que cambiar es el\ntema de los cigarros, que no genere exento toda la comanda.\"*\n\n## Pendientes\n\n1. **Arreglo automático:** la Order API de Point (Chile) acepta\n   `taxes: [{ payer_condition: \"payment_taxable_iva\" }]`. **Falta que Mercado\n   Pago confirme el valor para exento** — la doc oficial devuelve 403. Con ese\n   dato, la app manda el impuesto en cada cobro y el cajero deja de elegir.\n2. **Arreglo intermedio, si MP no responde:** separar el cobro en dos\n   transacciones cuando la comanda lleva cigarros. Acota el exento al valor real\n   del tabaco. **No se toca en día de servicio.**\n3. **Carlos Jirón:** cómo corresponde documentar la venta de cigarros, dado que\n   hoy sale de la boleta y se marca exenta la transacción entera.",
    "origen": "20-sep-2026, Excel 'Detalle Cobros 1-14 sept' de Mercado Pago, cruzado con el RCV del SII y con las ventas de DiMangoToGo",
-   "grado": 3,
+   "grado": 4,
    "color": "#4a9eff"
   },
   {
@@ -1582,6 +1582,28 @@
    "cuerpo": "# H-065 · La pregunta de agosto, respondida\n\n`H-010` (20-ago) fijó el número que había que medir **antes** de construir\ncualquier alerta de reposición:\n\n> *\"¿Qué % de los productos vendidos tiene una `ReglaInsumo` que los cubra?\"*\n\n## La respuesta\n\nDe **517 recetas vinculadas y activas**:\n\n| | Cuántos | % |\n|---|---|---|\n| Descuentan **todos** sus insumos | 65 | **13%** |\n| Descuentan **solo algunos** | 44 | 9% |\n| **No descuentan nada** | **408** | **79%** |\n\nCausa: de los ~230 insumos que las recetas usan, **solo 52 tienen encendido el\ninterruptor \"Descuenta\"**. Los otros 178 tienen receta y el descuento apagado.\n\n## Lo que sí está sano\n\n**Cero recetas apuntan a un insumo inexistente.** El riesgo número uno de H-010\n—el puente venta↔bodega por nombre de texto— hoy no está fallando. Nada se\npierde en silencio por un nombre mal escrito.\n\n**Solo 4 insumos se cuentan sin que ningún plato los use:** Filete, frutos del\nmar, galletón Americano, mozzarella 38. *(El galletón otra vez, el mismo del\nárea equivocada.)*\n\n## Consecuencia\n\n**El stock de insumos no es un inventario: es una lista de números escritos a\nmano.** Salvo en 65 platos, vender no mueve nada. Por eso hay insumos\ncongelados en el valor que alguien escribió hace semanas.\n\nEs también la causa de fondo del incidente del 20-sep: cuando Alejandra encendió\n\"Corta venta\" en diez insumos, encendió el corte sobre números que en su mayoría\nnadie mantiene.\n\n## Recomendación (no ejecutada)\n\n**No encender los 178.** Serían 178 contadores bajando solos sobre stocks sin\ncargar, y en una semana media carta bloqueada — lo del 20-sep multiplicado.\n\nEl orden correcto es por área: empezar por **pastelería** (16 insumos y gente\nque los cuenta), cargar su stock real, encender el descuento solo ahí, y\nverificar una semana contra el conteo físico con la hoja impresa (L-013). Si\ncuadra, se suma la siguiente área.\n\n**Regla:** insumo que nadie cuenta no debe tener el descuento encendido. Un\nnúmero que no se mantiene no protege — apaga la carta.",
    "origen": "21-sep-2026, chequeo sobre 246 insumos y 800 recetas de DiMangoToGo",
    "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
+   "id": "H-066",
+   "tipo": "hallazgo",
+   "titulo": "Los kioscos emiten boleta DTE sobre pagos con tarjeta que ya se declaran solos: IVA pagado dos veces",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "sii",
+    "dte",
+    "boleta",
+    "iva",
+    "kiosko",
+    "medios-de-pago",
+    "dimangotogo"
+   ],
+   "cuerpo": "# H-066 · Doble documento tributario en autoatención\n\n## La regla, dicha por Ricardo\n\n**Solo emiten boleta: efectivo, transferencia y Khipu.**\nNo emiten: tarjeta, online, Mercado Pago, Flow, tarjeta de alimentación, QR, SB.\n\nRazón: esos medios **se declaran solos ante el SII** y ya registran IVA. Emitir\nboleta encima es pagar el IVA **dos veces**.\n\n## Lo que hacía el sistema\n\nSiete puntos pueden emitir boleta. Auditados todos:\n\n| Dónde | Medio | Emitía | |\n|---|---|---|---|\n| Caja — `ModalCobrar` / `ModalPostCobro` | tarjeta | No, comprobante interno | ✔ |\n| **`emitirBoleta` V1, vía `/AdminBoletas`** | **default `'tarjeta'`** | **Sí, sin filtro** | ✘ |\n| Caja | efectivo, transferencia | Sí, botón manual | ✔ |\n| **Kiosko Autoatención Playa 1/2/3** | **tarjeta** | **Sí, automático** | ✘ |\n| **`MenuPedido`, canal kiosko** | **tarjeta** | **Sí, automático** | ✘ |\n| Waiter — garzón | casilla, cualquier medio | Sí si la marcaban | ✘ |\n| Webhook Flow / Mercado Pago mesa | online | Sí, automático | ✘ |\n| Webhook Khipu mesa | khipu_online | Sí | ✔ |\n\nEl código: `medio_pago: \"tarjeta\", source: \"kiosko\"` en\n`KioskoAutoatencionPlayaBase.jsx:629` y `MenuPedido.jsx:721`.\n\n**La Caja estaba bien resuelta desde antes y el kiosco nunca se alineó.** Cada\nventa de autoatención generaba dos documentos: el comprobante del terminal\nMercado Pago Point (DTE 48) y una boleta nuestra (DTE 39).\n\n## Estado: corregido y publicado el 22-sep-2026 (00:22)\n\nCandado puesto en **las tres puertas**, verificado sobre el código publicado:\n`emitirBoletaV2` (385 líneas), `emitirBoleta` V1 (301) y `ModalEmitirBoleta.jsx`\n(326). Ninguna quedó cortada ni duplicada al pegar.\n\n**Probado — efectivo en caja emite boleta con folio, normal.** Esa era la\nprueba crítica: el riesgo del cambio no era dejar de emitir de más, era dejar de\nemitir donde el SII sí lo exige. **Pendiente:** una venta de kiosco con tarjeta,\nque debe completarse sin folio.\n\n## La corrección\n\n**Un candado en el backend, no siete parches de pantalla:** lista blanca de\nmedios en `emitirBoletaV2`, que es por donde pasan los siete. Si el medio\ndeclarado no es efectivo, transferencia o Khipu, devuelve\n`bloqueado_por_medio_pago` y no emite.\n\nParche completo en `parche-boleta-medios.md` (scratchpad de la sesión):\ncandado + retirar la llamada del kiosco + bloquear la casilla del waiter +\nsacar la emisión de los webhooks de Flow y MP.\n\n**El medio vacío pasa a propósito:** lo mandan la caja y la pestaña Sin Boleta,\ndonde un humano con sesión ya decidió. Se bloquea el medio declarado, no el\nsilencio.\n\n## Lo que queda abierto, y es plata\n\n1. **Cuánto IVA se pagó de más, y desde cuándo.** Todas las boletas de kiosco\n   emitidas sobre pagos con tarjeta. Se mide contando `Boleta` con\n   `source: kiosko`. **Es material para Carlos Jirón** (N-006): si el doble IVA\n   se declaró, se corrige por rectificatoria.\n2. **Eliminar `qr` del enum** `Order.payment_method`\n   (`base44/entities/Order.jsonc:198`). Cambio de esquema: antes hay que contar\n   las ventas históricas que lo usan, porque borrar el valor rompe la lectura de\n   esas órdenes.\n\n## Nota de método\n\nRicardo pidió *\"anular la emisión en todos los medios\"*. Anular en **todos**\nhabría dejado el efectivo sin ningún documento tributario — nadie más emite ahí.\nLa instrucción se acotó antes de ejecutarla y él fijó la regla exacta. **El\nexceso se corrige; la ausencia es infracción.**",
+   "origen": "21-sep-2026, Ricardo reporta emision de folio en pagos con tarjeta; auditoria de los 7 puntos de emision de DiMangoToGo",
+   "grado": 3,
    "color": "#4a9eff"
   },
   {
@@ -2079,7 +2101,7 @@
    ],
    "cuerpo": "**Respuestas de Ricardo:**\n- DiMangoToGo **no emite**: emite **SimpleFactura**, proveedor certificado.\n- Contingencia: emisión manual desde la web del proveedor.\n- Folios CAF al día. **Cero fallas de emisión en julio.**\n- **Los encargados de ambos locales saben emitir manual** → cumple P3.\n\n**Error de Maximus, conservado a propósito:** se clasificó como riesgo #1 del\nnegocio a $5,5M/día, y se repitió cinco veces. Ese número asumía que DiMangoToGo\nemitía por sí misma y que no había alternativa. Era una construcción propia\n(autoridad 5) presentada con el peso de un hecho. Ver L-005.",
    "origen": "informado por Ricardo, 20-ago-2026",
-   "grado": 12,
+   "grado": 13,
    "color": "#ff5f56"
   },
   {
@@ -2222,7 +2244,7 @@
    ],
    "cuerpo": "El punto único ya no es DiMangoToGo: son **SimpleFactura e internet**.\n\nLas dos vías de emisión —la app y la web del proveedor— requieren conexión. En\nChile la boleta es 100% electrónica: el talonario timbrado ya no existe como\ncontingencia.\n\n**Pregunta abierta para el proveedor, sin urgencia:** ¿SimpleFactura **encola**\nlas boletas si cae internet y las timbra al recuperar conexión? El SII contempla\nese modo, pero hay que confirmar si el software lo implementa o simplemente\nfalla.",
    "origen": "derivado de P-001",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff5f56"
   },
   {
@@ -4644,6 +4666,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-066",
+   "a": "H-062",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-066",
+   "a": "P-001",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-066",
+   "a": "P-009",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -5974,7 +6011,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-09-21",
+ "generado": "2026-09-22",
  "huerfanos": [],
  "enlaces_rotos": [
   "H-024 --relacionado--> H-010",
