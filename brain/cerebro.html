@@ -550,7 +550,9 @@ async function preguntar(texto){
       headers:{'Content-Type':'application/json',
                'x-maximus-token': g('mx_tok'),
                'ngrok-skip-browser-warning':'1'},
-      body: JSON.stringify({mensaje: texto, sesion:'cerebro', voz: g('mx_voz')==='1'})
+      // Sin voz a propósito: el audio se pide aparte, en pedirVoz(). Pedirlo
+      // aquí dejaba el texto esperando ~2,4 s a que el sintetizador terminara.
+      body: JSON.stringify({mensaje: texto, sesion:'cerebro'})
     });
     if(r.status === 401){ caja.textContent='Token inválido. Toca ⚙ conexión abajo.'; estado(''); return; }
     if(r.status === 503){ caja.textContent='El chat no está habilitado en el servidor: falta MAXIMUS_CHAT_TOKEN en el .env.'; estado(''); return; }
@@ -560,7 +562,7 @@ async function preguntar(texto){
     caja.textContent = d.respuesta;
     estado('');
 
-    if(d.audio) sonar(d.audio, 0.9);   // cierra el mic mientras habla: ver sonar()
+    if(g('mx_voz')==='1') pedirVoz(d.respuesta, 0.9);   // en paralelo: ya puedes leer
 
     // lo mejor del grafo: iluminar exactamente lo que Maximus usó para responder
     const usadas = (d.notas || []).filter(n => idx[n] !== undefined);
@@ -711,20 +713,36 @@ async function mirarCamara(){
   btn.classList.remove('on');
 }
 
-// Pide solo el audio de un texto ya generado (para lo que ve, no para el chat)
-async function hablarRespuesta(texto){
+// Pide SOLO el audio de un texto que ya está en pantalla.
+//
+// El texto no espera al audio: la respuesta se pinta apenas llega y la voz
+// entra después, cuando el sintetizador termina (~2,4 s medidos el 23-sep).
+// Antes viajaban juntos y esos segundos se sumaban enteros a la espera.
+//
+// Antes esto mandaba "Repite exactamente esto: …" al chat — un turno completo
+// de Claude para no decir nada nuevo. /maximus/voz solo sintetiza.
+async function pedirVoz(texto, volumen){
+  if(!texto) return;
+  const pedido = ++ultimoPedidoVoz;   // si preguntas otra cosa, el audio viejo se descarta
+  esperandoVoz = true;                // el micrófono no se abre en este hueco
   try{
-    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/chat', {
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/voz', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-maximus-token':g('mx_tok'),
                'ngrok-skip-browser-warning':'1'},
-      body: JSON.stringify({mensaje:'Repite exactamente esto, sin agregar nada: ' + texto,
-                            sesion:'voz-solo', voz:true})
+      body: JSON.stringify({texto})
     });
+    if(!r.ok) return;
     const d = await r.json();
-    if(d.audio) sonar(d.audio, 1.0);   // cierra el mic mientras habla: ver sonar()
-  }catch(e){}
+    if(d.audio && pedido === ultimoPedidoVoz) sonar(d.audio, volumen || 1.0);
+  }catch(e){ /* sin voz no pasa nada: el texto ya se está leyendo */ }
+  finally{
+    // Solo suelta el pestillo si nadie pidió otra voz encima: si no, el
+    // micrófono se abriría justo cuando el otro audio está por sonar.
+    if(pedido === ultimoPedidoVoz) esperandoVoz = false;
+  }
 }
+const hablarRespuesta = texto => pedirVoz(texto, 1.0);
 window.mirarPantalla = mirarPantalla;
 window.mirarCamara = mirarCamara;
 
@@ -732,6 +750,11 @@ window.mirarCamara = mirarCamara;
 // Reconocimiento del propio navegador: gratis, sin servidor, sin API key.
 // Solo Chrome y Edge lo implementan; Safari no.
 let rec = null, escuchando = false, audioActual = null;
+
+// El audio ya no llega junto con el texto: hay un hueco de un par de segundos
+// entre que se pinta la respuesta y que empieza a sonar. Sin esto, el
+// micrófono se reabriría justo ahí y se escucharía a sí mismo arrancar.
+let esperandoVoz = false, ultimoPedidoVoz = 0;
 
 // El micrófono tiene DOS estados y confundirlos era el bug:
 //   micAbierto  → el pestillo. Lo pones tú y solo tú lo sacas.
@@ -743,6 +766,7 @@ let micAbierto = false, fallosSeguidos = 0;
 // ¿Está sonando la respuesta? Mientras habla no se escucha: por los parlantes se
 // oiría a sí mismo, se transcribiría y se contestaría solo, en bucle.
 function hablando(){
+  if(esperandoVoz) return true;            // el audio viene en camino: cuenta como hablar
   return !!(audioActual && !audioActual.paused && !audioActual.ended);
 }
 
@@ -916,6 +940,9 @@ function alternarMic(){
 
   // Si estaba hablando, se calla: le estás interrumpiendo.
   if(audioActual){ try{ audioActual.pause(); }catch(e){} audioActual = null; }
+  // Y si la voz venía en camino, se descarta: interrumpir tiene que callarlo
+  // también cuando el audio todavía no llegaba.
+  ultimoPedidoVoz++; esperandoVoz = false;
 
   // Quien habla espera que le contesten hablando: la voz se enciende sola.
   if(g('mx_voz') !== '1'){ s('mx_voz','1'); marcarVoz(); }
