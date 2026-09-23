@@ -1706,9 +1706,9 @@
     "latencia",
     "tts"
    ],
-   "cuerpo": "# H-070 · Dos cosas distintas que parecían una\n\nRicardo trajo tres molestias del panel en una sola frase: **lento**, **no\nescucha bien** y **lee los emojis**. Son tres problemas separados y solo dos\nse arreglaron hoy.\n\n## 1. El texto esperaba a la voz — 2,4 segundos regalados\n\n`/maximus/chat` sintetizaba el audio **antes** de devolver la respuesta, y los\ndos viajaban en el mismo paquete:\n\n```python\nrespuesta = await responder_maximus(...)   # ya está listo\naudio = await sintetizar_voz(respuesta)    # y aquí se queda esperando\nreturn {\"respuesta\": ..., \"audio\": ...}    # recién ahora sale\n```\n\nMedido contra edge-tts el 23-sep: **2,42 s** para una frase corta. Todo ese\nrato la respuesta ya existía en el servidor y la pantalla seguía en \"…\".\n\n**Arreglo:** endpoint nuevo `/maximus/voz`, que solo sintetiza. El panel pinta\nel texto apenas llega y pide el audio aparte. Aplicado en los dos paneles —\n`brain/cerebro.html` y `agent/static/maximus_command.html`.\n\n**Beneficio lateral, y no es menor:** para hablar un texto que ya existía, el\ncerebro mandaba `\"Repite exactamente esto: …\"` al chat — **un turno completo de\nClaude para no decir nada nuevo.** Eso desaparece.\n\n**Los tres cuidados que necesitó:** un contador descarta el audio de una\npregunta vieja; callarlo o abrir el micrófono cancela también la voz en camino;\ny mientras el audio viene en camino el micrófono **no** se abre — si no, se\nescucharía a sí mismo arrancar. Es el mismo conflicto de H-020, con otra cara.\n\n## 2. El sintetizador leía los emojis\n\nNo eran los signos, como parecía. Medición contra edge-tts:\n\n```\n'Hola'          11.232 bytes de audio\n'Hola 👋'       12.240 bytes   ← ese kilobyte es el emoji hablado\n'Hola, listo!'    +144 bytes   ← eso es la pausa, no una palabra\n```\n\n**`!` y `?` no se pronuncian: dan la entonación.** Sacarlos dejaría a Maximus\nhablando plano. Se sacan los emojis y pictogramas (👋 ✅ ❌ 💰 ⏰ ➡), se\nconservan acentos y ñ. Solo afecta a la voz; el texto escrito sigue igual.\n\n## 3. Lo que NO se arregló: \"no escucha bien\"\n\n`cerebro.html` usa el reconocimiento **del navegador** (solo Chrome, es-CL).\nChrome corta el turno apenas te callas medio segundo y el panel **envía solo**\nlo que alcanzó a entender: si dudas a mitad de frase, manda la mitad.\n\n**El reemplazo ya existe y funciona**: `maximus_command.html` graba el audio y\nlo manda a **Groq Whisper** (`transcripcion.py`, el mismo que transcribe los\naudios de WhatsApp). Falta portarlo al cerebro. Medio día.\n\n## La lección, que se repite\n\nTres síntomas en una frase, tres causas distintas. **La lentitud no era del\nmodelo ni de la red: era una decisión de diseño —mandar texto y voz juntos—\nque nadie había medido.** Igual que D-011, donde la latencia se atribuyó al\nprompt caching sin comprobarlo.",
+   "cuerpo": "# H-070 · Dos cosas distintas que parecían una\n\nRicardo trajo tres molestias del panel en una sola frase: **lento**, **no\nescucha bien** y **lee los emojis**. Son tres problemas separados y solo dos\nse arreglaron hoy.\n\n## 1. El texto esperaba a la voz — 2,4 segundos regalados\n\n`/maximus/chat` sintetizaba el audio **antes** de devolver la respuesta, y los\ndos viajaban en el mismo paquete:\n\n```python\nrespuesta = await responder_maximus(...)   # ya está listo\naudio = await sintetizar_voz(respuesta)    # y aquí se queda esperando\nreturn {\"respuesta\": ..., \"audio\": ...}    # recién ahora sale\n```\n\nMedido contra edge-tts el 23-sep: **2,42 s** para una frase corta. Todo ese\nrato la respuesta ya existía en el servidor y la pantalla seguía en \"…\".\n\n**Arreglo:** endpoint nuevo `/maximus/voz`, que solo sintetiza. El panel pinta\nel texto apenas llega y pide el audio aparte. Aplicado en los dos paneles —\n`brain/cerebro.html` y `agent/static/maximus_command.html`.\n\n**Beneficio lateral, y no es menor:** para hablar un texto que ya existía, el\ncerebro mandaba `\"Repite exactamente esto: …\"` al chat — **un turno completo de\nClaude para no decir nada nuevo.** Eso desaparece.\n\n**Los tres cuidados que necesitó:** un contador descarta el audio de una\npregunta vieja; callarlo o abrir el micrófono cancela también la voz en camino;\ny mientras el audio viene en camino el micrófono **no** se abre — si no, se\nescucharía a sí mismo arrancar. Es el mismo conflicto de H-020, con otra cara.\n\n## 2. El sintetizador leía los emojis\n\nNo eran los signos, como parecía. Medición contra edge-tts:\n\n```\n'Hola'          11.232 bytes de audio\n'Hola 👋'       12.240 bytes   ← ese kilobyte es el emoji hablado\n'Hola, listo!'    +144 bytes   ← eso es la pausa, no una palabra\n```\n\n**`!` y `?` no se pronuncian: dan la entonación.** Sacarlos dejaría a Maximus\nhablando plano. Se sacan los emojis y pictogramas (👋 ✅ ❌ 💰 ⏰ ➡), se\nconservan acentos y ñ. Solo afecta a la voz; el texto escrito sigue igual.\n\n## 3. \"No escucha bien\": era Chrome cortando la frase\n\nEl cerebro usaba el reconocimiento **del navegador**. Dos defectos: solo\nfunciona en Chrome (en Safari de escritorio existe y falla en silencio), y\n**Chrome corta el turno apenas te callas medio segundo** — el panel enviaba\nentonces lo que alcanzó a entender. Si dudabas a mitad de frase, mandaba la\nmitad. De ahí terminar escribiendo.\n\n**Ahora graba el audio y lo transcribe Groq Whisper** en el servidor, por el\nmismo `/maximus/escuchar` que ya usaba el Command Center — el mismo motor de\nlos audios de WhatsApp.\n\n**El manos libres se conserva**, que era lo bueno del panel: el pestillo sigue\npuesto y **el turno lo corta tu silencio**, no un botón ni el navegador. Corta\na los **1,2 s** callado, con tope de 30 s por turno y descarte si nunca\nhablaste.\n\nProbado en el navegador con micrófono simulado:\n\n```\ngraba          →  te callas a 1.503 ms  →  corta a 2.704 ms   (1,2 s exactos)\n               →  manda a Whisper       →  envía la pregunta\n               →  vuelve a grabar solo a 3.057 ms\n```\n\nY la prueba que importa, la que Chrome fallaba: hablas 800 ms, **dudas 700 ms**,\nsigues 800 ms. **No cortó en la duda.** Cortó una sola vez, 1,2 s después de\nque terminaste de verdad.\n\n## La lección, que se repite\n\nTres síntomas en una frase, tres causas distintas. **La lentitud no era del\nmodelo ni de la red: era una decisión de diseño —mandar texto y voz juntos—\nque nadie había medido.** Igual que D-011, donde la latencia se atribuyó al\nprompt caching sin comprobarlo.",
    "origen": "23-sep-2026, Ricardo reporta que la respuesta del panel a veces es lenta, que no lo escucha bien y que dice 'manito arriba saludando'",
-   "grado": 4,
+   "grado": 6,
    "color": "#4a9eff"
   },
   {
@@ -1780,7 +1780,7 @@
    ],
    "cuerpo": "Existían dos `MEMORY.md` divergentes: uno en `~/harvey/` y otro en\n`~/Downloads/` (más avanzado). Trabajar sobre el equivocado habría significado\nrepetir decisiones ya tomadas y perder los hallazgos financieros.\n\n**Es el mismo error que D-008 acaba de eliminar en el POS**, replicado en el\nsistema que existe para evitar ese error.\n\n**Regla derivada:** la memoria vive en `~/harvey/`, versionada en git. Los\narchivos que salen a otra carpeta son exportaciones de solo lectura y mueren\nahí. Toda sesión arranca con `cd ~/harvey`.",
    "origen": "observado directamente el 20-ago-2026",
-   "grado": 6,
+   "grado": 7,
    "color": "#27c93f"
   },
   {
@@ -1817,7 +1817,7 @@
    ],
    "cuerpo": "El agente no levantaba. El traceback que llegaba mostraba `SystemExit: 1`, un\n`CancelledError` de SQLAlchemy y un error del loop de colación. Maximus concluyó\nque la causa era un cambio propio —una segunda base de datos SQLite— e hizo\nrevertir el despliegue.\n\n**No era eso.** La causa estaba en la primera línea, cortada por el scroll:\n\n```\nOSError: [Errno 10048] error al intentar enlazar la dirección ('0.0.0.0', 8000):\nsolo se permite un uso de cada dirección de socket\n```\n\n**El puerto estaba tomado por un proceso zombi.** Todo lo demás —el SystemExit,\nel pool cerrándose, el loop de colación— era la cascada de apagado, no la falla.\n\n**Costo:** cerca de dos horas con el webhook de WhatsApp caído, un domingo con\nlos dos locales operando, más un rollback innecesario.\n\n**Regla derivada — se lee al revés de como aparece:**\n1. La **primera** línea del traceback es la causa. Lo que sigue es consecuencia.\n2. Si el error llega cortado, **capturarlo entero antes de teorizar**\n   (`... *> C:\\error.txt`). Diagnosticar sobre un fragmento es adivinar.\n3. Antes de arrancar un servicio, **verificar que el puerto está libre** — y\n   verificar que quedó libre después de matarlo, no asumirlo.\n4. Nunca lanzar un segundo intento sobre uno que parece colgado: así se crea el\n   zombi que bloquea todos los siguientes.\n\n**Es la misma familia que L-005:** allá se cuantificó un riesgo sin verificar la\narquitectura; acá se atribuyó una falla sin leer el error completo. En los dos\ncasos la hipótesis se presentó con el peso de un hecho.",
    "origen": "dos horas perdidas el 23-ago-2026, con el traceback a la vista",
-   "grado": 20,
+   "grado": 21,
    "color": "#27c93f"
   },
   {
@@ -1965,6 +1965,25 @@
    "cuerpo": "# L-014 · Tres publicaciones que costaron dos\n\nRicardo reportó que el TV de helados no mostraba los comentarios escritos en la\nCaja. Maximus fue directo al código de las pantallas.\n\n| Intento | Qué arregló | ¿Era el problema? |\n|---|---|---|\n| 1 | campo fantasma `order.observations` en 10 pantallas | no |\n| 2 | blindaje del carrito contra estado viejo (closure) | no |\n| 3 | `ModalCobrar` no copiaba las notas al crear la comanda | **sí** |\n\nLos dos primeros eran defectos reales y quedaron corregidos, pero **fueron a\nproducción sin resolver nada** y Ricardo probó dos veces de más.\n\n## Lo que lo resolvió, y estaba disponible desde el minuto uno\n\n**Consultar la orden guardada.** Traía `payment_method: \"tarjeta\"` y\n`payment_status: \"pagado\"`, cuando el camino que yo estaba leyendo crea con\n`\"efectivo\"` / `\"pendiente_pago\"`. Ese par de campos probó en un segundo que la\ncomanda nacía en otro lugar. Dos pasos después apareció la causa.\n\n## Regla\n\nCuando un dato no aparece donde debería, el primer movimiento es **leer el\nregistro tal como quedó guardado** y comparar sus campos contra los que produce\ncada camino de escritura. La huella del creador está en los valores por\ndefecto: son la firma de quién lo escribió.\n\nLeer código viene después, y ya sabiendo qué archivo abrir.\n\n**Misma familia que L-006** (atribuir una falla sin leer el error completo) y\n**L-005** (cuantificar un riesgo sin verificar la arquitectura): en los tres\ncasos se teorizó antes de mirar la evidencia que estaba a una consulta.\n\n## Pista de oro que dio Ricardo\n\n*\"los otros display como kitchen display funciona\"*. Que algo funcione en un\nlado y no en otro **acota más que cualquier lectura de código**: descarta la\npantalla y obliga a buscar la diferencia entre los dos caminos. Preguntarlo\nantes habría ahorrado la segunda publicación.",
    "origen": "19-sep-2026, tres publicaciones para arreglar que el TV no mostraba las observaciones de la Caja",
    "grado": 7,
+   "color": "#27c93f"
+  },
+  {
+   "id": "L-015",
+   "tipo": "leccion",
+   "titulo": "cerebro.html no es código fuente: lo genera grafo.py, y editarlo directo se pierde en silencio",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "cerebro",
+    "grafo",
+    "maximus",
+    "herramientas"
+   ],
+   "cuerpo": "# L-015 · El archivo que se edita no siempre es el archivo que manda\n\n`brain/cerebro.html` **es un artefacto generado.** La plantilla completa —HTML,\nCSS y todo el JavaScript— vive dentro de `brain/grafo.py`, que la escribe\nentera cada vez que corre.\n\n## Cómo se descubrió, que es la parte útil\n\nEl arreglo de la voz (H-070) se editó en `cerebro.html`, se probó, se\ncommiteó y se subió. **Funcionaba.** Después, para guardar la nota de memoria,\nse corrió lo de siempre:\n\n```bash\npython3 ~/harvey/brain/grafo.py\n```\n\nEse comando regeneró `cerebro.html` desde la plantilla y **borró el arreglo**.\nEl commit siguiente subió la reversión sin que nadie la pidiera. El síntoma\napareció recién al probar en el navegador: la llamada nueva no salía.\n\n**Nada falló ni avisó.** El archivo se sobrescribió como corresponde; el error\nfue editar la salida en vez de la fuente.\n\n## La regla\n\n**Todo cambio al cerebro va en `brain/grafo.py`.** Después se corre\n`grafo.py` y se commitean los dos archivos juntos. Un cambio que solo aparece\nen `cerebro.html` está muerto: dura hasta el próximo `grafo.py`, que se corre\ncada vez que se guarda una nota de memoria — o sea, casi todos los días.\n\n## Por qué se cayó igual habiendo probado\n\nPorque la prueba fue **antes** del comando que lo deshizo, y la verificación\nposterior fue `git diff` contra un HEAD que ya venía revertido. Los dos se\nveían sanos.\n\n**Misma familia que L-006:** ahí la causa estaba en la primera línea del error,\ntapada por el scroll; acá estaba en un archivo que nadie miró porque parecía\ngenerado por otra cosa. En los dos casos, lo que se revisó no era donde estaba\nel problema.\n\n**Cómo se detecta barato:** después de tocar algo del cerebro, correr\n`grafo.py` **y volver a verificar** que el cambio sigue ahí. Si sobrevive a la\nregeneración, es real.",
+   "origen": "23-sep-2026, un arreglo ya probado y commiteado desapareció al regenerar el índice de la memoria",
+   "grado": 4,
    "color": "#27c93f"
   },
   {
@@ -4896,6 +4915,11 @@
    "rel": "relacionado"
   },
   {
+   "de": "H-070",
+   "a": "L-015",
+   "rel": "relacionado"
+  },
+  {
    "de": "L-001",
    "a": "H-001",
    "rel": "relacionado"
@@ -5093,6 +5117,21 @@
   {
    "de": "L-014",
    "a": "H-060",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-015",
+   "a": "H-070",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-015",
+   "a": "L-004",
+   "rel": "relacionado"
+  },
+  {
+   "de": "L-015",
+   "a": "L-006",
    "rel": "relacionado"
   },
   {

@@ -681,6 +681,7 @@ async function preguntar(texto){
   caja.style.display='block';
   caja.textContent='…';
   estado('pensando');
+  pensando = true;        // el micrófono no graba mientras esperas respuesta
 
   try{
     const r = await fetch(url + '/maximus/chat', {
@@ -688,7 +689,9 @@ async function preguntar(texto){
       headers:{'Content-Type':'application/json',
                'x-maximus-token': g('mx_tok'),
                'ngrok-skip-browser-warning':'1'},
-      body: JSON.stringify({mensaje: texto, sesion:'cerebro', voz: g('mx_voz')==='1'})
+      // Sin voz a propósito: el audio se pide aparte, en pedirVoz(). Pedirlo
+      // aquí dejaba el texto esperando ~2,4 s a que el sintetizador terminara.
+      body: JSON.stringify({mensaje: texto, sesion:'cerebro'})
     });
     if(r.status === 401){ caja.textContent='Token inválido. Toca ⚙ conexión abajo.'; estado(''); return; }
     if(r.status === 503){ caja.textContent='El chat no está habilitado en el servidor: falta MAXIMUS_CHAT_TOKEN en el .env.'; estado(''); return; }
@@ -698,7 +701,7 @@ async function preguntar(texto){
     caja.textContent = d.respuesta;
     estado('');
 
-    if(d.audio) sonar(d.audio, 0.9);   // cierra el mic mientras habla: ver sonar()
+    if(g('mx_voz')==='1') pedirVoz(d.respuesta, 0.9);   // en paralelo: ya puedes leer
 
     // lo mejor del grafo: iluminar exactamente lo que Maximus usó para responder
     const usadas = (d.notas || []).filter(n => idx[n] !== undefined);
@@ -713,6 +716,7 @@ async function preguntar(texto){
       '\n\nRevisa que el servidor esté arriba y que la URL sea la correcta (⚙ conexión).';
     estado('');
   }
+  finally{ pensando = false; }   // pase lo que pase, el micrófono vuelve
 }
 
 function ajustarA(ids){
@@ -849,27 +853,57 @@ async function mirarCamara(){
   btn.classList.remove('on');
 }
 
-// Pide solo el audio de un texto ya generado (para lo que ve, no para el chat)
-async function hablarRespuesta(texto){
+// Pide SOLO el audio de un texto que ya está en pantalla.
+//
+// El texto no espera al audio: la respuesta se pinta apenas llega y la voz
+// entra después, cuando el sintetizador termina (~2,4 s medidos el 23-sep).
+// Antes viajaban juntos y esos segundos se sumaban enteros a la espera.
+//
+// Antes esto mandaba "Repite exactamente esto: …" al chat — un turno completo
+// de Claude para no decir nada nuevo. /maximus/voz solo sintetiza.
+async function pedirVoz(texto, volumen){
+  if(!texto) return;
+  const pedido = ++ultimoPedidoVoz;   // si preguntas otra cosa, el audio viejo se descarta
+  esperandoVoz = true;                // el micrófono no se abre en este hueco
   try{
-    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/chat', {
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/voz', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-maximus-token':g('mx_tok'),
                'ngrok-skip-browser-warning':'1'},
-      body: JSON.stringify({mensaje:'Repite exactamente esto, sin agregar nada: ' + texto,
-                            sesion:'voz-solo', voz:true})
+      body: JSON.stringify({texto})
     });
+    if(!r.ok) return;
     const d = await r.json();
-    if(d.audio) sonar(d.audio, 1.0);   // cierra el mic mientras habla: ver sonar()
-  }catch(e){}
+    if(d.audio && pedido === ultimoPedidoVoz) sonar(d.audio, volumen || 1.0);
+  }catch(e){ /* sin voz no pasa nada: el texto ya se está leyendo */ }
+  finally{
+    // Solo suelta el pestillo si nadie pidió otra voz encima: si no, el
+    // micrófono se abriría justo cuando el otro audio está por sonar.
+    if(pedido === ultimoPedidoVoz) esperandoVoz = false;
+  }
 }
+const hablarRespuesta = texto => pedirVoz(texto, 1.0);
 window.mirarPantalla = mirarPantalla;
 window.mirarCamara = mirarCamara;
 
 // ── hablarle a Maximus ────────────────────────────────────────────
-// Reconocimiento del propio navegador: gratis, sin servidor, sin API key.
-// Solo Chrome y Edge lo implementan; Safari no.
-let rec = null, escuchando = false, audioActual = null;
+// Se graba el audio y lo transcribe GROQ WHISPER en el servidor — el mismo
+// motor que transcribe los audios de WhatsApp desde hace meses.
+//
+// Antes esto usaba el reconocimiento del propio navegador. Era gratis y sin
+// servidor, pero tenía dos defectos que se sentían todos los días: solo
+// funciona en Chrome (en Safari de escritorio existe y falla en silencio), y
+// Chrome CORTA el turno apenas te callas medio segundo — si dudabas a mitad
+// de frase, mandaba la mitad. De ahí el "no me escucha bien".
+//
+// Se conserva el manos libres, que es lo bueno del panel: el pestillo sigue
+// puesto y los turnos los corta el silencio, no un botón.
+let escuchando = false, audioActual = null, pensando = false;
+
+// El audio ya no llega junto con el texto: hay un hueco de un par de segundos
+// entre que se pinta la respuesta y que empieza a sonar. Sin esto, el
+// micrófono se reabriría justo ahí y se escucharía a sí mismo arrancar.
+let esperandoVoz = false, ultimoPedidoVoz = 0;
 
 // El micrófono tiene DOS estados y confundirlos era el bug:
 //   micAbierto  → el pestillo. Lo pones tú y solo tú lo sacas.
@@ -881,13 +915,14 @@ let micAbierto = false, fallosSeguidos = 0;
 // ¿Está sonando la respuesta? Mientras habla no se escucha: por los parlantes se
 // oiría a sí mismo, se transcribiría y se contestaría solo, en bucle.
 function hablando(){
+  if(esperandoVoz) return true;            // el audio viene en camino: cuenta como hablar
   return !!(audioActual && !audioActual.paused && !audioActual.ended);
 }
 
 function sonar(b64, volumen){
   try{
     if(audioActual){ audioActual.pause(); }
-    if(escuchando){ try{ rec && rec.abort(); }catch(e){} }   // cierra el mic antes de hablar
+    if(escuchando) cortarGrabacion(true);   // cierra el mic antes de hablar, y descarta
     audioActual = new Audio('data:audio/mpeg;base64,' + b64);
     audioActual.volume = volumen;
     engancharAudio(audioActual);      // para que la cara se mueva con la voz
@@ -1049,96 +1084,209 @@ function pintarCara(){
   cx.beginPath(); cx.arc(cxc,cyc,R,0,7); cx.stroke();
 }
 
-function alternarMic(){
+// Cuánto silencio cierra el turno. 1,2 s deja respirar y pensar a mitad de
+// frase —que es justo lo que Chrome no hacía— sin que se sienta lento.
+const SILENCIO_CORTA = 1200;
+const VOZ_MINIMA     = 500;    // menos que esto es un ruido, no una frase
+const TURNO_MAXIMO   = 30000;  // tope duro: nadie dicta más de medio minuto
+const UMBRAL_VOZ     = 0.015;  // volumen (RMS) sobre el que se considera voz
+
+let micStream = null, mediaRec = null, trozos = [], vadTimer = null;
+let analizMic = null, muestrasMic = null;
+let huboVoz = false, calladoDesde = 0, turnoDesde = 0;
+
+// Ocupado = no es momento de grabar. O habla él, o su voz viene en camino, o
+// está pensando la respuesta. Grabar en cualquiera de los tres casos termina
+// en que se oye a sí mismo o manda una segunda pregunta encima de la primera.
+function ocupado(){ return hablando() || pensando; }
+
+async function alternarMic(){
   if(micAbierto){ pararMic(); return; }        // apagar es explícito: lo pediste tú
 
   // Si estaba hablando, se calla: le estás interrumpiendo.
   if(audioActual){ try{ audioActual.pause(); }catch(e){} audioActual = null; }
+  // Y si la voz venía en camino, se descarta: interrumpir tiene que callarlo
+  // también cuando el audio todavía no llegaba.
+  ultimoPedidoVoz++; esperandoVoz = false;
 
   // Quien habla espera que le contesten hablando: la voz se enciende sola.
   if(g('mx_voz') !== '1'){ s('mx_voz','1'); marcarVoz(); }
 
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
-    mostrarRta('Este navegador no reconoce voz.\n\nÁbrelo en Chrome: Safari no implementa el reconocimiento de voz.');
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) ||
+     typeof MediaRecorder === 'undefined'){
+    mostrarRta('Este navegador no permite grabar audio. Escríbele abajo.');
     return;
   }
+  // La transcripción es del servidor: sin token no hay micrófono que valga.
+  if(!g('mx_tok')){ configurar(); if(!g('mx_tok')) return; }
 
   micAbierto = true; fallosSeguidos = 0;
   marcarMic(); estado('escuchando');
   arrancarMic();
 }
 
-function arrancarMic(){
-  if(!micAbierto || escuchando || hablando()) return;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) return;
+async function arrancarMic(){
+  if(!micAbierto || escuchando || ocupado()) return;
 
-  rec = new SR();
-  rec.lang = 'es-CL';
-  rec.continuous = false;      // el turno lo corta el navegador; el pestillo lo reabre
-  rec.interimResults = true;
-
-  const caja = document.getElementById('chat');
-  let final = '';              // local a cada turno: no arrastra lo ya enviado
-
-  rec.onstart = () => { escuchando = true; fallosSeguidos = 0; marcarMic(); estado('escuchando'); };
-
-  rec.onresult = e => {
-    let interino = '';
-    for(let i = e.resultIndex; i < e.results.length; i++){
-      const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) final += t; else interino += t;
+  try{
+    // El permiso se pide UNA vez y el stream queda abierto entre turnos:
+    // pedirlo en cada frase agrega medio segundo y, en algunos navegadores,
+    // vuelve a preguntar.
+    if(!micStream || !micStream.active){
+      micStream = await navigator.mediaDevices.getUserMedia({
+        audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true }
+      });
+      analizMic = null;
     }
-    caja.value = (final + interino).trim();     // se ve lo que va entendiendo
-  };
-
-  rec.onerror = ev => {
-    escuchando = false;
-    // Con el pestillo puesto estos dos son normales, no fallas: te quedaste
-    // callado, o el turno se cortó para reabrirse. No deben apagar el micrófono.
-    if(ev.error === 'no-speech' || ev.error === 'aborted') return;
-
-    // Sin permiso o sin micrófono no sirve reintentar: se suelta el pestillo.
+  }catch(e){
     micAbierto = false; marcarMic(); estado('');
-    mostrarRta({
-      'not-allowed':'Falta permiso del micrófono. Dáselo en el candado de la barra de direcciones.',
-      'service-not-allowed':'El navegador bloqueó el micrófono. Prueba abriendo el archivo en Chrome.',
-      'audio-capture':'No encuentro micrófono.'
-    }[ev.error] || ('Error de reconocimiento: ' + ev.error));
-  };
+    mostrarRta(e && e.name === 'NotAllowedError'
+      ? 'Falta permiso del micrófono. Dáselo en el candado de la barra de direcciones.'
+      : 'No encuentro micrófono: ' + (e && e.message ? e.message : e));
+    return;
+  }
 
-  rec.onend = () => {
-    escuchando = false;
-    const t = caja.value.trim();
-    if(t){ caja.value=''; preguntar(t); }        // al callarte, se envía solo
-    if(micAbierto){ estado('escuchando'); setTimeout(arrancarMic, 300); }
-    else { marcarMic(); estado(''); }
-  };
+  if(!medidorListo()){                  // sin medidor no hay corte por silencio
+    micAbierto = false; marcarMic(); estado('');
+    mostrarRta('No pude medir el nivel del micrófono. Escríbele abajo.');
+    return;
+  }
 
-  try { rec.start(); }
-  catch(e){
+  try{
+    const mime = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4'
+               : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+    mediaRec = mime ? new MediaRecorder(micStream, {mimeType: mime})
+                    : new MediaRecorder(micStream);
+    trozos = [];
+    mediaRec.ondataavailable = e => { if(e.data && e.data.size) trozos.push(e.data); };
+    mediaRec.start();
+  }catch(e){
     escuchando = false;
     if(++fallosSeguidos >= 3){
       micAbierto = false; marcarMic(); estado('');
       mostrarRta('No pude abrir el micrófono: ' + e.message);
-    }else{
-      setTimeout(arrancarMic, 500);
+    }else setTimeout(arrancarMic, 500);
+    return;
+  }
+
+  escuchando = true; fallosSeguidos = 0;
+  huboVoz = false; calladoDesde = 0; turnoDesde = performance.now();
+  marcarMic(); estado('escuchando');
+
+  clearInterval(vadTimer);
+  vadTimer = setInterval(vigilarSilencio, 100);
+}
+
+// Enchufa el micrófono a un medidor de volumen. No se conecta a los parlantes
+// a propósito: se oiría a sí mismo.
+function medidorListo(){
+  try{
+    if(!ac) ac = new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state !== 'running') ac.resume().catch(()=>{});
+    if(!analizMic){
+      const fuente = ac.createMediaStreamSource(micStream);
+      analizMic = ac.createAnalyser(); analizMic.fftSize = 512;
+      muestrasMic = new Uint8Array(analizMic.fftSize);
+      fuente.connect(analizMic);
     }
+    return true;
+  }catch(e){ return false; }
+}
+
+function nivelMic(){
+  if(!analizMic) return 0;
+  analizMic.getByteTimeDomainData(muestrasMic);
+  let suma = 0;
+  for(let i=0;i<muestrasMic.length;i++){
+    const v = (muestrasMic[i]-128)/128;
+    suma += v*v;
+  }
+  return Math.sqrt(suma/muestrasMic.length);   // RMS: el volumen real, no el pico
+}
+
+// El turno lo corta TU silencio, no el navegador. Esta es la diferencia con
+// el reconocimiento de Chrome, que cortaba a los ~500 ms y mandaba la frase
+// por la mitad.
+function vigilarSilencio(){
+  if(!escuchando) return;
+  const ahora = performance.now();
+
+  if(nivelMic() > UMBRAL_VOZ){ huboVoz = true; calladoDesde = 0; }
+  else if(huboVoz){
+    if(!calladoDesde) calladoDesde = ahora;
+    else if(ahora - calladoDesde > SILENCIO_CORTA){ cortarGrabacion(); return; }
+  }
+
+  // Nunca hablaste, o te extendiste demasiado: se cierra igual. Sin esto, un
+  // micrófono olvidado abierto sube minutos de sala vacía a transcribir.
+  if(!huboVoz && ahora - turnoDesde > 12000){ cortarGrabacion(true); return; }
+  if(ahora - turnoDesde > TURNO_MAXIMO) cortarGrabacion();
+}
+
+function cortarGrabacion(descartar){
+  clearInterval(vadTimer); vadTimer = null;
+  const valeLaPena = huboVoz && !descartar && (performance.now() - turnoDesde) >= VOZ_MINIMA;
+  try{ if(mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }catch(e){}
+  escuchando = false;
+  marcarMic();
+
+  if(!valeLaPena){ trozos = []; return; }
+
+  // El blob se arma en el próximo tick: mediaRec.stop() entrega el último
+  // trozo de forma asíncrona.
+  setTimeout(() => {
+    const tipo = (mediaRec && mediaRec.mimeType) || 'audio/mp4';
+    const blob = new Blob(trozos, {type: tipo});
+    trozos = [];
+    if(blob.size > 1200) transcribir(blob);
+  }, 120);
+}
+
+// Lo transcribe Groq Whisper en el servidor — el mismo /maximus/escuchar que
+// usa el Command Center, y el mismo motor de los audios de WhatsApp.
+async function transcribir(blob){
+  pensando = true;                  // el mic no se reabre mientras tanto
+  estado('transcribiendo');
+  try{
+    const r = await fetch((g('mx_url')||DEFECTO) + '/maximus/escuchar', {
+      method:'POST',
+      headers:{'x-maximus-token': g('mx_tok'), 'Content-Type': blob.type,
+               'ngrok-skip-browser-warning':'1'},
+      body: blob
+    });
+    if(!r.ok){
+      estado(r.status === 401 ? 'token inválido' : 'no pude transcribir', 3000);
+      return;
+    }
+    const d = await r.json();
+    const texto = (d.texto || '').trim();
+    if(texto){
+      document.getElementById('chat').value = '';
+      pensando = false;             // preguntar() lo vuelve a poner enseguida
+      preguntar(texto);
+    }else{
+      estado('no te entendí', 2000);   // Whisper devolvió vacío: ruido, no voz
+    }
+  }catch(e){
+    estado('sin conexión', 3000);
+  }finally{
+    pensando = false;
   }
 }
 
-// Red de seguridad. Si el pestillo está puesto y el reconocimiento quedó abajo
-// por cualquier camino —un error de red, una salida temprana, el navegador en
-// segundo plano— esto lo levanta. Vale más un vigilante de tres líneas que
+// Red de seguridad. Si el pestillo está puesto y la grabación quedó abajo por
+// cualquier camino —un error de red, una salida temprana, el navegador en
+// segundo plano— esto la levanta. Vale más un vigilante de tres líneas que
 // perseguir cada punto de salida a mano.
 setInterval(() => {
-  if(micAbierto && !escuchando && !hablando()) arrancarMic();
+  if(micAbierto && !escuchando && !ocupado()) arrancarMic();
 }, 1500);
 
 function pararMic(){
   micAbierto = false;                      // primero suelta el pestillo…
-  try{ rec && rec.stop(); }catch(e){}      // …o el onend lo volvería a abrir
+  cortarGrabacion(true);                   // …o el vigilante lo reabriría
+  try{ micStream && micStream.getTracks().forEach(t => t.stop()); }catch(e){}
+  micStream = null; analizMic = null;
   marcarMic(); estado('');
 }
 function marcarMic(){
