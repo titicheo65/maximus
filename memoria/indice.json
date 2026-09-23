@@ -199,7 +199,7 @@
    ],
    "cuerpo": "**Resultado del banco de pruebas, contra el criterio fijado de antemano:**\n\n| Criterio | Resultado | |\n|---|---|---|\n| Cero pérdidas de información | 0 detectadas | ✅ |\n| Primer token bajo 800 ms | 1.558 ms (mediana) | ❌ |\n| Ricardo da el visto bueno | otorgado | ✅ |\n\n| | Vieja | Nueva | |\n|---|---|---|---|\n| Tokens de entrada | 20.284 | 7.535 | **−63%** |\n| Primer token (mediana) | 1.126 ms | 1.558 ms | +38% |\n\n**La memoria nueva resultó superior en dos casos concretos, no solo equivalente:**\n\n1. **M14 — la memoria vieja miente.** Sigue diciendo que Cristian Vidal es el\n   contador externo. Es programador (N-003); la contadora es Carla Montoya\n   (N-002). Las notas atómicas tienen el dato corregido; los archivos originales\n   no.\n2. **M08 — manejo de contradicciones.** Ante \"¿es creíble el 26% de margen?\", la\n   memoria vieja respondió *\"no es creíble\"* y eligió un lado en silencio. La\n   nueva declaró el conflicto entre H-012 y H-017 con sus autoridades. Eso solo\n   es posible con notas tipadas y `estado: conflicto`.\n\n**Decisión:**\n- **Texto (WhatsApp/Telegram): migrado.** 1,5 s es imperceptible en un canal\n  donde ya se espera la respuesta.\n- **Voz: bloqueada.** El criterio de 800 ms era para conversación fluida y no se\n  cumplió.\n\n**Causa de la latencia, pendiente de resolver:** el prompt caching **no está\nacertando** (0 tokens leídos en las 25). El contexto se separó en bloque fijo\n(core + índice) y bloque variable (notas), justamente para que el prefijo se\ncachee, y aun así el cache no dio. Es un defecto de implementación, no del\ndiseño. Hasta arreglarlo, la recuperación ahorra tokens pero cuesta latencia.\n\n**Salvaguarda en producción:** `agent/maximus.py` usa la memoria atómica solo si\nencuentra `memoria/indice.json` y `core/SOUL.md`. Si falta cualquiera de los dos,\nvuelve solo a los seis archivos completos. Falla cerrado: antes memoria completa\ny lenta que memoria a medias.\n\n**Los archivos originales siguen intactos** en la raíz y congelados en `archivo/`.",
    "origen": "banco de 25 preguntas corrido el 20-ago-2026, brain/evaluacion.json",
-   "grado": 7,
+   "grado": 8,
    "color": "#f5a623"
   },
   {
@@ -681,7 +681,7 @@
    ],
    "cuerpo": "**Solo un proceso a la vez escucha bien el micrófono del Mac.** Con el cerebro\nabierto y el micrófono en modo fijo, `escuchar.py` mide **0.0000** — literalmente\nnada, ni ruido de fondo.\n\nEs una consecuencia directa del arreglo del mismo día (S-017): antes el\nmicrófono se apagaba solo entre turnos y dejaba huecos por donde el detector\nalcanzaba a oír. Ahora que el pestillo queda puesto hasta que Ricardo lo saque,\nel conflicto es permanente.\n\n**Consecuencia práctica:** mientras el cerebro esté escuchando, aplaudir no hace\nnada. Hay que apagar el micrófono del cerebro para que el despertar funcione.\n\n**Esto arruinó tres intentos de calibración** antes de entenderlo, y produjo un\nveredicto falso — \"el aplauso no sirve como disparador\"— que salía de un\ninstrumento sordo, no de una medición. Por eso `brain/calibrar.py` ahora arranca\ncomprobando que el micrófono llegue y **se detiene** si no.\n\n**Duda de fondo, sin resolver:** el aplauso como disparador es frágil por diseño.\nDepende de un umbral fijo sobre una entrada que macOS amplifica sola, compite por\nel micrófono con el propio cerebro, y `escuchar.py` no valida la duración del\npico pese a que su documentación dice que sí. Un atajo de teclado global o el\nícono del Dock hacen lo mismo, son deterministas y no dependen de que nadie deje\ncaer una taza.\n\n**Estado:** `escuchar.py` quedó **detenido** el 23-ago. Corría con `--umbral 0.15`\n—la mitad del que trae por defecto— y por eso cualquier par de ruidos secos\ndespertaba a Maximus solo. Antes de relanzarlo hay que calibrar, y para calibrar\nhay que soltar el micrófono.",
    "origen": "medido en el Mac el 23-ago-2026: 0.0000 con Chrome escuchando",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -1691,6 +1691,27 @@
    "color": "#4a9eff"
   },
   {
+   "id": "H-070",
+   "tipo": "hallazgo",
+   "titulo": "El panel de Maximus era lento porque el texto esperaba a la voz, y el sintetizador leía los emojis en voz alta",
+   "estado": "resuelto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "maximus",
+    "voz",
+    "panel",
+    "cerebro",
+    "latencia",
+    "tts"
+   ],
+   "cuerpo": "# H-070 · Dos cosas distintas que parecían una\n\nRicardo trajo tres molestias del panel en una sola frase: **lento**, **no\nescucha bien** y **lee los emojis**. Son tres problemas separados y solo dos\nse arreglaron hoy.\n\n## 1. El texto esperaba a la voz — 2,4 segundos regalados\n\n`/maximus/chat` sintetizaba el audio **antes** de devolver la respuesta, y los\ndos viajaban en el mismo paquete:\n\n```python\nrespuesta = await responder_maximus(...)   # ya está listo\naudio = await sintetizar_voz(respuesta)    # y aquí se queda esperando\nreturn {\"respuesta\": ..., \"audio\": ...}    # recién ahora sale\n```\n\nMedido contra edge-tts el 23-sep: **2,42 s** para una frase corta. Todo ese\nrato la respuesta ya existía en el servidor y la pantalla seguía en \"…\".\n\n**Arreglo:** endpoint nuevo `/maximus/voz`, que solo sintetiza. El panel pinta\nel texto apenas llega y pide el audio aparte. Aplicado en los dos paneles —\n`brain/cerebro.html` y `agent/static/maximus_command.html`.\n\n**Beneficio lateral, y no es menor:** para hablar un texto que ya existía, el\ncerebro mandaba `\"Repite exactamente esto: …\"` al chat — **un turno completo de\nClaude para no decir nada nuevo.** Eso desaparece.\n\n**Los tres cuidados que necesitó:** un contador descarta el audio de una\npregunta vieja; callarlo o abrir el micrófono cancela también la voz en camino;\ny mientras el audio viene en camino el micrófono **no** se abre — si no, se\nescucharía a sí mismo arrancar. Es el mismo conflicto de H-020, con otra cara.\n\n## 2. El sintetizador leía los emojis\n\nNo eran los signos, como parecía. Medición contra edge-tts:\n\n```\n'Hola'          11.232 bytes de audio\n'Hola 👋'       12.240 bytes   ← ese kilobyte es el emoji hablado\n'Hola, listo!'    +144 bytes   ← eso es la pausa, no una palabra\n```\n\n**`!` y `?` no se pronuncian: dan la entonación.** Sacarlos dejaría a Maximus\nhablando plano. Se sacan los emojis y pictogramas (👋 ✅ ❌ 💰 ⏰ ➡), se\nconservan acentos y ñ. Solo afecta a la voz; el texto escrito sigue igual.\n\n## 3. Lo que NO se arregló: \"no escucha bien\"\n\n`cerebro.html` usa el reconocimiento **del navegador** (solo Chrome, es-CL).\nChrome corta el turno apenas te callas medio segundo y el panel **envía solo**\nlo que alcanzó a entender: si dudas a mitad de frase, manda la mitad.\n\n**El reemplazo ya existe y funciona**: `maximus_command.html` graba el audio y\nlo manda a **Groq Whisper** (`transcripcion.py`, el mismo que transcribe los\naudios de WhatsApp). Falta portarlo al cerebro. Medio día.\n\n## La lección, que se repite\n\nTres síntomas en una frase, tres causas distintas. **La lentitud no era del\nmodelo ni de la red: era una decisión de diseño —mandar texto y voz juntos—\nque nadie había medido.** Igual que D-011, donde la latencia se atribuyó al\nprompt caching sin comprobarlo.",
+   "origen": "23-sep-2026, Ricardo reporta que la respuesta del panel a veces es lenta, que no lo escucha bien y que dice 'manito arriba saludando'",
+   "grado": 4,
+   "color": "#4a9eff"
+  },
+  {
    "id": "L-001",
    "tipo": "leccion",
    "titulo": "DiMango no estaba instrumentado — parcialmente refutada",
@@ -2310,7 +2331,7 @@
    ],
    "cuerpo": "1. **Nada arranca solo.** Si se reinicia ese Windows, ni el agente ni ngrok\n   vuelven. Se resuelve con tarea programada al inicio.\n2. ~~**La memoria del servidor no se actualiza sola.**~~ **CERRADO el\n   17-sep-2026** con `scripts/sync-memoria.ps1` (pull cada 15 min). Antes de eso\n   se descubrió algo peor: el Mac tenía **128 commits sin subir**, así que no\n   había ni de dónde bajar. Ver H-054. **Falta que Ricardo cree la tarea\n   programada en Windows.**\n3. ~~**Telegram sin token válido.** El webhook devolvió 404.~~ **RESUELTO en\n   agosto, la nota quedó vieja.** El bot funciona: avisa desde `monitor-maximus.ps1`\n   (26-ago), hay `advisor_diario.py` y bots de checklist por local. Ver H-054.\n4. **Cinco copias muertas** del proyecto en el servidor, pendientes de archivar.\n5. **Todo pasa por un túnel ngrok gratuito.** Si cae, el webhook de WhatsApp deja\n   de recibir mensajes de clientes y nadie se entera.\n\n---\n\n## Dejó de ser un riesgo teórico — 23-ago-2026\n\nEl punto 1 se cobró su factura: **cerca de dos horas con el webhook de WhatsApp\ncaído, un domingo con los dos locales operando.**\n\nQué pasó, en orden: al reiniciar el agente para desplegar un cambio, se cerró la\nventana equivocada y **ngrok murió con ella** (`ERR_NGROK_3200`). Al reiniciarlo,\nquedó un **proceso zombi con el puerto 8000 tomado**, así que ningún intento\nposterior levantaba (L-006). Todo el sistema depende de **dos ventanas de\nPowerShell abiertas a mano**, y si una se cierra no hay quien lo note.\n\n**Nadie se enteró de la caída salvo porque Ricardo estaba mirando.** No hay\nalerta, ni reintento, ni verificación periódica. La única razón por la que se\ndetectó fue que estábamos trabajando encima.\n\n**Lo que faltaba y sigue faltando:**\n- Tarea programada al inicio para el agente y para ngrok. **Ya existe el\n  precedente en casa:** `subir_venta_mall` corre así desde hace meses.\n- Un aviso cuando el webhook deja de responder. Sin esto, la próxima caída se\n  descubre por el reclamo de un cliente.\n- Ojo con activar el arranque automático **antes** de resolver H-018: hace más\n  probable la reimpresión masiva de boletas viejas.\n\n**El dato que ordena la prioridad:** una hora de webhook caído en horario de\noperación es una hora sin pedidos por WhatsApp ni control de colación, sobre una\nventa de ~$5,5M/día. El costo exacto no se midió porque tampoco hay forma de\nmedirlo — que es parte del mismo problema.\n\n## Segunda caída, 24-ago-2026 — con tarea programada puesta y aun así falló\n\nVer `H-021.md`. Corte de luz, Windows reinició, la tarea `Maximus-Arranque` SÍ\ncorrió (verificado), PM2 SÍ resucitó sus procesos — y aun así `start /min\npython -m uvicorn` no dejó nada escuchando en el puerto 8000. **La tarea\nprogramada que este pendiente pedía ya existía, y no bastó.** El punto 1 de\nesta lista queda redefinido: no es \"falta arranque automático\", es \"el\narranque automático tiene un paso (`start /min` para uvicorn) que falla en\nsilencio y sin PM2 detrás para reintentar\".\n\n## Punto 1 — cerrado esa misma madrugada, migrado a PM2\n\n`maximus-agent` quedó dentro de PM2 (`server6`, `voiceagentkit` y ahora\ntambién el agente), lanzado vía `iniciar_maximus.bat` con `--interpreter\ncmd.exe --interpreter-args \"/c\"`. `arranque.bat` ya no usa `start /min` para\nel agente — `pm2 resurrect` lo trae junto con los demás. Verificado con\n`pm2 list` (`online`) y `POST /maximus/chat` sin token → `401`. Detalle\ncompleto de los tres intentos fallidos antes de este, en `H-021.md`.\n\n**Sigue pendiente:** verlo pasar por un corte de luz real (no simulado) antes\nde darlo por blindado del todo — y solo entonces reconsiderar activar más\nautomatización de impresión (H-018).\n\n## La prueba real llegó ese mismo día — y no pasó limpia\n\nHubo un segundo corte de luz el 24-ago por la tarde. PM2 en sí no falló, pero\nun `python.exe` zombi — nacido en el reinicio de esa mañana, **por fuera del\ncontrol de PM2** — llevaba horas ocupando el puerto 8000. Ningún restart de\nPM2 podía tomar el puerto mientras el zombi siguiera vivo. Se resolvió a mano\n(`Stop-Process -Force` + `pm2 restart`), verificado con WhatsApp real\nrespondiendo. **Telegram sigue sin responder, pendiente de revisar.**\n\nDetalle completo en `H-021.md`. Migrar a PM2 resolvió el problema de\nconfiguración, pero no explicaba ni evitaba que naciera un proceso fuera\nde PM2 en el arranque — esa fuente faltaba encontrar.\n\n## Punto 1 — cerrado de verdad, 26-ago-2026\n\nTercera repetición del zombi (25-ago por la mañana, sin corte de luz esta\nvez) llevó a mirar donde nadie había mirado: la **carpeta de Inicio de\nWindows**, no las tareas programadas. Ahí vivía `iniciar-agente.bat`,\nresto de la carpeta abandonada `C:\\Users\\usuario\\Desktop\\dimango-app`\n(H-013) — lanzaba su propio Python en el puerto 8000 en cada arranque,\npor fuera de PM2. Junto con dos scripts más redundantes\n(`ServidorPlaya.bat`, `pm2-autostart.bat`). Los tres movidos a\n`Startup\\respaldo-25ago\\` — detalle completo en `H-021.md`.\n\n**Único pendiente real:** confirmarlo en el próximo reinicio de verdad.",
    "origen": "despliegue del 20-ago-2026",
-   "grado": 22,
+   "grado": 23,
    "color": "#ff5f56"
   },
   {
@@ -2965,7 +2986,7 @@
    ],
    "cuerpo": "El cerebro visual ya no se abre como archivo. Se sirve desde\n**`http://localhost:8899/cerebro.html`** con `brain/servidor.py`, que además hace\nde **puente** hacia el agente.\n\n**Por qué, y no es cosmético:** en `file://` Chrome trata la página como origen\nopaco y **no puede recordar el permiso del micrófono**. Lo volvía a pedir en cada\nturno, así que no se podía conversar de corrido. Servirlo por http lo resuelve —\npero al cambiar de origen, el agente rechazaba la llamada por CORS. El puente\nresuelve las dos cosas: la página y el agente quedan en el mismo origen.\n\n```\nnavegador → localhost:8899 (sirve la página y reenvía) → ngrok → agente\n```\n\n**Detalles que importan:**\n- Solo reenvía `/maximus/chat` y `/maximus/ver`. El panel y el webhook **no** se\n  exponen por ahí. Escucha únicamente en `127.0.0.1`.\n- Usa los certificados de `certifi`: el Python de python.org viene sin raíces y\n  toda llamada https fallaba con `CERTIFICATE_VERIFY_FAILED`.\n- `Maximus.command` lo levanta solo, con `USAR_LOCALHOST=1`.\n- El token de ⚙ conexión vive en `localStorage`, que es **por origen**: al\n  cambiar de `file://` a localhost hubo que volver a configurarlo una vez.\n\n**El mismo día se arreglaron dos cosas más de `Maximus.command`:** lock de\ninstancia única (no se solapan música ni saludo) y detección de pestaña ya\nabierta comparando la URL exacta, para que el cerebro no se duplique.\n\n**Y la voz quedó fija (pestillo).** El micrófono tenía un solo estado, y Chrome\ndispara `onend` cada vez que uno se calla — no cuando el usuario lo apaga. Ahora\nhay dos: `micAbierto` (lo pone y lo saca Ricardo) y `escuchando` (el motor, que\nse cae entre frases). Mientras habla Maximus el micrófono se cierra, o se oye a\nsí mismo y se contesta solo.",
    "origen": "implementado y verificado punta a punta el 23-ago-2026",
-   "grado": 7,
+   "grado": 8,
    "color": "#ff8c42"
   },
   {
@@ -4852,6 +4873,26 @@
   {
    "de": "H-069",
    "a": "L-014",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-070",
+   "a": "D-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-070",
+   "a": "H-020",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-070",
+   "a": "S-017",
+   "rel": "relacionado"
+  },
+  {
+   "de": "H-070",
+   "a": "P-008",
    "rel": "relacionado"
   },
   {
