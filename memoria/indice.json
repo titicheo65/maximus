@@ -344,7 +344,27 @@
    ],
    "cuerpo": "# D-018 · Marketing DiMango (19-sep-2026)\n\nRicardo aprueba construir un agente de marketing **dentro** de Maximus — no un\ncerebro nuevo — y pide **etapas 1 y 2 en paralelo**, más un módulo extra:\n**Laboratorio Creativo**, que investiga herramientas de IA y propone **una**\nprueba concreta por semana, con costo, \"porque quiero aprender a usar estas\ntecnologías mientras construimos nuestra propia agencia\".\n\n## La objeción que se planteó antes de aprobar\n\n**No hay con qué saber si funciona.** Marketing es el 0,145% de la venta, sin\natribución y sin línea base; el diagnóstico de agosto concluyó que *la\nfacturación la genera la ubicación, no la estrategia*. Por eso la **etapa 1 no\nproduce contenido: mide** el último año de Instagram y Facebook. Ricardo lo\naceptó y pidió las dos etapas en paralelo, que es compatible: medir no bloquea\nconstruir.\n\n**Clasificación:** proyecto activo, **quinto en la fila**. Compite con el Club\nsin adoptar, `Product.cost` vacío, `emitirBoletaV2` y P-021. Pasa el filtro\n—toca ventas y hoy lo hace Ricardo a mano— pero no desplaza a esos.\n\n## La decisión técnica que define el proyecto\n\n**La IA no inventa comida.** Las fotos reales son la materia prima y el modelo\nhace oficio de estudio: recorta, corrige luz, arma el carrusel, monta el texto.\nRazón: un plato generado se nota, el cliente que llega al local compara, y en\npublicidad tiene filo legal. **El video queda fuera de la v1** — lo más caro, lo\nmás lento y lo que peor envejece.\n\n## Lo construido el 19-sep (commit `d502add`)\n\nTodo en `agent/marketing/`, **aditivo**: no toca el cerebro operativo ni sus 21\nherramientas.\n\n| Pieza | Qué hace |\n|---|---|\n| `insights.py` | métricas reales de IG/FB, **solo lectura**, con los tokens que ya existen. Si falta un permiso, dice **cuál** y dónde se pide |\n| `banco_fotos.py` | las fotos que deja Ricardo en una carpeta, descritas **una vez** con visión y catalogadas por producto, categoría y calidad |\n| `propuestas.py` | cruza venta + fotos + redes + fechas chilenas reales y arma 2-3 propuestas, **cada una justificada con un dato** |\n| `marketing_diario.py` | la corrida diaria; mismo patrón que `advisor_diario` |\n| `laboratorio_creativo.py` | una prueba por semana, con costo al frente y **lo que descartó**, que importa tanto como lo que recomienda |\n\n**Nada publica.** Todo va a aprobación por Telegram. Publicar es la etapa 3 y\nnecesita un permiso de Meta que pasa por revisión.\n\n**Las fotos entran por carpeta, no por chat** (v1): un bot nuevo obliga a crear\nbot, webhook y credencial. El ingreso por chat queda para la v2.\n\n## Pendiente de Ricardo\n\n1. Confirmar que el token de Meta tiene permisos de lectura de métricas.\n2. Crear el grupo de Telegram de marketing y dar su chat_id.\n3. Dejar 20-30 fotos reales en la carpeta.\n4. **Definir qué es DiMango para el cliente** — si es el helado, la pizza del\n   domingo en familia o el after del Chinchorro. Ningún agente puede inventar\n   eso, y sin esa definición produce contenido correcto y sin alma.\n\n## Condición explícita de Ricardo\n\n**Antes de contratar cualquier servicio externo, se presentan los costos y él\naprueba.** Las etapas 1 y 2 no requieren contratar nada: el modelo ya está\npagado y las métricas de Meta son gratis.",
    "origen": "19-sep-2026, Ricardo aprueba la propuesta técnica y pide arrancar",
-   "grado": 5,
+   "grado": 6,
+   "color": "#f5a623"
+  },
+  {
+   "id": "D-019",
+   "tipo": "decision",
+   "titulo": "Qué es DiMango para el cliente: la definición de marca que faltaba para el agente de marketing",
+   "estado": "vigente",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "marketing",
+    "marca",
+    "posicionamiento",
+    "agente",
+    "helados"
+   ],
+   "cuerpo": "# D-019 · La definición de marca de DiMango\n\nD-018 dejó abierta la única pregunta que ningún agente puede responder solo:\n**qué es DiMango para el cliente.** Sin eso, produce contenido correcto y sin\nalma. Esta es la respuesta de Ricardo, cruzada con lo que dicen las ventas.\n\n---\n\n## 1. DiMango es una heladería que creció hasta ser restaurante\n\n**El dato:** de 500 órdenes pagadas (16-23 sep), **helados es la categoría\nnúmero uno: 336 unidades y el 20,9% de la venta.** Los tres productos más\nvendidos del negocio son helado:\n\n```\n125 und   Helado 1 Sabor Ch\n113 und   2 sabores GR\n 48 und   Helado 1 Sabor Cono Gr\n```\n\n307 unidades de helado contra 66 del cuarto producto. **Helados + postres =\n30,8%.** La pizza, que es lo segundo, vende 52 unidades contra 336.\n\nY estaba a la vista: la razón social es **\"GELATERIA DIMANGO LIMITADA\"**,\nimpresa en cada boleta.\n\n**Ricardo, textual:** *\"al contrario, gracias a los helados tenemos todo.\"*\n\n**Consecuencia para el contenido:** el helado es lo que trae gente y financió\nel resto. No es el producto de relleno que se muestra al final — **es la puerta\nde entrada.** La carta amplia es la consecuencia, no el titular.\n\n---\n\n## 2. El cliente es la familia, y lo que la trae es la variedad\n\n**Ricardo:** *\"la familia, por la variedad.\"*\n\nNo es el foodie ni el turista de paso: es el grupo donde cada uno quiere algo\ndistinto — el niño el helado, el papá la pizza, la abuela el té. **DiMango gana\nporque nadie tiene que ceder.**\n\nEso explica el mix: 154 unidades de cafetería, 120 de postres, 102 de sándwich,\n87 de bebidas **en las mismas mesas**. No son clientes distintos: es la misma\nmesa pidiendo cosas distintas.\n\n**Consecuencia:** el contenido que muestra UN plato perfecto habla menos que el\nque muestra **una mesa con cinco cosas distintas**. La variedad no es un\nargumento secundario; es el argumento.\n\n---\n\n## 3. El negocio vive de noche, y el almuerzo está flojo\n\n**Ricardo:** *\"el almuerzo es lo bajo, las ventas están siendo fuertes desde\nlas 18:30, no antes.\"*\n\n**Confirmado con datos:** en una semana hubo **más de 500 ventas después de las\n21:13** — la consulta se llenó solo con ese tramo.\n\n**Consecuencia directa para el agente, y es la más accionable de todo este\ndocumento:** publicar a las 10 de la mañana es hablarle a nadie. **El momento de\ndecisión del cliente es la tarde**, cuando se está resolviendo qué hacer en la\nnoche.\n\n**Y queda una pregunta de negocio abierta, que no es del agente:** ¿el almuerzo\nse pelea o se acepta? Llenar el almuerzo es venta nueva sobre costos fijos que\nya están pagados. Es la oportunidad más grande que dejaron estos números, y es\ndecisión de Ricardo, no de marketing.\n\n---\n\n## 4. Lo que DiMango NO es\n\n**Ricardo:** *\"discoteque; sí para la previa antes, pero no fiesta.\"*\n\n**La línea:** DiMango es donde **empieza** la noche, no donde termina. Se puede\nhablar de la previa, del grupo de amigos, del after de la playa. **No** de\ncarrete, trago barato ni música fuerte.\n\nImporta porque el negocio abre hasta tarde y en Chinchorro la tentación de\ncomunicar \"fiesta\" está ahí. **Eso espantaría a la familia, que es el cliente\nque sí vuelve.**\n\n---\n\n## 5. El slogan ya existe y no hay que inventar otro\n\n> **\"La calidad de mi negocio la hacen mis clientes.\"**\n\nVale la pena notar lo que dice: no habla del producto ni del chef. **Habla de la\ngente.** Es coherente con todo lo anterior — la familia, la mesa donde cada uno\npide lo suyo, el helado que es de todos.\n\nEl agente **no propone slogans nuevos**. Trabaja con este.\n\n---\n\n## Resumen para el prompt del agente\n\n```\nDiMango es una heladería de Arica que creció hasta ser restaurante.\nEl helado es la puerta de entrada y lo que financió todo lo demás.\n\nCliente: la familia. Viene porque hay de todo y nadie tiene que ceder.\nMomento: de tarde y de noche, fuerte desde las 18:30. El almuerzo es flojo.\nEs donde EMPIEZA la noche. No es discoteca ni carrete.\nSlogan: \"La calidad de mi negocio la hacen mis clientes.\"\n\nAl escribir: mostrar mesas con variedad antes que platos solos.\nEl helado va adelante, no de relleno. Publicar pensando en la tarde.\nNunca hablar de fiesta, trago barato ni música fuerte.\n```\n\n## Lo que esta definición deja pendiente\n\n1. **El almuerzo** — decisión de negocio, no de marketing.\n2. **11.958 seguidores con 7,5 de interacción promedio** (H-058). Con esta\n   definición hay por fin algo que decir; falta ver si mueve ese número.",
+   "origen": "23-sep-2026, madrugada. Ricardo responde las cuatro preguntas que D-018 dejó abiertas desde el 19-sep",
+   "grado": 3,
    "color": "#f5a623"
   },
   {
@@ -1436,7 +1456,7 @@
    ],
    "cuerpo": "# H-058 · La primera medición real de marketing que tiene DiMango (19-sep-2026)\n\nHasta hoy el marketing de DiMango era **$238.000 al mes y ninguna medición**.\nEsta es la línea base, leída de la API de Meta:\n\n| | |\n|---|---|\n| Cuenta | `@dimango.arica` (Página: Dimango Arica) |\n| **Seguidores** | **11.958** |\n| Publicaciones analizadas | 50 · del 27-jun al 18-sep-2026 |\n| **Interacción promedio** | **7,5** por publicación |\n| Interacción total del período | 373 |\n\n## Los tres hallazgos\n\n**1. La tasa de interacción es 0,06%.** Siete interacciones sobre casi doce mil\nseguidores. En gastronomía local lo normal es 1-3%: DiMango está **entre 15 y 50\nveces por debajo**. Y no es por falta de publicar — 50 posts en 83 días.\n**El problema no es la cantidad, es que el contenido no está llegando.**\n\n**2. El video rinde 6 veces más, y se publicó UNO en tres meses.**\n\n| Formato | Publicaciones | Interacción promedio |\n|---|---|---|\n| VIDEO | **1** | **42,0** |\n| IMAGE | 49 | 6,8 |\n\nUn caso no es una ley, pero la diferencia es demasiado grande para ignorarla.\n\n**3. Se publica en los días que menos rinden.**\n\n| Día | Publicaciones | Promedio |\n|---|---|---|\n| martes | 3 | **18,0** |\n| sábado | 2 | 8,0 |\n| viernes | 12 | 7,6 |\n| lunes | 12 | 7,6 |\n| miércoles | 10 | 7,3 |\n| domingo | 10 | 4,4 |\n| jueves | 1 | 4,0 |\n\nEl martes rinde el doble que el promedio y es el día en que menos se publica.\n\n## Corrección a la propuesta del mismo día (D-018)\n\nMaximus propuso **dejar el video fuera de la v1** por caro, lento y artificial.\n**Los datos lo desmienten en parte y la recomendación cambia:** lo que no sirve\nes el video **generado con IA**; lo que estos números piden es video **real** —\nel horno, el helado, la mesa servida. Eso no cuesta créditos, cuesta grabar.\n\n## Lo que todavía no se puede medir\n\nEl token **no tiene permiso para leer alcance ni visitas al perfil**: solo likes\ny comentarios. Falta `instagram_manage_insights` (y `pages_read_engagement`).\n\n**Por qué importa y no es un detalle:** sin alcance no se sabe si el contenido\nno gusta o si Instagram directamente no lo está mostrando. **Son dos problemas\ncon soluciones opuestas** — uno se arregla con mejor contenido, el otro con\nfrecuencia, formato y horario. Pedir ese permiso en el panel de Meta no toca la\nmensajería que hoy funciona.\n\n## Hipótesis abierta, sin verificar\n\nUna tasa de 0,06% con 11.958 seguidores hace sospechar que **buena parte de esa\naudiencia no es real o está inactiva** (seguidores antiguos, comprados en algún\nmomento, o cuentas muertas). Con el permiso de alcance se resuelve en una\nconsulta. **No se afirma nada todavía.**",
    "origen": "19-sep-2026, primera lectura de métricas reales de @dimango.arica vía API de Meta",
-   "grado": 3,
+   "grado": 4,
    "color": "#4a9eff"
   },
   {
@@ -1561,7 +1581,7 @@
    ],
    "cuerpo": "# H-064 · Línea base del Mall antes del alza de precios\n\nMedida para poder juzgar el alza de precios que Ricardo quiere hacer en el Mall.\n**Cierra dos indicadores que `BRAIN.md` §3 tenía como DESCONOCIDO desde el\n19-ago-2026:** ticket promedio por local y número de transacciones por local.\n\n## Mall — 4 semanas completas (17-ago al 13-sep)\n\n| Semana | Días | Venta | Comandas | Ticket | Venta/día |\n|---|---|---|---|---|---|\n| 17-ago | 7 | $6.564.413 | 342 | $19.194 | $937.773 |\n| 24-ago | 7 | $9.613.508 | 449 | $21.411 | $1.373.358 |\n| 31-ago | 7 | $8.303.983 | 457 | $18.171 | $1.186.283 |\n| 7-sep | 7 | $7.570.698 | 392 | $19.313 | $1.081.528 |\n| **Total** | **28** | **$32.052.602** | **1.640** | **$19.545** | **$1.144.736** |\n\nPlaya en el mismo período: ticket **$16.000**, venta/día **$3,5M**.\n\n## El hallazgo: el Mall no es barato, es chico\n\n**El ticket del Mall es 22% más alto que el de Playa** ($19.545 vs $16.000) y su\nventa diaria es **un tercio** ($1,14M vs $3,5M).\n\nEl problema del Mall no es el precio por comanda: es que entran pocas comandas\npara pagar un arriendo de $12,7M al mes (37,4% de su venta neta, H-015).\n**Subir precios es palanca de margen, no solución al arriendo** — para eso hacen\nfalta más comandas, no comandas más caras.\n\n## Cómo medir el alza, porque el ticket global NO sirve\n\nEl ticket semanal del Mall oscila **±9%** ($18.171 a $21.411); Playa la mitad.\nCon ~400 comandas por semana, un grupo grande mueve el promedio.\n\n**Un alza de 8% medida contra el ticket global es indistinguible del ruido.**\nLa medición correcta, en las categorías que se suban:\n\n- **unidades vendidas** de esa categoría\n- **venta de esa categoría**\n\nEl ticket global queda solo como control de que no se cayó el volumen total.\n\n## Advertencia de uso\n\n**No usar las semanas del 14 y 21 de septiembre como base:** el Mall cerró el 18\ny 19 por fiestas patrias. Están contaminadas.\n\n## Dato que habilita el alza\n\nDe 675 productos, **359 se venden en el Mall y solo 28 tienen precio propio de\nMall** (`price_waiter_mall`). Los otros 331 cobran lo mismo que Playa. **El\ncampo existe y funciona desde hace meses; no se usa porque cargarlo producto por\nproducto entre cinco pantallas es inviable.** De ahí la ficha única.",
    "origen": "21-sep-2026, TurnoCaja de DiMangoToGo, 4 semanas completas del 17-ago al 13-sep-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -3632,6 +3652,21 @@
   {
    "de": "D-018",
    "a": "H-057",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-019",
+   "a": "D-018",
+   "rel": "deriva_de"
+  },
+  {
+   "de": "D-019",
+   "a": "H-058",
+   "rel": "relacionado"
+  },
+  {
+   "de": "D-019",
+   "a": "H-064",
    "rel": "relacionado"
   },
   {
@@ -6178,6 +6213,7 @@
  "generado": "2026-09-23",
  "huerfanos": [],
  "enlaces_rotos": [
+  "D-019 --relacionado--> BRAIN",
   "H-024 --relacionado--> H-010",
   "H-042 --relacionado--> H-010",
   "H-045 --relacionado--> H-010",
