@@ -619,7 +619,7 @@ window.abrir=abrir; window.alternar=alternar;
 // directo al túnel, como siempre.
 const DEFECTO = location.protocol.startsWith('http')
   ? location.origin
-  : 'https://oak-cornea-marlin.ngrok-free.dev';
+  : 'https://maximus.ngrok.app';   // el dominio vivo: oak-cornea murió (H-044)
 // localStorage también está bloqueado en algunos visores embebidos. Si falla,
 // la configuración vive en memoria: sirve para esta sesión y no rompe nada.
 const _mem = {};
