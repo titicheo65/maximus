@@ -364,7 +364,7 @@
    ],
    "cuerpo": "# D-019 · La definición de marca de DiMango\n\nD-018 dejó abierta la única pregunta que ningún agente puede responder solo:\n**qué es DiMango para el cliente.** Sin eso, produce contenido correcto y sin\nalma. Esta es la respuesta de Ricardo, cruzada con lo que dicen las ventas.\n\n---\n\n## 1. DiMango es una heladería que creció hasta ser restaurante\n\n**El dato:** de 500 órdenes pagadas (16-23 sep), **helados es la categoría\nnúmero uno: 336 unidades y el 20,9% de la venta.** Los tres productos más\nvendidos del negocio son helado:\n\n```\n125 und   Helado 1 Sabor Ch\n113 und   2 sabores GR\n 48 und   Helado 1 Sabor Cono Gr\n```\n\n307 unidades de helado contra 66 del cuarto producto. **Helados + postres =\n30,8%.** La pizza, que es lo segundo, vende 52 unidades contra 336.\n\nY estaba a la vista: la razón social es **\"GELATERIA DIMANGO LIMITADA\"**,\nimpresa en cada boleta.\n\n**Ricardo, textual:** *\"al contrario, gracias a los helados tenemos todo.\"*\n\n**Consecuencia para el contenido:** el helado es lo que trae gente y financió\nel resto. No es el producto de relleno que se muestra al final — **es la puerta\nde entrada.** La carta amplia es la consecuencia, no el titular.\n\n---\n\n## 2. El cliente es la familia, y lo que la trae es la variedad\n\n**Ricardo:** *\"la familia, por la variedad.\"*\n\nNo es el foodie ni el turista de paso: es el grupo donde cada uno quiere algo\ndistinto — el niño el helado, el papá la pizza, la abuela el té. **DiMango gana\nporque nadie tiene que ceder.**\n\nEso explica el mix: 154 unidades de cafetería, 120 de postres, 102 de sándwich,\n87 de bebidas **en las mismas mesas**. No son clientes distintos: es la misma\nmesa pidiendo cosas distintas.\n\n**Consecuencia:** el contenido que muestra UN plato perfecto habla menos que el\nque muestra **una mesa con cinco cosas distintas**. La variedad no es un\nargumento secundario; es el argumento.\n\n---\n\n## 3. El negocio vive de noche, y el almuerzo está flojo\n\n**Ricardo:** *\"el almuerzo es lo bajo, las ventas están siendo fuertes desde\nlas 18:30, no antes.\"*\n\n**Confirmado con datos:** en una semana hubo **más de 500 ventas después de las\n21:13** — la consulta se llenó solo con ese tramo.\n\n**Consecuencia directa para el agente, y es la más accionable de todo este\ndocumento:** publicar a las 10 de la mañana es hablarle a nadie. **El momento de\ndecisión del cliente es la tarde**, cuando se está resolviendo qué hacer en la\nnoche.\n\n**Y queda una pregunta de negocio abierta, que no es del agente:** ¿el almuerzo\nse pelea o se acepta? Llenar el almuerzo es venta nueva sobre costos fijos que\nya están pagados. Es la oportunidad más grande que dejaron estos números, y es\ndecisión de Ricardo, no de marketing.\n\n---\n\n## 4. Lo que DiMango NO es\n\n**Ricardo:** *\"discoteque; sí para la previa antes, pero no fiesta.\"*\n\n**La línea:** DiMango es donde **empieza** la noche, no donde termina. Se puede\nhablar de la previa, del grupo de amigos, del after de la playa. **No** de\ncarrete, trago barato ni música fuerte.\n\nImporta porque el negocio abre hasta tarde y en Chinchorro la tentación de\ncomunicar \"fiesta\" está ahí. **Eso espantaría a la familia, que es el cliente\nque sí vuelve.**\n\n---\n\n## 5. El slogan ya existe y no hay que inventar otro\n\n> **\"La calidad de mi negocio la hacen mis clientes.\"**\n\nVale la pena notar lo que dice: no habla del producto ni del chef. **Habla de la\ngente.** Es coherente con todo lo anterior — la familia, la mesa donde cada uno\npide lo suyo, el helado que es de todos.\n\nEl agente **no propone slogans nuevos**. Trabaja con este.\n\n---\n\n## Resumen para el prompt del agente\n\n```\nDiMango es una heladería de Arica que creció hasta ser restaurante.\nEl helado es la puerta de entrada y lo que financió todo lo demás.\n\nCliente: la familia. Viene porque hay de todo y nadie tiene que ceder.\nMomento: de tarde y de noche, fuerte desde las 18:30. El almuerzo es flojo.\nEs donde EMPIEZA la noche. No es discoteca ni carrete.\nSlogan: \"La calidad de mi negocio la hacen mis clientes.\"\n\nAl escribir: mostrar mesas con variedad antes que platos solos.\nEl helado va adelante, no de relleno. Publicar pensando en la tarde.\nNunca hablar de fiesta, trago barato ni música fuerte.\n```\n\n## Lo que esta definición deja pendiente\n\n1. **El almuerzo** — decisión de negocio, no de marketing.\n2. **11.958 seguidores con 7,5 de interacción promedio** (H-058). Con esta\n   definición hay por fin algo que decir; falta ver si mueve ese número.",
    "origen": "23-sep-2026, madrugada. Ricardo responde las cuatro preguntas que D-018 dejó abiertas desde el 19-sep",
-   "grado": 4,
+   "grado": 5,
    "color": "#f5a623"
   },
   {
@@ -1771,7 +1771,7 @@
    ],
    "cuerpo": "# H-072 · Dos promociones para el mismo día\n\nRicardo pidió que el push diario leyera las promos del Club. Al abrir\n`server6.js` apareció algo peor que un texto desactualizado: **dos juegos de\npromociones distintos, circulando a la vez.**\n\n| Día | Tarjeta Wallet (`server6.js`) | Club (`PromoSemanal`) |\n|---|---|---|\n| Lunes | 2x1 conos de helados 17:30-18:30 | Segunda bola de helado GRATIS |\n| Martes | 10% desc café | Café de cortesía con tu porción de torta |\n| Miércoles | 10% desc tortas | Segunda pizza al 50% |\n| Domingo | 10% desc reservando mesa | Helado de cortesía para un niño |\n\n**El cliente con la tarjeta en el teléfono veía una cosa y el que abría el Club\notra.** Quien llegara al local con cualquiera de las dos iba a discutir con el\ncajero. No era un riesgo futuro: estaba ocurriendo.\n\nEs **L-004 otra vez** —dos fuentes de verdad para el mismo dato— pero de cara\nal cliente en vez de en la memoria.\n\n## Segundo hallazgo: `server6.js` no manda el push\n\nNo tiene cron ni `setInterval`. Lo que hace es **poner la promo dentro del\npase** (`PROMO DE HOY`, con `changeMessage: 'Promo de hoy: %@'`); la\nnotificación la dispara Apple cuando el pase cambia.\n\nPor eso arreglar `getPromoDelDia()` arregla las dos cosas de una: lo que se ve\nen la tarjeta y lo que dice la notificación.\n\n## Cómo quedó\n\n- **`promoDelDia`** (función nueva en el Club, solo lectura): calcula el día\n  **en hora de Arica** —en UTC, a las 02:00 del martes acá todavía es lunes, y\n  mandaría la promo del día equivocado justo en el borde— y devuelve el texto\n  armado. Probada: `{\"ok\":true,\"dia\":\"Miércoles\",\"texto\":\"🍕 Segunda pizza al 50%\"}`.\n- **`server6.js`**: `getPromoDelDia()` pasó a `async` y consulta esa función,\n  con caché de 10 minutos y timeout de 3 segundos.\n- **La tabla vieja NO se borró: quedó de respaldo.** Si el Club no responde, la\n  tarjeta sale con el texto de antes. Una promo desactualizada es fea; un\n  servidor de pases caído es peor. Ese es el sistema que Ricardo pidió no tocar\n  (9-sep), así que el cambio fue de tres líneas, con respaldo del archivo y\n  aborto automático si el texto no calzaba exactamente.\n\n**Verificado que levantó:** `dimango.ngrok.app/health` → 200 tras el reinicio.\n\n## Riesgo que queda anotado\n\nBase44 respondió un desafío de **Cloudflare** (\"Just a moment…\") a llamadas\nrepetidas desde una misma IP. Si algún día se lo hace a ServidorPlaya, el fetch\nfalla y **cae al respaldo local en silencio**: la tarjeta volvería a la promo\nvieja sin que nadie se entere. El aviso queda en el log\n(`promoDelDia no respondio, usando respaldo local`).\n\n**Plan B, mejor que lo actual y ya pensado:** `server6.js` ya habla con Base44\nseis veces con `BASE44_KEY` para leer clientes y tokens. Leer `/PromoSemanal`\ndirecto con esa misma llave usa el camino que ese archivo recorre todos los\ndías. Dos líneas.\n\n## Lo que falta verificar\n\n**Mañana jueves**, la tarjeta debe decir *\"Postre de cortesía con tu plato de\npasta\"*. Si dice otra cosa, está cayendo al respaldo.",
    "origen": "23-sep-2026, Ricardo pide que el push diario lea las promos del Club",
-   "grado": 4,
+   "grado": 5,
    "color": "#4a9eff"
   },
   {
@@ -2798,6 +2798,27 @@
    "color": "#ff5f56"
   },
   {
+   "id": "P-027",
+   "tipo": "pendiente",
+   "titulo": "Fidelización: QR de reseñas en Google (hecho), QR de visita y sellos en la Wallet (pendientes)",
+   "estado": "abierto",
+   "autoridad": 1,
+   "fuente": "VERIFICADO",
+   "fecha": "",
+   "tags": [
+    "fidelizacion",
+    "club",
+    "qr",
+    "google",
+    "wallet",
+    "sellos"
+   ],
+   "cuerpo": "# P-027 · Lo que el Club ya tenía, y las tres cosas que pidió Ricardo\n\n**Antes de construir, se miró qué existía — y existía casi todo:**\n\n- **Visitas y sellos ya están modelados y funcionando**: el Cajero crea `Visit`\n  y `Stamp` por categoría, y ya controla cuántas visitas lleva el socio ese día.\n- **Ya hay escáner de QR con cámara**, y el código lo dice: *\"el QR del socio es\n  la prueba de que está en el local\"*.\n- **La Wallet ya existe**: `server6.js` genera pases de Apple y Google Wallet,\n  hoy con PUNTOS y CATEGORÍA (Bronce/Plata/Oro).\n\n## 1. QR de reseñas en Google — HECHO el 24-sep\n\nLink: `https://g.page/r/CV4JGqxdVuAtEAE/review` (verificado, responde 302).\n\nEntregados un **cartel A6 en SVG** (vectorial: imprime nítido a cualquier\ntamaño) y el **QR suelto en PNG** para carta y redes. Corrección de errores\n**alta** a propósito: un cartel de mesa se mancha y se dobla.\n\n**Verificado con lector real (OpenCV):** el QR devuelve exactamente la URL, y\nse comprobó además que el cartel lleva ese mismo QR y no otro.\n\n**Advertencia dada a Ricardo:** Google **prohíbe incentivar reseñas**. Nada de\ndescuentos, helado gratis ni puntos del Club a cambio — pueden filtrarse las\nreseñas o penalizar la ficha. Pedirlas sí; pagarlas no. El cruce es tentador\njustamente porque existe el Club.\n\n**Pendiente:** confirmar si Playa y Mall tienen **fichas separadas** en Google.\nSi las tienen, hace falta un QR por local o las reseñas del Mall se van a la\nficha de Playa. Y sumar el QR a CartaPublica.\n\n## 2. QR para registrar visita — CON OBJECIÓN, sin resolver\n\nHoy el flujo es al revés y es **más sólido**: el cajero escanea al socio, lo que\nexige presencia y atención de una persona.\n\n**Un QR fijo que el cliente escanea permite registrar visitas sin consumir** —\ndesde la vereda, o diez veces al día si la foto circula. Los sellos dejarían de\nsignificar \"vino y compró\".\n\nTres caminos, de menor a mayor esfuerzo:\n1. QR fijo + tope de una visita al día (el control que el Cajero ya hace);\n2. QR por mesa validando que esa mesa tenga consumo abierto;\n3. QR que rota cada pocos minutos en una pantalla del local.\n\n**El 2 es el correcto; el 1 es el barato.** Falta que Ricardo elija.\n\n## 3. Sellos en la Wallet — pendiente, trabajo chico\n\nEl pase ya existe y muestra puntos. Falta agregarle el contador de sellos. Es\ntocar `server6.js`, el mismo archivo de la promo del día (H-072), así que\nconviene hacerlo en la misma pasada.",
+   "origen": "24-sep-2026, Ricardo pide QR para registrar visita, QR para reseñas de Google, y sellos en la Wallet",
+   "grado": 3,
+   "color": "#ff5f56"
+  },
+  {
    "id": "R-001",
    "tipo": "regla",
    "titulo": "Caja chica por local — APROBADA y en producción",
@@ -3036,7 +3057,7 @@
    ],
    "cuerpo": "CRM de fidelización con notificaciones push. Corre en **ServidorPlaya**, puerto\n**3003**, expuesto por el túnel `dimango.ngrok.app`.\n\n**Se levanta a mano.** Igual que el servicio del puerto 8001 (voiceagentkit).\n\n**Riesgo (L-002):** tercer sistema que solo Ricardo sabe levantar, en el mismo\nWindows del local. Si se corta la luz en Playa Chinchorro caen los tres a la vez\n—el agente de clientes, el de voz y el CRM— y nadie se entera hasta que alguien\nreclama.\n\n**Pendiente:** incluirlo en el arranque automático de P-008. Falta conocer el\ncomando exacto y su carpeta.",
    "origen": "informado por Ricardo, 21-ago-2026",
-   "grado": 4,
+   "grado": 5,
    "color": "#ff8c42"
   },
   {
@@ -6032,6 +6053,21 @@
    "rel": "relacionado"
   },
   {
+   "de": "P-027",
+   "a": "S-011",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-027",
+   "a": "H-072",
+   "rel": "relacionado"
+  },
+  {
+   "de": "P-027",
+   "a": "D-019",
+   "rel": "relacionado"
+  },
+  {
    "de": "R-001",
    "a": "E-001",
    "rel": "deriva_de"
@@ -6567,7 +6603,7 @@
    "rel": "relacionado"
   }
  ],
- "generado": "2026-09-24",
+ "generado": "2026-09-25",
  "huerfanos": [],
  "enlaces_rotos": [
   "D-019 --relacionado--> BRAIN",
